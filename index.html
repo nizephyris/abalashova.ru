@@ -545,9 +545,15 @@
     .win-img .win-bar { flex: 0 0 2.75rem; padding: 0 .75rem; gap: .5rem; }
     .win-shot { height: auto; object-fit: contain; }
     .stage-arrow { display: none; }                  /* стрелка между окнами тут не нужна */
+    /* на телефоне выноски к окнам собраны в ряд кнопок под кадром,
+       раскрытая занимает всю строку и раздвигает соседей вниз */
     .note-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
-    .note-bar .note { position: static; transform: none; width: 100%; }
-    .note-bar .note:not(.open) { flex: 0 0 auto; }
+    .note-bar .note { position: relative; transform: none; left: auto; top: auto;
+                      width: 48px; height: 48px; flex: 0 0 auto; }
+    .note-bar .note.open { width: 100%; height: auto; }
+    .note-bar .note.open .note-body {
+      position: static; transform: none; width: 100%; max-width: none; margin-top: .75rem;
+    }
     .wide-shots { margin: 0; height: auto; gap: 1rem; }
     .wide-shots img { max-height: none; width: 100%; }
     .scr-wide .note { position: static; transform: none; width: auto; margin-top: 1rem; }
