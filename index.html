@@ -326,6 +326,10 @@
     transition: opacity .14s var(--ease);
   }
   .note-tap img { width: calc(48 * var(--n)); height: calc(48 * var(--n)); }
+  /* на экранах с телефонами кадр мелкий — там кнопка подсказки меньше,
+     иначе она закрывает собой пол-экрана прибора */
+  .scr-row.fit .note { width: calc(48 * var(--n)); height: calc(48 * var(--n)); }
+  .scr-row.fit .note-tap img { width: calc(28 * var(--n)); height: calc(28 * var(--n)); }
   .note-body {
     position: absolute; top: 0; left: 0; display: none;
     width: calc(var(--nw) * var(--n));
@@ -503,11 +507,12 @@
     html { font-size: 16px; }
     .stage { height: 78svh; min-height: 30rem; }
     .bg { object-position: 68% 25%; }
-    .top { top: 1rem; right: 1rem; gap: .5rem; }
-    .pill { height: 2.25rem; padding: 0 .875rem .18rem; font-size: 1rem; }
+    /* ряд кнопок должен помещаться в ширину телефона вместе с «назад» слева */
+    .top { top: 1rem; right: 1rem; gap: .375rem; }
+    .pill { height: 2.25rem; padding: 0 .75rem .18rem; font-size: 1rem; }
     .pill img { width: 1.25rem; }
-    .lang { width: 2.75rem; padding: 0 0 .18rem; }
-    .snd { width: 2.75rem; padding: 0; }
+    .lang { width: 2.5rem; padding: 0 0 .18rem; }
+    .snd { width: 2.5rem; padding: 0; }
     .folders { left: 1rem; right: 1rem; bottom: 2.5rem; gap: .75rem; justify-content: space-between; }
     .folder { flex: 1; width: auto; min-width: 0; }
     .f-link { font-size: 1rem; white-space: normal; text-align: center; line-height: 1.2; }
@@ -592,7 +597,8 @@
     /* на телефоне выноски к окнам собраны в ряд кнопок под кадром,
        раскрытая занимает всю строку и раздвигает соседей вниз */
     .note-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
-    .note-bar .note { position: relative; transform: none; left: auto; top: auto;
+    .note-bar .note { position: relative; transform: none;
+                      left: auto; right: auto; top: auto; bottom: auto;
                       width: 48px; height: 48px; flex: 0 0 auto; }
     .note-bar .note.open { width: 100%; height: auto; }
     .note-bar .note.open .note-body {
@@ -1142,7 +1148,7 @@
         ],
       },
       en: {
-        title: 'freight forwarding in the delivery account',
+        title: 'freight forwarding in Yandex Delivery Account',
         blocks: [
           ['context', 'From 1 September 2026 Russia requires forwarding paperwork to be issued electronically, through the state system for electronic transport documents'],
           ['problem', 'The law covers pickup points, lorries and freight delivery. Without electronic document flow inside the client account, half of the tariffs cannot be used at all'],
@@ -1346,7 +1352,7 @@
     // case — id кейса в CASES, cover — картинка обложки 204×140.
     folder1: [
       { ru: 'роботы в го', en: 'robots in go', case: 'go', cover: 'assets/cover-go.webp' },
-      { ru: 'экспедиция в лк', en: 'forwarding in the account', case: 'expedition', cover: 'assets/cover-expedition.webp' },
+      { ru: 'экспедиция в лк', en: 'freight forwarding', case: 'expedition', cover: 'assets/cover-expedition.webp' },
     ],
     folder2: [
       { ru: 'админка отп', en: 'otp admin', case: 'otp', cover: 'assets/cover-otp.webp' },
@@ -1892,7 +1898,7 @@ Add your own takeaway here` },
             <p>In my free time: drawing, playing D&amp;D, running a <a class="ext" data-link="telegram">Telegram channel${ext}</a></p>`,
       foot: '2026, all made with my own paws 🦦',
       f1: '02.2026 → now', f2: '08.2024 → 02.2026', f3: 'studying stuff',
-      resume: 'resume.meow', cat: 'my.cat', cv: 'resume',
+      resume: 'cv.meow', cat: 'my.cat', cv: 'CV',
       collapse: 'Collapse', expand: 'Expand', tap: 'tap', photoAlt: 'Nastya Balashova', sound: 'Sound', back: 'Back', close: 'Close', home: 'back',
       videoSoon: 'A video with the full scenario goes here',
     },
@@ -2122,6 +2128,8 @@ Add your own takeaway here` },
 
       const fan = document.createElement('div');
       fan.className = 'fan';
+      // в первой папке обложки вылетают вправо, в остальных — влево
+      if (key === 'folder1') fan.dataset.dir = 'right';
       items.forEach((it, i) => {
         const a = document.createElement(it.case ? 'button' : 'a');
         if (it.case) { a.type = 'button'; a.dataset.case = it.case; }
@@ -2193,6 +2201,7 @@ Add your own takeaway here` },
 
     fan.style.setProperty('--k', 1);
     const w = items[0].offsetWidth, h = items[0].offsetHeight;
+    if (!w || !h) return;      // экран кейса прячет папки — считать тут нечего
 
     const gap = 2.5 * rem;                 // 40px от папки до нижнего ряда
     const colGap = 2.5 * rem, rowGap = .31 * h, lean = .19 * w;   // 40px между обложками
@@ -2203,12 +2212,15 @@ Add your own takeaway here` },
       for (const ch of (el.dataset.seed || '') + salt) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
       return ((h >>> 0) % 2000) / 1000 - 1;                        // −1…1
     };
+    const toRight = fan.dataset.dir === 'right';
     const pt = i => {
       const row = Math.floor(i / cols), col = i % cols;
       const inRow = Math.min(cols, n - row * cols);                // в верхнем ряду бывает одна
+      // ближняя к папке обложка стоит по её центру, остальные уходят в сторону через 40px
+      const slot = toRight ? col : col - (inRow - 1);
       return {
-        // правая обложка стоит по центру папки, остальные уходят влево через 40px
-        x: (col - (inRow - 1)) * (w + colGap) + row * lean + noise(items[i], 'x') * .03 * w,
+        x: slot * (w + colGap) + (toRight ? -row * lean : row * lean)
+           + noise(items[i], 'x') * .03 * w,
         y: gap + row * (h + rowGap) + noise(items[i], 'y') * .02 * h,
       };
     };
@@ -2223,7 +2235,7 @@ Add your own takeaway here` },
     });
 
     const available = folder.getBoundingClientRect().top - pad;
-    const k = Math.min(1, available / top);
+    const k = Math.min(1, available / top, (innerWidth - 2 * pad) / (right - left));
     fan.style.setProperty('--k', k.toFixed(3));
 
     const originX = fan.getBoundingClientRect().left;
@@ -2331,10 +2343,9 @@ Add your own takeaway here` },
         (sc.notes || []).forEach(n => {
           const el = document.createElement('div');
           el.className = 'note';
-          if (n.r != null) { el.style.right = pc(n.r, 1400); el.style.left = 'auto'; el.classList.add('anch-r'); }
-          else { el.style.left = pc(n.x, 1400); el.style.right = 'auto'; }
-          el.style.top = pc(n.y, 1080);
-          el.style.bottom = 'auto';
+          if (n.r != null) { el.style.setProperty('--nr', pc(n.r, 1400)); el.classList.add('anch-r'); }
+          else { el.style.setProperty('--nx', pc(n.x, 1400)); }
+          el.style.setProperty('--ny', pc(n.y, 1080));
           el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
                        + '<span class="note-body"><span class="note-text"></span></span>';
           el.querySelector('.note-text').textContent = n[lang] || n.ru;
@@ -2343,9 +2354,10 @@ Add your own takeaway here` },
         if (bar.children.length) st.appendChild(bar);
         // на компьютере карточка переворачивается по наведению и держится, пока курсор на кадре,
         // чтобы можно было дотянуться до выносок; на телефоне — по тапу
-        card.addEventListener('mouseenter', () => st.classList.add('on'));
-        st.addEventListener('mouseleave', () => st.classList.remove('on'));
-        card.addEventListener('click', () => st.classList.toggle('on'));
+        const hoverable = () => matchMedia('(hover: hover)').matches;
+        card.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') st.classList.add('on'); });
+        st.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') st.classList.remove('on'); });
+        card.addEventListener('click', () => { if (!hoverable()) st.classList.toggle('on'); });
         row.appendChild(st);
       }
       if ((sc.frames || []).length) {                // окна браузера с кадрами интерфейса
@@ -2381,12 +2393,11 @@ Add your own takeaway here` },
           if (n.r === 'snd') {                                 // правым краем ровно под кнопкой звука
             el.classList.add('at-snd', 'anch-r');
           } else if (n.r != null) {                            // r — отступ правого края от края кадра
-            el.style.right = px(n.r, 1400); el.style.left = 'auto'; el.classList.add('anch-r');
+            el.style.setProperty('--nr', px(n.r, 1400)); el.classList.add('anch-r');
           } else {                                             // x — левый край плашки в макете
-            el.style.left = px(n.x, 1400); el.style.right = 'auto';
+            el.style.setProperty('--nx', px(n.x, 1400));
           }
-          el.style.top = px(n.y, 1080);
-          el.style.bottom = 'auto';
+          el.style.setProperty('--ny', px(n.y, 1080));
           el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
                        + '<span class="note-body"><span class="note-text"></span></span>';
           el.querySelector('.note-text').textContent = n[lang] || n.ru;
@@ -2697,6 +2708,7 @@ Add your own takeaway here` },
     document.body.dataset.view = 'home';
     document.querySelectorAll('video').forEach(v => v.pause());
     setLang(lang);
+    document.querySelectorAll('.fan').forEach(layoutFan);
   }
 
   // Адрес меняем осторожно: внутри iframe на claude.ai это может быть запрещено,
