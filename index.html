@@ -182,9 +182,9 @@
   .fan-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .fan-emoji { font-size: 4em; line-height: 1; filter: drop-shadow(0 .1em .2em rgba(0,0,0,.45)); }
   .fan-name {
-    max-width: 100%; margin-top: .5rem; /* 8px до подписи */ font-size: 1.25rem; text-align: center;
-    line-height: 1.2; min-height: 2.4em;        /* подписи в две строки — у всех карточек одна высота */
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    margin-top: .5rem; /* 8px до подписи */ font-size: 1.25rem; text-align: center;
+    line-height: 1.2; min-width: 100%;
+    white-space: nowrap;      /* подпись всегда в одну строку, даже если шире карточки */
     text-shadow: 0 1px 8px rgba(0,0,0,.5);
   }
   .folder:hover .fan, .folder:focus-within .fan, .folder.open .fan { pointer-events: auto; }
@@ -452,6 +452,9 @@
     .f-link { font-size: 1rem; white-space: normal; text-align: center; line-height: 1.2; }
     .f-link > span { position: static; left: auto; right: auto; }   /* на телефоне подпись в потоке */
     .fan-item { width: 8.5rem; }           /* пучок по тапу: карточки компактнее */
+    /* на телефоне карточки стоят вплотную — подпись в одну строку наезжала бы на соседнюю */
+    .fan-name { white-space: normal; min-width: 0; max-width: 100%; min-height: 2.4em;
+                display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .fan-name { font-size: 1rem; }
 
     /* Кейс на узком экране: ноутбук сверху, под ним текст, ниже файлы */
