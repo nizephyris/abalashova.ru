@@ -302,7 +302,7 @@
   .note {
     --nw: 380;                                      /* ширина плашки в пикселях макета */
     position: absolute; z-index: 2;
-    width: calc(40 * var(--n)); height: calc(40 * var(--n));
+    width: calc(80 * var(--n)); height: calc(80 * var(--n));
     left: var(--nx); right: var(--nr); top: var(--ny); bottom: var(--nb);
   }
   .note-tap {
@@ -311,7 +311,7 @@
     -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
     transition: opacity .14s var(--ease);
   }
-  .note-tap img { width: calc(24 * var(--n)); height: calc(24 * var(--n)); }
+  .note-tap img { width: calc(48 * var(--n)); height: calc(48 * var(--n)); }
   .note-body {
     position: absolute; top: 0; left: 0; display: none;
     width: calc(var(--nw) * var(--n));
@@ -541,9 +541,9 @@
     /* выноска свёрнута в «жми» и раскрывается по тапу — обе по центру телефона */
     .note {
       top: var(--py); bottom: auto; left: 50%; right: auto; transform: translateX(-50%);
-      width: 40px; height: 40px; cursor: pointer;
+      width: 80px; height: 80px; cursor: pointer;
     }
-    .note-tap img { width: 24px; height: 24px; }
+    .note-tap img { width: 48px; height: 48px; }
     /* плашка по центру экрана, шип у неё сверху — ровно там, где была кнопка */
     .note-body, .note.anch-r .note-body {
       left: 50%; right: auto; transform: translateX(-50%);
