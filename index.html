@@ -541,9 +541,9 @@
     /* выноска свёрнута в «жми» и раскрывается по тапу — обе по центру телефона */
     .note {
       top: var(--py); bottom: auto; left: 50%; right: auto; transform: translateX(-50%);
-      width: 80px; height: 80px; cursor: pointer;
+      width: 48px; height: 48px; cursor: pointer;
     }
-    .note-tap img { width: 48px; height: 48px; }
+    .note-tap img { width: 28px; height: 28px; }
     /* плашка по центру экрана, шип у неё сверху — ровно там, где была кнопка */
     .note-body, .note.anch-r .note-body {
       left: 50%; right: auto; transform: translateX(-50%);
@@ -727,7 +727,7 @@
 <script>
   // ▼ Сюда вставь свои ссылки
   const LINKS = {
-    contact:  'https://t.me/nizephyris',  // личный телеграм — кнопка «связаться»
+    contact:  'https://t.me/nizephyris',  // личный телеграм — кнопка «связь»
     telegram: 'https://t.me/mir_bez_zephyr', // телеграм-канал
     resume:   '#',                        // резюме (PDF или ссылка)
     folder1:  '#',                        // Яндекс Доставка, 02.2026 → сейчас
@@ -1721,7 +1721,7 @@ Add your own takeaway here` },
 
   const T = {
     ru: {
-      lang: 'ру', name: 'Настя Балашова', contact: 'связаться',
+      lang: 'ру', name: 'Настя Балашова', contact: 'связь',
       bio: `<p>Привет! <b>Я Настя Балашова, продуктовый дизайнер<br>с 3+ годами опыта</b>${heart}</p>
             <p>Начинала в финтехе и эдтехе, сейчас — <b>в B2B-команде Яндекс Доставки</b>${truck}. Параллельно учусь в <b>магистратуре ЦУ</b></p>
             <p>В остальное время: рисую, играю в D&amp;D, веду <a class="ext" data-link="telegram">телеграм-канал${ext}</a></p>`,
