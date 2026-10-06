@@ -19,6 +19,7 @@
     --dim: rgba(255, 255, 255, .5);
     --font: "SF Pro Rounded", ui-rounded, "Nunito", system-ui, sans-serif;
     --ease: cubic-bezier(.3, .7, .2, 1);
+    --tap: 2rem;                                  /* кнопка подсказки, одна на всех экранах */
   }
   html { font-size: clamp(11px, min(1.1111vw, 1.5625vh), 20px); }
   * { box-sizing: border-box; }
@@ -227,7 +228,7 @@
   .scr-item { position: relative; height: 100%; aspect-ratio: var(--ph-ar, 431.333 / 885.333); }
   /* снимок шире самого прибора (тень по бокам) — кладём его с выносом, чтобы корпус встал ровно */
   .scr-item.bleed { overflow: visible; }
-  .scr-item.bleed img { position: absolute; top: var(--sy, 0); left: var(--sx, 0);
+  .scr-item.bleed > img { position: absolute; top: var(--sy, 0); left: var(--sx, 0);
                         width: var(--sw, 100%); height: auto; }
   /* широкий экран: один-два кадра интерфейса и выноска слева — для десктопных кейсов */
   .scr-wide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
@@ -282,7 +283,7 @@
   .win-stage .note { position: absolute; transform: none; z-index: 20; }   /* ширину задаёт сама выноска */
   /* ноутбук в ленте — та же рамка, что на главном экране кейса */
   .scr-laptop { position: relative; width: calc(1280 * var(--u)); aspect-ratio: 1280 / 776; }
-  .scr-item img { width: 100%; height: 100%; display: block; }
+  .scr-item > img { width: 100%; height: 100%; display: block; }   /* сам снимок, не иконка выноски */
   .scr-phone { width: 26%; min-width: 16rem; max-height: 72%; }
   /* первый экран: видео стоит само по себе — телефон уже внутри ролика.
      Радиус 120px от ширины 816 и высоты 1684 обрезает чёрные углы кадра */
@@ -316,7 +317,8 @@
   .note {
     --nw: 380;                                      /* ширина плашки в пикселях макета */
     position: absolute; z-index: 2;
-    width: calc(80 * var(--n)); height: calc(80 * var(--n));
+    /* кнопка не зависит от масштаба кадра: на всех экранах она одного размера */
+    width: var(--tap); height: var(--tap);
     left: var(--nx); right: var(--nr); top: var(--ny); bottom: var(--nb);
   }
   .note-tap {
@@ -325,11 +327,7 @@
     -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
     transition: opacity .14s var(--ease);
   }
-  .note-tap img { width: calc(48 * var(--n)); height: calc(48 * var(--n)); }
-  /* на экранах с телефонами кадр мелкий — там кнопка подсказки меньше,
-     иначе она закрывает собой пол-экрана прибора */
-  .scr-row.fit .note { width: calc(48 * var(--n)); height: calc(48 * var(--n)); }
-  .scr-row.fit .note-tap img { width: calc(28 * var(--n)); height: calc(28 * var(--n)); }
+  .note-tap img { width: calc(var(--tap) * .46); height: calc(var(--tap) * .46); }
   .note-body {
     position: absolute; top: 0; left: 0; display: none;
     width: calc(var(--nw) * var(--n));
@@ -358,7 +356,7 @@
   .flip-card .flip-back { opacity: 0; }
   .flip-card .note-tap {
     inset: auto; left: var(--tx); top: var(--ty); transform: translate(-50%, -50%);
-    width: calc(80 * var(--n)); height: calc(80 * var(--n));
+    width: var(--tap); height: var(--tap);
   }
   /* на этом экране выноски не сворачиваются в кнопку: по наведению на глобус
      сразу видны все плашки целиком, как в макете */
@@ -560,8 +558,8 @@
     .scr-item { width: min(100%, (100svh - 5rem) / 2.0525); }
     .scr-video { width: min(100%, (100svh - 5rem) / 2.0637); }
     .scr-video.wide { width: 100%; border-radius: 1rem; }
-    .scr-item img { height: auto; }
-    .scr-item.bleed img { position: static; width: 100%; }   /* на телефоне запас вокруг корпуса не нужен */
+    .scr-item > img { height: auto; }
+    .scr-item.bleed > img { position: static; width: 100%; }   /* на телефоне запас вокруг корпуса не нужен */
     .scr-item:last-child, .scr-video { margin-bottom: 0; }
     .scr-wide, .wide-stage { position: static; display: block; height: auto; width: auto; max-width: none; }
     /* окна на телефоне идут столбиком во всю ширину, выноски — рядом «жми» под ними */
@@ -585,7 +583,7 @@
                  left: auto !important; top: auto !important;
                  width: auto !important; height: auto !important; }
     .flip-card .note-tap { left: 50%; top: 50%; width: 48px; height: 48px; }
-    .flip-card .note-tap img { width: 28px; height: 28px; }
+    .flip-card .note-tap img { width: 22px; height: 22px; }
     .flip-stage:not(.on) .note-bar { display: none; }
     /* на телефоне после тапа плашки идут столбиком, все раскрытые */
     .flip-stage .note-bar { flex-direction: column; align-items: stretch; }
@@ -612,7 +610,7 @@
       top: var(--py); bottom: auto; left: 50%; right: auto; transform: translateX(-50%);
       width: 48px; height: 48px; cursor: pointer;
     }
-    .note-tap img { width: 28px; height: 28px; }
+    .note-tap img { width: 22px; height: 22px; }
     /* плашка по центру экрана, шип у неё сверху — ровно там, где была кнопка */
     .note-body, .note.anch-r .note-body {
       left: 50%; right: auto; transform: translateX(-50%);
@@ -1236,208 +1234,9 @@
 
   // ▼ Тексты файлов. Взяты с abalashova.ru/admin_panel.
   // Пустая строка разделяет абзацы, строка вида '## Заголовок' — подзаголовок.
-  const DOCS = {
-    hypotheses: {
-      ru: { title: 'гипотезы', body: `Создание продукта идёт в два прохода: сначала параметры, потом сам продукт. Если добавлять параметры прямо в карточке, процесс ускорится
-
-Работники через костыли переиспользуют настройки готовых продуктов. Дублирование продукта с правкой копии ускорит создание
-
-Ошибки всплывают только при запуске продукта в банковские системы. Поэтапная валидация разделов поможет ловить их сразу` },
-      en: { title: 'hypotheses', body: `Creating a product takes two passes: parameters first, then the product. Adding parameters inside the product card will speed that up
-
-People work around the system by reusing settings of finished products. Duplicating a product and editing the copy will be faster
-
-Errors only surface when the product goes live in the bank systems. Validating each section as it is filled will catch them earlier` },
-    },
-    jobs: {
-      ru: { title: 'джобы', body: `Когда я нанимаю новых сотрудников, я не хочу задействовать на их обучение много ресурсов и времени, чтобы они сразу начинали работать
-
-Когда я добавляю продукт, похожий на какой-то уже существующий, я не хочу заполнять такие же карточки, чтобы не тратить время на одно и то же
-
-Когда я добавляю продукт, я хочу чувствовать себя уверенным в правильности заполненных карточек, чтобы не исправлять их после релиза` },
-      en: { title: 'jtbd', body: `When I hire new people, I don't want to spend much time and resources on training, so that they can start working right away
-
-When I add a product similar to an existing one, I don't want to fill in the same cards again, so that I don't repeat the same work
-
-When I add a product, I want to be sure the cards are filled in correctly, so that I don't have to fix them after release` },
-    },
-    interviews: {
-      ru: { title: 'результаты интервью', body: `Работников волнует существенная трата времени на создание продукта и переход из приложения в приложение для добавления параметров
-
-Часто работники сокращают путь по процессу: скачивают и подгружают настройки уже существующих продуктов, после чего редактируют только часть полей
-
-Теперь не нужно выбирать, какое приложение открывать в первую очередь, потому что добавление продукта стало единым процессом` },
-      en: { title: 'interview findings', body: `Employees are bothered by how much time creating a product takes and by jumping between apps to add parameters
-
-They often shortcut the process: they download and upload the settings of existing products and then edit only some of the fields
-
-Now there is no need to choose which app to open first, because adding a product has become a single process` },
-    },
-    changes: {
-      ru: { title: 'существенные изменения', body: `## Карточка продукта
-
-Деление на разделы фокусирует внимание на связанных параметрах. Система проверяет блоки последовательно, чтобы в карточке не осталось ошибок
-
-## Добавление параметров
-
-Новый параметр, например партнёра, добавляют прямо в процессе по опции «Нет подходящего варианта»
-
-## Дублирование продукта
-
-Если похожий продукт уже есть, работник дублирует его и правит копию` },
-      en: { title: 'key changes', body: `## Product card
-
-Sections focus attention on groups of related parameters. The system checks blocks one by one, so the card has no errors
-
-## Adding parameters
-
-A new parameter, a partner for example, is added inside the process: fields load in under the "No suitable option" choice
-
-## Duplicating a product
-
-If a similar product exists, the employee duplicates it and edits the copy` },
-    },
-    resume: {
-      ru: { title: 'резюме.мяу', body: `## Настя Балашова — продуктовый дизайнер
-
-Здесь будет текст резюме: опыт, проекты, навыки, контакты.
-Замени его в объекте DOCS в index.html.` },
-      en: { title: 'resume.meow', body: `## Nastya Balashova — product designer
-
-Your resume goes here: experience, projects, skills, contacts.
-Edit it in the DOCS object in index.html.` },
-    },
-
-    // ── ИИ-агент в GigaChat ──
-    // ── UX-дизайн, НИУ ВШЭ ──
-    // ── Rostok ──
-    // ── «о проекте»: цель, роль и выводы, которых нет в карточке ──
-    otp_about: {
-      ru: { title: 'о проекте', body: `## Цель
-
-Сделать добавление продукта понятным и быстрым
-
-## Моя роль
-
-Интервью с пользователями админки, JTBD и гипотезы, user-flow, UX/UI, компоненты на базе дизайн-системы, прототип и юзабилити-тест, ревью разработчикам
-
-## Выводы
-
-Вела задачу целиком: от структуризации CJ и исследований до прототипа и ревью у дизайнеров системы` },
-      en: { title: 'about the project', body: `## Goal
-
-Make adding a product clear and quick
-
-## My role
-
-Interviews with admin panel users, JTBD and hypotheses, user flow, UI/UX, design system components, prototype and usability test, review for developers
-
-## Takeaways
-
-I ran the project end to end: from structuring the journeys and research to the prototype and the design system review` },
-    },
-    // ── Роверы в приложении Го ──
-    go_hypothesis: {
-      ru: { title: 'гипотеза', body: `Если не выделять ровер в отдельную карточку, а встроить его в привычный флоу экспресса — клиент сначала заполняет все доступные данные (адреса доставки, ВГХ), и затем, при доступности, ему предлагается оформить заказ ровером, — оформление будет проще, без усложнения интерфейса и преждевременного выбора
-
-Что нужно сделать: флоу формы экспресса, где клиент сначала заполняет доступные данные по обычному флоу. Предложение оформить заказ ровером появляется после заполнения данных и только при доступности ровера` },
-      en: { title: 'hypothesis', body: `If the rover is not pulled out into its own card but built into the familiar express flow — the client fills in the available data first (addresses, dimensions), and only then, if a rover is available, is offered to order one — placing an order gets simpler, with no extra interface complexity and no premature choice
-
-What to build: the express form flow where the client fills in the usual data first. The offer to order a rover appears after that, and only when a rover is available` },
-    },
-    go_key: {
-      ru: { title: 'главное для пользователя', body: `Курьер и робот — два разных способа доставки, а не доп-опция. Переключатель должен читаться как выбор
-
-Разница в цене видна сразу: цена — главное преимущество робота
-
-Робот тоже довозит до двери. Без подсказки часть людей отсеет его ещё до сравнения цены
-
-Форма перестраивается под способ: поля разные, переключение после адреса
-
-Робо-тариф зависит от адреса, и на экране понятно, почему он есть` },
-      en: { title: 'what matters to the user', body: `A courier and a robot are two delivery methods, not an add-on. The switch must read as a choice
-
-The price gap is visible at once: price is the robot's main advantage
-
-The robot also delivers to the door. Without a hint some people rule it out before comparing prices
-
-The form changes with the method: different fields, the switch after the address
-
-The robo tariff depends on the address, and the screen explains why it is there` },
-    },
-    go_parallel: {
-      ru: { title: 'что можно сделать параллельно', body: `Вынести выбор курьерского сапплая в «Опции». Это позволит сократить форму, но нужно уточнить, как много пользователей вообще проваливаются в этот блок сейчас
-
-При первом совпадении географий выводить информационный поп-ап про доставку роботами
-
-Вынести настройку «Как удобнее» на форму, чтобы сократить количество сумм «от x ₽» на экране. Но нужно решить, с предвыбором или без` },
-      en: { title: 'what can be done in parallel', body: `Move the courier supply choice into "Options". That would shorten the form, but first we need to know how many people open that block at all
-
-Show an informational pop-up about robot delivery the first time the geography matches
-
-Move the "What suits you" setting onto the form to cut the number of "from x ₽" prices on the screen — though we still need to decide whether it comes preselected` },
-    },
-    go_limits: {
-      ru: { title: 'ограничения', body: `Только для корпоративных клиентов
-
-Оплата — только по расчётному счёту
-
-Робот имеет специфичные ВГХ и не может доставлять товары категории 18+. При создании заказа нужно получать: ВГХ — опционально, наличие товаров 18+ — обязательно` },
-      en: { title: 'constraints', body: `Business clients only
-
-Payment by bank transfer only
-
-The robot has its own size and weight limits and cannot carry age-restricted goods. When an order is created, dimensions are optional but the answer about age-restricted goods is required` },
-    },
-    go_about: {
-      ru: { title: 'о проекте', body: `## Цель
-
-Сделать заказ ровером частью обычного сценария экспресса, чтобы клиент видел выгоду робота до оформления
-
-## Моя роль
-
-Флоу формы и выбор тарифа, трекинг у отправителя и получателя, состояния на главной, карточки в фиде, компоненты дизайн-системы
-
-## Выводы
-
-Здесь допиши свой вывод` },
-      en: { title: 'about the project', body: `## Goal
-
-Make ordering a rover part of the usual express scenario, so the client sees its advantage before checkout
-
-## My role
-
-The form flow and tariff choice, tracking for sender and recipient, main screen states, feed cards, design system components
-
-## Takeaways
-
-Add your own takeaway here` },
-    },
-    av_about: {
-      ru: { title: 'о проекте', body: `## Цель
-
-Собрать в Aviasales единое место, где группа договаривается о поездке и доводит её до билетов
-
-## Моя роль
-
-Здесь допиши свою роль
-
-## Выводы
-
-Здесь допиши свой вывод` },
-      en: { title: 'about the project', body: `## Goal
-
-Give Aviasales one place where a group agrees on a trip and takes it all the way to the tickets
-
-## My role
-
-Add your role here
-
-## Takeaways
-
-Add your own takeaway here` },
-    },
-  };
+  // Документы на столе кейса: { ключ: { ru: { title, body }, en: {…} } }.
+  // Сейчас ни один кейс их не раскладывает — механизм оставлен на будущее.
+  const DOCS = {};
 
   const heart = '<img class="emo" src="assets/emoji-heart.png" alt="❤️">';
   const truck = '<img class="emo big" src="assets/emoji-delivery.png" alt="📦">';
@@ -2258,6 +2057,8 @@ Add your own takeaway here` },
     document.getElementById('collapse').setAttribute('aria-label', T[lang].back);
 
     document.body.dataset.view = 'case';
+    feed.scrollTop = 0;                  // кейс всегда открывается с первого экрана
+    scrollTo(0, 0);
     layoutNotes();                       // сперва разводим выноски, потом режем контур
     layoutWindows();
     shapeNotes();                        // контур считаем, когда экран уже показан и выноски измерены
