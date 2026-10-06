@@ -421,6 +421,9 @@
   .case-file img { width: 5rem; }
 
   .home-btn { display: none; }
+  /* в кейсе вместо шеврона внизу панели — обычная кнопка «назад» в шапке */
+  body[data-view="case"] .home-btn { display: inline-flex; }
+  body[data-view="case"] #collapse { display: none; }
 
   /* ── Окна с текстом (фрейм 42:20994): 520×496, стекло, шапка 60 светлее,
      заголовок чёрный слева на 40/18, крестик 16 справа на 40/22, текст белый 20 ── */
@@ -489,7 +492,6 @@
     /* на телефоне заголовок остаётся в чёрном блоке, как сейчас */
     .case-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
     body[data-view="case"] .top { top: 1rem; bottom: auto; left: auto; right: 1rem; }
-    body[data-view="case"] .home-btn { display: inline-flex; }   /* шеврона на узком экране нет */
     /* на телефоне порядок такой: видео, описание проекта, потом экраны с выносками */
     body[data-view="case"] { background: #fff; }
     body[data-view="case"] .case, body.has-feed .case-feed { display: contents; }
