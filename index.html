@@ -338,6 +338,9 @@
     font-size: calc(16 * var(--n)); line-height: 1.2;
   }
   .note.anch-r .note-body { left: auto; right: 0; }  /* выноска прижата правым краем */
+  /* выноска, которая на компьютере всегда раскрыта — кнопка ей не нужна */
+  .note.always .note-tap { display: none; }
+  .note.always .note-body { display: block; }
   .note.open { z-index: 4; }
   .note.open .note-tap { opacity: 0; }
   .note.open .note-body { display: block; }
@@ -599,6 +602,9 @@
                       left: auto; right: auto; top: auto; bottom: auto;
                       width: 48px; height: 48px; flex: 0 0 auto; }
     .note-bar .note.open { width: 100%; height: auto; }
+    /* на телефоне и такая выноска сворачивается в кнопку, как все остальные */
+    .note-bar .note.always .note-tap { display: grid; }
+    .note-bar .note.always:not(.open) .note-body { display: none; }
     .note-bar .note.open .note-body {
       position: static; transform: none; width: 100%; max-width: none; margin-top: .75rem;
     }
@@ -888,11 +894,11 @@
             { src: 'assets/otp-s3.webp', x: 81, y: 148, w: 1239, h: 785 },
           ],
           notes: [
-            { x: 0, y: 775, ru: 'Разделила форму на разделы, чтобы сфокусировать внимание работника на группах связанных параметров',
+            { b: [18.06, 48.15], x: 0, y: 775, ru: 'Разделила форму на разделы, чтобы сфокусировать внимание работника на группах связанных параметров',
               en: 'I split the form into sections to keep the employee focused on groups of related parameters' },
-            { r: 'snd', y: 258, ru: 'Прямо над формой добавляем кнопку для загрузки настроек файлом, чтобы ускорить добавление похожих продуктов',
+            { b: [81.94, 37.34], r: 'snd', y: 258, ru: 'Прямо над формой добавляем кнопку для загрузки настроек файлом, чтобы ускорить добавление похожих продуктов',
               en: 'Right above the form we add a button that uploads the settings as a file, to speed up adding similar products' },
-            { r: 'snd', y: 775, ru: 'Каждый блок проверяется системой последовательно, чтобы не допустить ошибок в заполненной карточке',
+            { b: [81.94, 58.79], r: 'snd', y: 775, ru: 'Каждый блок проверяется системой последовательно, чтобы не допустить ошибок в заполненной карточке',
               en: 'The system checks each block in turn, so the finished card has no mistakes' },
           ] },
         // Desktop-34 — два окна внахлёст и стрелка между ними
@@ -904,7 +910,7 @@
           arrow: { src: 'assets/otp-arrow.svg', x: 883, y: 265.529, w: 264.375, h: 121.335 },
           notes: [
             // 137+397 = 534 — низ верхнего окна, 480 — левый край правого: по 40 от обоих
-            { x: 60, y: 574, ru: 'Параметр (например, нового партнёра) добавляется в основном процессе через подгрузку полей при выборе опции «Нет подходящего варианта»',
+            { always: true, x: 60, y: 574, ru: 'Параметр (например, нового партнёра) добавляется в основном процессе через подгрузку полей при выборе опции «Нет подходящего варианта»',
               en: 'A parameter — a new partner, for example — is added inside the main process: picking “None of these fits” loads the extra fields' },
           ] },
         // Desktop-35 — карточка готового продукта с меню операций
@@ -952,27 +958,27 @@
         { video: 'assets/go-rovers-phone.mp4' },
         { title: { ru: 'форма экспресса и роботы', en: 'express form and robots' },
           shots: ['assets/go-2a.webp', 'assets/go-2b.webp'], notes: [
-          { at: 'l', tail: 'tr', x: 40, y: 410, h: 117, ru: 'Сильно форму не меняем, но учитываем ограничения роботов. Например, нельзя оформить мультидоставку', en: 'We barely change the form, but we allow for the robots\u2019 limits. A multi-stop order, for example, is not possible' },
-          { at: 'c', tail: 'tr', x: 557, y: 611, h: 66, ru: 'Сразу уточняем, что к роботу нужно будет спуститься', en: 'We say up front that you will have to come down to the robot' },
-          { at: 'c', tail: 'tr', x: 557, y: 938, h: 83, ru: 'Корпоративных клиентов вычисляем по оплате с корпоративного счёта', en: 'We tell business clients by payment from a corporate account' },
-          { at: 'r', tail: 'tl', x: 1100, y: 301, h: 100, ru: 'Показываем форму роботов, только если адреса, введённые ранее, входят в зоны рободоставки', en: 'We show the robot form only if the addresses entered earlier are inside the rover delivery zones' },
-          { at: 'r', tail: 'tl', x: 1100, y: 681, h: 100, ru: 'Вносим роботов как вариант экспресса, чтобы клиент мог сравнить цены. УТП робота — более низкая цена', en: 'We add robots as an express option so the client can compare prices. The robot sells on the lower price' },
+          { b: [0.8, 37.8], at: 'l', tail: 'tr', x: 40, y: 410, h: 117, ru: 'Сильно форму не меняем, но учитываем ограничения роботов. Например, нельзя оформить мультидоставку', en: 'We barely change the form, but we allow for the robots\u2019 limits. A multi-stop order, for example, is not possible' },
+          { b: [113.4, 49.2], at: 'c', tail: 'tr', x: 557, y: 611, h: 66, ru: 'Сразу уточняем, что к роботу нужно будет спуститься', en: 'We say up front that you will have to come down to the robot' },
+          { b: [126.0, 98.1], at: 'c', tail: 'tr', x: 557, y: 938, h: 83, ru: 'Корпоративных клиентов вычисляем по оплате с корпоративного счёта', en: 'We tell business clients by payment from a corporate account' },
+          { b: [99.4, 23.2], at: 'r', tail: 'tl', x: 1100, y: 301, h: 100, ru: 'Показываем форму роботов, только если адреса, введённые ранее, входят в зоны рободоставки', en: 'We show the robot form only if the addresses entered earlier are inside the rover delivery zones' },
+          { b: [99.4, 70.0], at: 'r', tail: 'tl', x: 1100, y: 681, h: 100, ru: 'Вносим роботов как вариант экспресса, чтобы клиент мог сравнить цены. УТП робота — более низкая цена', en: 'We add robots as an express option so the client can compare prices. The robot sells on the lower price' },
         ] },
         { title: { ru: 'завершение заказа', en: 'finishing the order' },
           shots: ['assets/go-3a.webp', 'assets/go-3b.webp'], notes: [
-          { at: 'l', tail: 'tr', x: 40, y: 792, h: 117, ru: 'Предупреждаем клиента, что робот может доставлять не всё. Например, при заказе энергетика, роботу паспорт не покажешь', en: 'We warn the client that a robot cannot deliver everything. With an energy drink, for example, you cannot show a robot your ID' },
-          { at: 'r', tail: 'tl', x: 1100, y: 421, h: 117, ru: 'У роботов не предзаполняем, как доставить: до подъезда или до двери — чтобы клиент сравнил цены и обдуманно сделал выбор', en: 'For robots we do not preselect how to deliver, to the entrance or to the door, so that the client compares the prices and chooses deliberately' },
+          { b: [1.5, 53.6], at: 'l', tail: 'tr', x: 40, y: 792, h: 117, ru: 'Предупреждаем клиента, что робот может доставлять не всё. Например, при заказе энергетика, роботу паспорт не покажешь', en: 'We warn the client that a robot cannot deliver everything. With an energy drink, for example, you cannot show a robot your ID' },
+          { b: [99.4, 39.6], at: 'r', tail: 'tl', x: 1100, y: 421, h: 117, ru: 'У роботов не предзаполняем, как доставить: до подъезда или до двери — чтобы клиент сравнил цены и обдуманно сделал выбор', en: 'For robots we do not preselect how to deliver, to the entrance or to the door, so that the client compares the prices and chooses deliberately' },
         ] },
         { title: { ru: 'общение с роботом', en: 'talking to the robot' },
           shots: ['assets/go-4a.webp', 'assets/go-4b.webp'], notes: [
-          { at: 'l', tail: 'tr', x: 40, y: 755, h: 117, ru: 'Отправителю всегда нужно выходить к роботу. Получатель выходит и сам открывает робота только при доставке до подъезда', en: 'The sender always has to come out to the robot. The recipient comes out and opens it only for delivery to the entrance' },
-          { at: 'r', tail: 'bl', x: 1100, y: 607, h: 100, ru: 'Чтобы упростить опыт общения с роботом, добавляем схему и инструкцию по работе', en: 'To make dealing with a robot easier we add a diagram and short instructions' },
-          { at: 'r', tail: 'tl', x: 1100, y: 940, h: 83, ru: 'Так как робот открывается только на минуту, уточняем у клиента, точно ли он готов', en: 'The robot stays open for one minute only, so we check that the client is really ready' },
+          { b: [1.5, 82.3], at: 'l', tail: 'tr', x: 40, y: 755, h: 117, ru: 'Отправителю всегда нужно выходить к роботу. Получатель выходит и сам открывает робота только при доставке до подъезда', en: 'The sender always has to come out to the robot. The recipient comes out and opens it only for delivery to the entrance' },
+          { b: [99.4, 65.5], at: 'r', tail: 'bl', x: 1100, y: 607, h: 100, ru: 'Чтобы упростить опыт общения с роботом, добавляем схему и инструкцию по работе', en: 'To make dealing with a robot easier we add a diagram and short instructions' },
+          { b: [79.9, 98.9], at: 'r', tail: 'tl', x: 1100, y: 940, h: 83, ru: 'Так как робот открывается только на минуту, уточняем у клиента, точно ли он готов', en: 'The robot stays open for one minute only, so we check that the client is really ready' },
         ] },
         { title: { ru: 'доставка до двери', en: 'delivery to the door' },
           shots: ['assets/go-5a.webp', 'assets/go-5b.webp'], notes: [
-          { at: 'l', tail: 'tr', x: 40, y: 635, h: 100, ru: 'При доставке до двери курьер помогает роботу доставить заказ до получателя', en: 'For delivery to the door the courier helps the robot bring the order to the recipient' },
-          { at: 'r', tail: 'tl', x: 1100, y: 708, h: 83, ru: 'Как только курьер забирает заказ. Мы добавляем кнопки связи с курьером', en: 'As soon as the courier picks the order up, we add buttons to contact them' },
+          { b: [1.9, 63.8], at: 'l', tail: 'tr', x: 40, y: 635, h: 100, ru: 'При доставке до двери курьер помогает роботу доставить заказ до получателя', en: 'For delivery to the door the courier helps the robot bring the order to the recipient' },
+          { b: [98.8, 72.1], at: 'r', tail: 'tl', x: 1100, y: 708, h: 83, ru: 'Как только курьер забирает заказ. Мы добавляем кнопки связи с курьером', en: 'As soon as the courier picks the order up, we add buttons to contact them' },
         ] },
       ],
       ru: {
@@ -1086,7 +1092,7 @@
             { src: 'assets/tg-hero.webp', x: 80, y: 147, w: 1241, h: 787 },
           ],
           notes: [
-            { x: 40, y: 749, ru: 'Телеграфу 100 лет. Мы спросили 100 студентов 100 вопросов об образовании, обмене опытом и связи, и составили граф',
+            { b: [5.61, 71.69], x: 40, y: 749, ru: 'Телеграфу 100 лет. Мы спросили 100 студентов 100 вопросов об образовании, обмене опытом и связи, и составили граф',
               en: 'The Telegraph turns 100. We asked 100 students 100 questions about education, sharing experience and connection, and built a graph out of the answers' },
           ] },
       ],
@@ -1152,13 +1158,13 @@
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-1.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-2.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-3.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { at: 0, side: 'l', over: 179, y: 612,
+            { b: [-0.3, 84.5], at: 0, side: 'l', over: 179, y: 612,
               ru: 'У aviasales гибкая лента, можно разместить промо баннер на главной как основную точку входа',
               en: 'Aviasales has a flexible feed, so a promo banner on the home screen can be the main entry point' },
-            { at: 1, side: 'l', over: 232, y: 356,
+            { b: [47.7, 50.7], at: 1, side: 'l', over: 232, y: 356,
               ru: 'Уже сейчас в приложении есть умный поиск. Можно активировать групповую поездку по контекстному анализу',
               en: 'The app already has smart search, so a group trip can be triggered from what the person typed' },
-            { at: 2, side: 'r', over: 179, y: 318,
+            { b: [99.0, 16.9], at: 2, side: 'r', over: 179, y: 318,
               ru: 'Можно также активировать групповые поездки при поиске билетов на 2+ человека',
               en: 'A group trip can also be offered when someone searches tickets for two or more people' },
           ] },
@@ -1167,10 +1173,10 @@
           phone: { w: 426.4, h: 885.333, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-4.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-5.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { at: 0, side: 'l', over: 54, y: 711,
+            { b: [0.0, 77.3], at: 0, side: 'l', over: 54, y: 711,
               ru: 'Делегируем не только распределение расходов, но и полное планирование поездки на ИИ-турагента aviasales',
               en: 'We hand over not just splitting the bill but the whole trip planning to the Aviasales AI agent' },
-            { at: 1, side: 'r', over: 73, y: 390,
+            { b: [97.1, 47.7], at: 1, side: 'r', over: 73, y: 390,
               ru: 'Инициатору группы нужно только кратко заполнить форму и разослать приглашения друзьям',
               en: 'All the person who starts the group has to do is fill in a short form and send the invites' },
           ] },
@@ -1178,13 +1184,13 @@
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-6.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-7.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-8.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { at: 0, side: 'l', over: 179, y: 642,
+            { b: [0.0, 50.9], at: 0, side: 'l', over: 179, y: 642,
               ru: 'Предлагаем пользователям направление, билеты и жильё на выбор, чтобы группа все покупки совершала внутри приложения',
               en: 'We offer the group destinations, tickets and places to stay, so that every purchase happens inside the app' },
-            { at: 1, side: 'l', over: 230, y: 471,
+            { b: [96.1, 65.5], at: 1, side: 'l', over: 230, y: 471,
               ru: 'Пока все не выберут и не оплатят, покупка не проходит. Не оплатившим приходят пуши',
               en: 'Nothing is bought until everyone has chosen and paid; whoever has not gets a push' },
-            { at: 2, side: 'r', over: 179, y: 681,
+            { b: [99.5, 50.9], at: 2, side: 'r', over: 179, y: 681,
               ru: 'Вся информация о поездке хранится в одном месте: даты, брони и билеты — в офлайн режиме',
               en: 'Everything about the trip lives in one place: dates, bookings and tickets, available offline' },
           ] },
@@ -1753,14 +1759,20 @@
         (sc.notes || []).forEach(n => {
           const el = document.createElement('div');
           el.className = 'note';
-          if (n.r === 'snd') {                                 // правым краем ровно под кнопкой звука
+          if (n.b) {                                           // b — центр кнопки в процентах от кадра
+            const half = v => 'calc(' + v.toFixed(3) + '% - var(--tap) / 2)';
+            if (n.b[0] >= 50) { el.style.setProperty('--nr', half(100 - n.b[0])); el.classList.add('anch-r'); }
+            else el.style.setProperty('--nx', half(n.b[0]));
+            el.style.setProperty('--ny', half(n.b[1]));
+          } else if (n.r === 'snd') {                          // правым краем ровно под кнопкой звука
             el.classList.add('at-snd', 'anch-r');
           } else if (n.r != null) {                            // r — отступ правого края от края кадра
             el.style.setProperty('--nr', px(n.r, 1400)); el.classList.add('anch-r');
           } else {                                             // x — левый край плашки в макете
             el.style.setProperty('--nx', px(n.x, 1400));
           }
-          el.style.setProperty('--ny', px(n.y, 1080));
+          if (n.always) el.classList.add('always');
+          if (!n.b) el.style.setProperty('--ny', px(n.y, 1080));
           el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
                        + '<span class="note-body"><span class="note-text"></span></span>';
           el.querySelector('.note-text').textContent = n[lang] || n.ru;
@@ -1856,7 +1868,16 @@
         // В макете телефон стоит на (249 или 720,333; 97) и занимает 431,333×885,333.
         // Выноску цепляем тем углом, где хвостик, — долей от своего телефона.
         const pc = v => v.toFixed(3) + '%';
-        if (n.side) {
+        // b — центр кнопки в процентах от коробки телефона; выноска растёт в ту же
+        // сторону, что и раньше, просто кнопка стоит там, где она отмечена в макете
+        const half = v => 'calc(' + v.toFixed(3) + '% - var(--tap) / 2)';
+        if (n.b) {
+          const toLeft = n.side ? n.side === 'l' : (n.at !== 'r');
+          if (toLeft) { el.style.setProperty('--nr', half(100 - n.b[0])); el.classList.add('anch-r'); }
+          else el.style.setProperty('--nx', half(n.b[0]));
+          el.style.setProperty('--ny', half(n.b[1]));
+          el.dataset.py = Math.min(Math.max(n.b[1] / 100, .02), .84);
+        } else if (n.side) {
           // side — с какой стороны телефона висит выноска, over — на сколько пикселей
           // макета она заходит на экран, y — её верх, считая от верха телефона
           const pw = (sc.phone && sc.phone.w) || PH.w, ph = (sc.phone && sc.phone.h) || PH.h;
