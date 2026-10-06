@@ -347,7 +347,11 @@
     inset: auto; left: var(--tx); top: var(--ty); transform: translate(-50%, -50%);
     width: calc(80 * var(--n)); height: calc(80 * var(--n));
   }
+  /* на этом экране выноски не сворачиваются в кнопку: по наведению на глобус
+     сразу видны все плашки целиком, как в макете */
   .flip-stage .note { opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
+  .flip-stage .note .note-tap { display: none; }
+  .flip-stage .note .note-body { display: block; }
   .flip-stage.on .flip-front { opacity: 0; }
   .flip-stage.on .flip-back { opacity: 1; }
   .flip-stage.on .flip-card .note-tap { opacity: 0; }
@@ -568,6 +572,12 @@
     .flip-card .note-tap { left: 50%; top: 50%; width: 48px; height: 48px; }
     .flip-card .note-tap img { width: 28px; height: 28px; }
     .flip-stage:not(.on) .note-bar { display: none; }
+    /* на телефоне после тапа плашки идут столбиком, все раскрытые */
+    .flip-stage .note-bar { flex-direction: column; align-items: stretch; }
+    .flip-stage .note-bar .note { width: 100%; height: auto; }
+    .flip-stage .note-bar .note .note-body {
+      position: static; transform: none; width: 100%; max-width: none;
+    }
     .stage-arrow { display: none; }                  /* стрелка между окнами тут не нужна */
     /* на телефоне выноски к окнам собраны в ряд кнопок под кадром,
        раскрытая занимает всю строку и раздвигает соседей вниз */
