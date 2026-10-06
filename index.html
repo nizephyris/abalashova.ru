@@ -335,6 +335,23 @@
     .note:hover .note-tap { opacity: 0; }
     .note:hover .note-body { display: block; }
   }
+  /* карточка-перевёртыш: по наведению глобус сменяется графом и проявляются выноски */
+  .flip-card {
+    position: absolute; overflow: hidden; cursor: pointer;
+    border-radius: calc(45 * var(--u)); background: #efedea;
+  }
+  .flip-card > img { position: absolute; inset: 0; width: 100%; height: 100%;
+                     object-fit: cover; display: block; transition: opacity .35s var(--ease); }
+  .flip-card .flip-back { opacity: 0; }
+  .flip-card .note-tap {
+    inset: auto; left: var(--tx); top: var(--ty); transform: translate(-50%, -50%);
+    width: calc(80 * var(--n)); height: calc(80 * var(--n));
+  }
+  .flip-stage .note { opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
+  .flip-stage.on .flip-front { opacity: 0; }
+  .flip-stage.on .flip-back { opacity: 1; }
+  .flip-stage.on .flip-card .note-tap { opacity: 0; }
+  .flip-stage.on .note { opacity: 1; pointer-events: auto; }
   .scr-title { display: none; }                     /* пары подписаны только на телефоне */
 
   .case-bar {
@@ -544,6 +561,13 @@
     .win-img { border-radius: 1rem; }
     .win-img .win-bar { flex: 0 0 2.75rem; padding: 0 .75rem; gap: .5rem; }
     .win-shot { height: auto; object-fit: contain; }
+    /* карточка-перевёртыш на телефоне: во всю ширину, кнопка по центру, выноски — после тапа */
+    .flip-card { position: relative; border-radius: 1rem; aspect-ratio: 711 / 790;
+                 left: auto !important; top: auto !important;
+                 width: auto !important; height: auto !important; }
+    .flip-card .note-tap { left: 50%; top: 50%; width: 48px; height: 48px; }
+    .flip-card .note-tap img { width: 28px; height: 28px; }
+    .flip-stage:not(.on) .note-bar { display: none; }
     .stage-arrow { display: none; }                  /* стрелка между окнами тут не нужна */
     /* на телефоне выноски к окнам собраны в ряд кнопок под кадром,
        раскрытая занимает всю строку и раздвигает соседей вниз */
@@ -1083,8 +1107,63 @@
     telegraph: {
       plain: true,
       video: '', shot: '',
+      // Экраны собраны по макету: Фигма, Section 117:12274 (четыре десктопа)
       screens: [
-        { hold: true },                     // экраны добавим, когда будут
+        { hold: true },                     // первый экран пустой — сюда встанет ролик
+        { windows: [
+            { x: 60, y: 226, title: { ru: 'исследовательские вопросы', en: 'research questions' }, items: [
+              { ru: 'Что аудитория знает о Центральном Телеграфе и будущем кампусе?',
+                en: 'What does the audience know about the Central Telegraph and the future campus?' },
+              { ru: 'Какие страхи вызывает смена функции здания?',
+                en: 'What fears does the change in the building’s function raise?' },
+              { ru: 'Какие ожидания есть у студентов и будущих пользователей?',
+                en: 'What do students and future users expect?' },
+              { ru: 'Какие примеры ревитализации помогают объяснить проект?',
+                en: 'Which examples of revitalisation help explain the project?' },
+            ] },
+            { x: 740, y: 400, title: { ru: 'дизайнерские вопросы', en: 'design questions' }, items: [
+              { ru: 'Как превратить сложную историю здания в понятный сайт?',
+                en: 'How do you turn the building’s complicated history into a site people understand?' },
+              { ru: 'Как показать преемственность между Телеграфом и Университетом?',
+                en: 'How do you show the continuity between the Telegraph and the University?' },
+              { ru: 'Как объяснить открытость кампуса без рекламного тона?',
+                en: 'How do you explain that the campus is open without sounding like an advert?' },
+              { ru: 'Какие разделы и сценарии нужны разным аудиториям?',
+                en: 'Which sections and flows do the different audiences need?' },
+              { ru: 'Как визуально связать темы связи, истории, технологий и образования?',
+                en: 'How do you visually tie together communication, history, technology and education?' },
+            ] },
+            { x: 60, y: 546, title: { ru: 'принципы работы', en: 'working principles' }, items: [
+              { ru: 'Сохранение идентичности: сохранить дух авангарда и связь с историей здания. Важно отразить в продукте знаковые элементы интерьера, сетку колонн и символические элементы фасада',
+                en: 'Keeping the identity: hold on to the avant-garde spirit and the building’s history. The product has to carry its signature interiors, the grid of columns and the symbols on the facade' },
+              { ru: 'Открытость и человечность: телеграфическая связь и связь поколений — это про сохранение опыта и любовь к людям и сообществу. Нужно сохранить ориентированность на человека в конечном продукте',
+                en: 'Openness and humanity: telegraph lines and the link between generations are both about keeping experience alive and caring for people and the community. The final product has to stay centred on the person' },
+              { ru: 'Гибридная инфраструктура: ЦУ — это современные лаборатории, проектные зоны и технологические пространства, нужно позиционировать продукт как ИТ-сектор',
+                en: 'Hybrid infrastructure: the University means modern labs, project zones and technology spaces, so the product should read as an IT hub' },
+            ] },
+          ] },
+        // карточка 711×790 в центре кадра: глобус с фасада переворачивается в граф
+        { title: { ru: 'метафора связи', en: 'the metaphor of connection' },
+          flip: { x: 365, y: 145, w: 711, h: 790, tx: 477, ty: 414,
+                  front: 'assets/tg-globe.webp', back: 'assets/tg-graph.webp' },
+          notes: [
+            { x: 223, y: 229, ru: 'Телеграф 1927 года соединял людей через медные провода и радиоволны',
+              en: 'The Telegraph of 1927 connected people through copper wires and radio waves' },
+            { r: 114, y: 306, ru: 'Университет 2027 года соединяет людей через алгоритмы, код и фундаментальные знания',
+              en: 'The University of 2027 connects people through algorithms, code and fundamental knowledge' },
+            { x: 183, y: 689, ru: 'Технология передачи изменилась, но суть здания как центра связи и развития остаётся неизменной спустя ровно 100 лет',
+              en: 'The technology of transmission has changed, but the building is still a centre of connection and growth, exactly 100 years on' },
+            { r: 154, y: 777, ru: 'Метафора — связь студентов и преподавателей, поколений, сфер. Образ — глобус с центральной части Телеграфа',
+              en: 'The metaphor is the link between students and teachers, generations and fields. The image is the globe from the centre of the Telegraph facade' },
+          ] },
+        { title: { ru: 'главный экран', en: 'the home screen' },
+          frames: [
+            { src: 'assets/tg-hero.webp', x: 80, y: 147, w: 1241, h: 787 },
+          ],
+          notes: [
+            { x: 40, y: 749, ru: 'Телеграфу 100 лет. Мы спросили 100 студентов 100 вопросов об образовании, обмене опытом и связи, и составили граф',
+              en: 'The Telegraph turns 100. We asked 100 students 100 questions about education, sharing experience and connection, and built a graph out of the answers' },
+          ] },
       ],
       ru: {
         title: 'артпроект к открытию центрального телеграфа',
@@ -2176,6 +2255,43 @@ Add your own takeaway here` },
         const v = box.querySelector('video');
         v.src = sc.video;
         v.addEventListener('loadeddata', () => v.play().catch(() => {}), { once: true });
+      }
+      if (sc.flip) {                                 // карточка-перевёртыш: глобус сменяется графом
+        row.className = 'scr-win';
+        const st = document.createElement('div'); st.className = 'win-stage flip-stage';
+        const pc = (v, base) => (v / base * 100).toFixed(3) + '%';
+        const card = document.createElement('div');
+        card.className = 'flip-card';
+        card.style.left = pc(sc.flip.x, 1400); card.style.top = pc(sc.flip.y, 1080);
+        card.style.width = pc(sc.flip.w, 1400); card.style.height = pc(sc.flip.h, 1080);
+        card.style.setProperty('--tx', pc(sc.flip.tx, sc.flip.w));   // кнопка стоит там же, где в макете
+        card.style.setProperty('--ty', pc(sc.flip.ty, sc.flip.h));
+        card.innerHTML = '<img class="flip-front" alt="" loading="lazy">'
+                       + '<img class="flip-back" alt="" loading="lazy">'
+                       + '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>';
+        card.querySelector('.flip-front').src = sc.flip.front;
+        card.querySelector('.flip-back').src = sc.flip.back;
+        st.appendChild(card);
+        const bar = document.createElement('div'); bar.className = 'note-bar';
+        (sc.notes || []).forEach(n => {
+          const el = document.createElement('div');
+          el.className = 'note';
+          if (n.r != null) { el.style.right = pc(n.r, 1400); el.style.left = 'auto'; el.classList.add('anch-r'); }
+          else { el.style.left = pc(n.x, 1400); el.style.right = 'auto'; }
+          el.style.top = pc(n.y, 1080);
+          el.style.bottom = 'auto';
+          el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
+                       + '<span class="note-body"><span class="note-text"></span></span>';
+          el.querySelector('.note-text').textContent = n[lang] || n.ru;
+          bar.appendChild(el);
+        });
+        if (bar.children.length) st.appendChild(bar);
+        // на компьютере карточка переворачивается по наведению и держится, пока курсор на кадре,
+        // чтобы можно было дотянуться до выносок; на телефоне — по тапу
+        card.addEventListener('mouseenter', () => st.classList.add('on'));
+        st.addEventListener('mouseleave', () => st.classList.remove('on'));
+        card.addEventListener('click', () => st.classList.toggle('on'));
+        row.appendChild(st);
       }
       if ((sc.frames || []).length) {                // окна браузера с кадрами интерфейса
         row.className = 'scr-win';
