@@ -15,7 +15,7 @@
   /* Все размеры из макета 1440×1024 записаны в rem (1rem = 16px на 1440×1024)
      и масштабируются под окно. */
   :root {
-    --glass: rgba(0, 0, 0, .5);
+    --glass: rgba(0, 0, 0, .47);
     --dim: rgba(255, 255, 255, .5);
     --font: "SF Pro Rounded", ui-rounded, "Nunito", system-ui, sans-serif;
     --ease: cubic-bezier(.3, .7, .2, 1);
@@ -60,7 +60,7 @@
   .card {
     position: absolute; left: 0; top: 0; bottom: 0; width: 32.5rem;
     background: var(--glass);
-    -webkit-backdrop-filter: blur(48px) saturate(1.6); backdrop-filter: blur(48px) saturate(1.6);
+    -webkit-backdrop-filter: blur(26px) saturate(1.7); backdrop-filter: blur(26px) saturate(1.7);
     border-radius: 0 1.5rem 1.5rem 0; overflow: hidden;
     transition: width .5s var(--ease); z-index: 1;
   }
@@ -105,7 +105,7 @@
        по буквам, а не по строчному боксу с запасом под выносные элементы */
     height: 2.5rem; padding: 0 1.25rem .22rem; border-radius: .5rem;
     display: inline-flex; align-items: center; gap: .5rem;
-    background: var(--glass); -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
+    background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.9); backdrop-filter: blur(16px) saturate(1.9);
     font-size: 1.25rem; transition: background .2s;
   }
   .pill:hover { background: rgba(0,0,0,.75); }
@@ -125,7 +125,7 @@
   .f-body {
     position: relative; width: 80%; aspect-ratio: 204 / 140; border-radius: 10% / 14.57%;
     container-type: inline-size; --p: calc(100cqw / 204);
-    -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(16px) saturate(1.9); backdrop-filter: blur(16px) saturate(1.9);
     transition: transform .35s var(--ease);
   }
   .folder:hover .f-body { transform: translateY(-.4rem) rotate(-1.5deg); }
@@ -174,8 +174,8 @@
   .fan-cover {
     position: relative; width: 100%; aspect-ratio: 204 / 140; overflow: hidden;
     display: grid; place-items: center; border-radius: .8em;
-    background: rgba(255, 255, 255, .14);
-    -webkit-backdrop-filter: blur(28px) saturate(1.6); backdrop-filter: blur(28px) saturate(1.6);
+    background: rgba(255, 255, 255, .1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.7); backdrop-filter: blur(16px) saturate(1.7);
     box-shadow: 0 .5em 1.4em rgba(0, 0, 0, .28);
     transition: transform .25s var(--ease);
   }
@@ -300,7 +300,7 @@
     width: calc(var(--nw, 380) * var(--n));
     padding: calc(16 * var(--n)); border-radius: calc(16 * var(--n));
     background: var(--glass);                       /* 60%, как у остального стекла */
-    -webkit-backdrop-filter: blur(32px) saturate(1.9); backdrop-filter: blur(32px) saturate(1.9);
+    -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
     color: #fff;                                    /* SF Pro Rounded Medium 16/120% */
     font-size: calc(16 * var(--n)); line-height: 1.2;
     left: var(--nx); right: var(--nr); top: var(--ny); bottom: var(--nb);
@@ -315,7 +315,7 @@
     /* верхняя точка — ниже кнопок, чтобы сразу было видно, что экран прокручивается */
     top: calc(6.25rem + var(--p, 0) * (100% - 6.25rem - 80 * var(--u)));
     border-radius: calc(8 * var(--u)); background: var(--glass); transition: top .12s linear;
-    -webkit-backdrop-filter: blur(32px) saturate(1.9); backdrop-filter: blur(32px) saturate(1.9);
+    -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
   }
   body.has-feed .case-bar { display: block; }
 
@@ -406,7 +406,7 @@
     width: min(92vw, 32.5rem); height: min(80vh, 31rem);
     display: flex; flex-direction: column;
     background: rgba(255,255,255,.2); border-radius: .85rem; overflow: hidden;
-    -webkit-backdrop-filter: blur(48px) saturate(1.6); backdrop-filter: blur(48px) saturate(1.6);
+    -webkit-backdrop-filter: blur(26px) saturate(1.7); backdrop-filter: blur(26px) saturate(1.7);
   }
   .doc-bar {
     position: relative; flex: none; height: 3.75rem; background: rgba(255,255,255,.4);
@@ -632,6 +632,7 @@
 
   <div class="top">
     <button class="pill home-btn" id="home-btn" type="button" data-i18n="home"></button>
+    <button class="pill cv" type="button" data-doc="resume" data-i18n="cv"></button>
     <a class="pill" data-link="contact"><span data-i18n="contact"></span></a>
     <button class="pill snd" id="snd" type="button" data-i18n-label="sound" aria-pressed="true">
       <svg class="snd-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z" fill="#fff"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
@@ -1675,7 +1676,7 @@ Add your own takeaway here` },
             <p>В остальное время: рисую, играю в D&amp;D, веду <a class="ext" data-link="telegram">телеграм-канал${ext}</a></p>`,
       foot: '2026, всё своими лапками 🦦',
       f1: '02.2026 → сейчас', f2: '08.2024 → 02.2026', f3: 'приколы с учёбы',
-      resume: 'резюме.мяу', cat: 'мой.кот',
+      resume: 'резюме.мяу', cat: 'мой.кот', cv: 'резюме',
       collapse: 'Свернуть', expand: 'Развернуть', tap: 'жми', photoAlt: 'Настя Балашова', sound: 'Звук', back: 'Назад', close: 'Закрыть', home: 'назад',
       videoSoon: 'Здесь будет видео с полным сценарием',
     },
@@ -1686,7 +1687,7 @@ Add your own takeaway here` },
             <p>In my free time: drawing, playing D&amp;D, running a <a class="ext" data-link="telegram">Telegram channel${ext}</a></p>`,
       foot: '2026, all made with my own paws 🦦',
       f1: '02.2026 → now', f2: '08.2024 → 02.2026', f3: 'studying stuff',
-      resume: 'resume.meow', cat: 'my.cat',
+      resume: 'resume.meow', cat: 'my.cat', cv: 'resume',
       collapse: 'Collapse', expand: 'Expand', tap: 'tap', photoAlt: 'Nastya Balashova', sound: 'Sound', back: 'Back', close: 'Close', home: 'back',
       videoSoon: 'A video with the full scenario goes here',
     },
