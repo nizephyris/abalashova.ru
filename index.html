@@ -1124,6 +1124,36 @@
       },
     },
 
+    expedition: {
+      plain: true,
+      video: '', shot: '',
+      screens: [
+        { hold: true },                     // экраны добавим, когда будут
+      ],
+      ru: {
+        title: 'транспортная экспедиция в личном кабинете доставки',
+        blocks: [
+          ['контекст', 'С 1 сентября 2026 в России стал обязательным переход на оформление экспедиторских документов в электронном виде через государственную систему электронных перевозочных документов'],
+          ['проблема', 'Под действие закона попадают пункты выдачи, фуры и грузовая доставка. Если не внедрить электронный документооборот в личный кабинет, нельзя оформлять половину тарифов'],
+          ['аудитория', 'B2B-клиенты, оформляющие доставку в личном кабинете'],
+          ['моя роль', 'Я доработала балансы, флоу регистрации и подписания нового договора, форму создания заказов и трекинг'],
+          ['статус', 'Электронный документооборот внедрён в личный кабинет, число доставок не упало'],
+          ['что будем измерять', 'Соотношение количества доставок до 1 сентября и после, конверсию в новые заказы, долю крупных клиентов, подписавших договор транспортной экспедиции'],
+        ],
+      },
+      en: {
+        title: 'freight forwarding in the delivery account',
+        blocks: [
+          ['context', 'From 1 September 2026 Russia requires forwarding paperwork to be issued electronically, through the state system for electronic transport documents'],
+          ['problem', 'The law covers pickup points, lorries and freight delivery. Without electronic document flow inside the client account, half of the tariffs cannot be used at all'],
+          ['audience', 'B2B clients who arrange deliveries in the client account'],
+          ['my role', 'I reworked the balances, the flow for signing up to and signing the new contract, the order form and the tracking'],
+          ['status', 'Electronic document flow is live in the client account, and the number of deliveries has not dropped'],
+          ['what we will measure', 'The number of deliveries before and after 1 September, conversion into new orders, and the share of large clients who signed the forwarding contract'],
+        ],
+      },
+    },
+
     telegraph: {
       plain: true,
       video: '', shot: '',
@@ -1316,6 +1346,7 @@
     // case — id кейса в CASES, cover — картинка обложки 204×140.
     folder1: [
       { ru: 'роботы в го', en: 'robots in go', case: 'go', cover: 'assets/cover-go.webp' },
+      { ru: 'экспедиция в лк', en: 'forwarding in the account', case: 'expedition', cover: 'assets/cover-expedition.webp' },
     ],
     folder2: [
       { ru: 'админка отп', en: 'otp admin', case: 'otp', cover: 'assets/cover-otp.webp' },
