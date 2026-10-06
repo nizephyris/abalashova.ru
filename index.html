@@ -201,8 +201,11 @@
   .fan-item:hover .fan-cover { transform: translateY(-.35em) scale(1.06); }
 
   /* ── Заголовок кейса и кнопки внутри карточки (макет 85:19987) ── */
-  .case-title { display: none; margin: 0 0 2.5rem; font-size: 1.75rem; line-height: 1.19; font-weight: 600; }
+  .case-title { display: none; margin: 0; font-size: 1.75rem; line-height: 1.19; font-weight: 600; }
   body[data-view="case"] .case-title { display: block; }   /* название кейса — вверху панели */
+  /* кнопка «назад» стоит слева от названия кейса */
+  .case-head { display: none; }
+  body[data-view="case"] .case-head { display: flex; align-items: center; gap: .75rem; margin: 0 0 2.5rem; }
 
   /* ── Лента экранов кейса: прокрутка справа со своим индикатором ── */
   .case-feed {
@@ -363,7 +366,7 @@
   body[data-view="case"] .mini-name:not(.mini-case) { display: none; }
   body[data-view="case"] .mini-case { display: inline-flex; }
   body[data-view="case"] .case-text { display: flex; }
-  .case-text, .case-foot, .mini-case, .home-btn { display: none; }
+  .case-text, .case-foot, .mini-case { display: none; }   /* .case-head и так скрыт вне кейса */
 
   /* текст кейса: блоки через 20px, внутри блока 4px, всё 20px */
   .case-text { flex-direction: column; gap: 1.25rem; width: 27.5rem; font-size: 1.25rem; line-height: 1.19;
@@ -420,10 +423,8 @@
   .case-file.dragging, .desk-item.dragging { cursor: grabbing; transition: none; }
   .case-file img { width: 5rem; }
 
-  .home-btn { display: none; }
-  /* в кейсе вместо шеврона внизу панели — обычная кнопка «назад» в шапке */
-  body[data-view="case"] .home-btn { display: inline-flex; }
-  body[data-view="case"] #collapse { display: none; }
+  .home-btn { flex: 0 0 auto; margin-left: -.5rem; }   /* шеврон слева от названия кейса */
+  body[data-view="case"] #collapse { display: none; }   /* шеврон внизу панели не нужен */
 
   /* ── Окна с текстом (фрейм 42:20994): 520×496, стекло, шапка 60 светлее,
      заголовок чёрный слева на 40/18, крестик 16 справа на 40/22, текст белый 20 ── */
@@ -490,7 +491,8 @@
     .case-phone { position: relative; inset: auto; width: min(60vw, 15rem); margin: 0 auto 1.5rem; }
     .case-text { width: auto; font-size: 1.125rem; }
     /* на телефоне заголовок остаётся в чёрном блоке, как сейчас */
-    .case-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
+    .case-title { font-size: 1.5rem; }
+    body[data-view="case"] .case-head { margin-bottom: 1.5rem; }
     body[data-view="case"] .top { top: 1rem; bottom: auto; left: auto; right: 1rem; }
     /* на телефоне порядок такой: видео, описание проекта, потом экраны с выносками */
     body[data-view="case"] { background: #fff; }
@@ -655,7 +657,6 @@
 </main>
 
   <div class="top">
-    <button class="pill home-btn" id="home-btn" type="button" data-i18n="home"></button>
     <button class="pill cv" type="button" data-doc="resume" data-i18n="cv"></button>
     <a class="pill" data-link="contact"><span data-i18n="contact"></span></a>
     <button class="pill snd" id="snd" type="button" data-i18n-label="sound" aria-pressed="true">
@@ -689,7 +690,12 @@
 <aside class="card" id="card">
   <div class="card-full">
     <div class="bio" data-i18n="bio"></div>
-    <h2 class="case-title" id="case-title"></h2>
+    <div class="case-head">
+      <button class="toggle back home-btn" id="home-btn" type="button" data-i18n-label="back">
+        <img src="assets/ic-arrow.svg" alt="">
+      </button>
+      <h2 class="case-title" id="case-title"></h2>
+    </div>
     <div class="case-text" id="case-text"></div>
     <div class="card-foot">
       <span id="foot" data-i18n="foot"></span>
