@@ -1852,11 +1852,21 @@ Add your own takeaway here` },
     };
   })();
 
-  let lang = store.get('lang') || (navigator.language.startsWith('ru') ? 'ru' : 'en');
-  setLang(lang);
+  // Язык берётся из адреса (?lang=en), иначе из памяти, иначе из языка браузера.
+  // Адрес нужен, чтобы можно было дать ссылку сразу на английскую версию.
+  const askedLang = new URLSearchParams(location.search).get('lang');
+  let lang = (askedLang === 'ru' || askedLang === 'en') ? askedLang
+           : store.get('lang') || (navigator.language.startsWith('ru') ? 'ru' : 'en');
+  // в адресе язык держим, только если он не родной для браузера — иначе не мусорим
+  function syncLangUrl() {
+    const url = new URL(location);
+    if (lang === 'en') url.searchParams.set('lang', 'en'); else url.searchParams.delete('lang');
+    history.replaceState(null, '', url);
+  }
+  setLang(lang); syncLangUrl();
   document.getElementById('lang').onclick = () => {
     lang = lang === 'ru' ? 'en' : 'ru';
-    setLang(lang);
+    setLang(lang); syncLangUrl();
     Sound.play('lang', lang === 'en');
   };
 
