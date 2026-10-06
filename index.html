@@ -1680,7 +1680,7 @@ Add your own takeaway here` },
             <p>Started out in fintech and edtech, <b>currently on the B2B team at Yandex Delivery</b>${truck}. Also, studying for <b>a master's at Central University</b></p>
             <p>In my free time: drawing, playing D&amp;D, running a <a class="ext" data-link="telegram">Telegram channel${ext}</a></p>`,
       foot: '2026, all made with my own paws 🦦',
-      f1: '02.2026 → now', f2: '08.2024 → 02.2026', f3: 'studying<br>stuff',
+      f1: '02.2026 → now', f2: '08.2024 → 02.2026', f3: 'studying stuff',
       resume: 'resume.meow', cat: 'my.cat',
       collapse: 'Collapse', expand: 'Expand', tap: 'tap', photoAlt: 'Nastya Balashova', sound: 'Sound', back: 'Back', close: 'Close', home: 'back',
       videoSoon: 'A video with the full scenario goes here',
@@ -2608,9 +2608,14 @@ Add your own takeaway here` },
   document.querySelectorAll('.desk-item').forEach(makeDraggable);
 
   window.docReady = true;
+  // На столе лежит настоящее резюме: открывается PDF на языке сайта
+  const RESUME = { ru: 'assets/resume-ru.pdf', en: 'assets/resume-en.pdf' };
   document.addEventListener('click', e => {
     const opener = e.target.closest('[data-doc]');
-    if (opener) { e.preventDefault(); openDoc(opener.dataset.doc); }
+    if (!opener) return;
+    e.preventDefault();
+    if (opener.dataset.doc === 'resume') window.open(RESUME[lang] || RESUME.ru, '_blank', 'noopener');
+    else openDoc(opener.dataset.doc);
   });
   // Esc закрывает верхнее окно
   addEventListener('keydown', e => {
