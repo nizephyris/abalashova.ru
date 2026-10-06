@@ -291,6 +291,13 @@
     border-radius: 14.7% / 7.13%; overflow: hidden; background: #000;
   }
   .scr-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* ролик, в котором уже нарисовано окно браузера: стоит во всю ширину кадра,
+     радиус срезает чёрные углы, оставшиеся от прозрачного фона исходника */
+  .scr-row.vid { --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080); --n: var(--u); }
+  .scr-video.wide {
+    height: auto; width: calc(1241 * var(--u)); max-width: 100%;
+    aspect-ratio: var(--ar); border-radius: calc(30 * var(--u)); background: #efedea;
+  }
   .scr-phone { position: relative; aspect-ratio: 431.33 / 885.33; }
   .scr-phone .ph-body { position: absolute; inset: 0; width: 100%; height: 100%; }
   .scr-phone .ph-scr {
@@ -545,6 +552,7 @@
     .scr-item, .scr-video { position: relative; height: auto; max-height: none; margin: 0 auto 40px; }
     .scr-item { width: min(100%, (100svh - 5rem) / 2.0525); }
     .scr-video { width: min(100%, (100svh - 5rem) / 2.0637); }
+    .scr-video.wide { width: 100%; border-radius: 1rem; }
     .scr-item img { height: auto; }
     .scr-item.bleed img { position: static; width: 100%; }   /* на телефоне запас вокруг корпуса не нужен */
     .scr-item:last-child, .scr-video { margin-bottom: 0; }
@@ -1119,7 +1127,7 @@
       video: '', shot: '',
       // Экраны собраны по макету: Фигма, Section 117:12274 (четыре десктопа)
       screens: [
-        { hold: true },                     // первый экран пустой — сюда встанет ролик
+        { video: 'assets/tg-intro.mp4', ar: '1984 / 1216' },
         { windows: [
             { x: 60, y: 226, title: { ru: 'исследовательские вопросы', en: 'research questions' }, items: [
               { ru: 'Что аудитория знает о Центральном Телеграфе и будущем кампусе?',
@@ -2260,6 +2268,10 @@ Add your own takeaway here` },
       if (sc.video) {
         const box = document.createElement('div');
         box.className = 'scr-video';
+        if (sc.ar) {                                 // ролик с готовым окном — во всю ширину кадра
+          row.classList.add('vid'); box.classList.add('wide');
+          box.style.setProperty('--ar', sc.ar);
+        }
         box.innerHTML = '<video playsinline muted loop autoplay controls preload="metadata"></video>';
         row.appendChild(box);
         const v = box.querySelector('video');
