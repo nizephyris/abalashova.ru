@@ -205,7 +205,9 @@
   body[data-view="case"] .case-title { display: block; }   /* название кейса — вверху панели */
   /* кнопка «назад» стоит слева от названия кейса */
   .case-head { display: none; }
-  body[data-view="case"] .case-head { display: flex; align-items: center; gap: .75rem; margin: 0 0 2.5rem; }
+  body[data-view="case"] .case-head { display: flex; align-items: flex-start; gap: .75rem; margin: 0 0 2.5rem; }
+  /* шеврон центруется по первой строке названия — в двух строчках стоит там же, где в одной */
+  .case-head .home-btn { margin-top: calc((1.75rem * 1.19 - 2.5rem) / 2); }
 
   /* ── Лента экранов кейса: прокрутка справа со своим индикатором ── */
   .case-feed {
@@ -2057,7 +2059,7 @@ Add your own takeaway here` },
     const w = items[0].offsetWidth, h = items[0].offsetHeight;
 
     const gap = 2.5 * rem;                 // 40px от папки до нижнего ряда
-    const colGap = .2 * w, rowGap = .31 * h, lean = .19 * w;
+    const colGap = 2.5 * rem, rowGap = .31 * h, lean = .19 * w;   // 40px между обложками
     const cols = n > 1 ? 2 : 1;
     // лёгкий хаос: у каждой карточки свой сдвиг — всегда один и тот же
     const noise = (el, salt) => {
@@ -2069,7 +2071,8 @@ Add your own takeaway here` },
       const row = Math.floor(i / cols), col = i % cols;
       const inRow = Math.min(cols, n - row * cols);                // в верхнем ряду бывает одна
       return {
-        x: (col - (inRow - 1) / 2) * (w + colGap) + row * lean + noise(items[i], 'x') * .03 * w,
+        // правая обложка стоит по центру папки, остальные уходят влево через 40px
+        x: (col - (inRow - 1)) * (w + colGap) + row * lean + noise(items[i], 'x') * .03 * w,
         y: gap + row * (h + rowGap) + noise(items[i], 'y') * .02 * h,
       };
     };
