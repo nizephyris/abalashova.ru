@@ -296,7 +296,9 @@
   .scr-row.vid { --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080); --n: var(--u); }
   .scr-video.wide {
     height: auto; width: calc(1241 * var(--u)); max-width: 100%;
-    aspect-ratio: var(--ar); border-radius: calc(30 * var(--u)); background: #efedea;
+    aspect-ratio: var(--ar); background: #efedea;
+    /* снизу углы ролика скруглены сильнее — там в исходник затесалась тень */
+    border-radius: calc(30 * var(--u)) calc(30 * var(--u)) calc(40 * var(--u)) calc(40 * var(--u));
   }
   .scr-phone { position: relative; aspect-ratio: 431.33 / 885.33; }
   .scr-phone .ph-body { position: absolute; inset: 0; width: 100%; height: 100%; }
