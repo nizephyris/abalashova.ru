@@ -274,7 +274,7 @@
   .stage-arrow { position: absolute; display: block; }
   /* выноски к окнам стоят по координатам макета 1400×1080, ширина — как в кейсе роботов */
   .note-bar { display: contents; }                   /* на компьютере обёртка ничего не меняет */
-  .win-stage .note { position: absolute; width: calc(380 * var(--u)); transform: none; z-index: 20; }
+  .win-stage .note { position: absolute; transform: none; z-index: 20; }   /* ширину задаёт сама выноска */
   /* ноутбук в ленте — та же рамка, что на главном экране кейса */
   .scr-laptop { position: relative; width: calc(1280 * var(--u)); aspect-ratio: 1280 / 776; }
   .scr-item img { width: 100%; height: 100%; display: block; }
@@ -296,17 +296,40 @@
 
   /* выноски: ровно 260px, текст 16/17 — как в макете. Координаты заданы долей
      от телефона, к которому выноска привязана, поэтому она ложится на тот же элемент */
+  /* Выноска — кнопка 40×40 с иконкой тапа; плашка с текстом лежит отдельным слоем
+     и выезжает по наведению (на компьютере) или по нажатию (на телефоне).
+     Сам блок размер не меняет — поэтому раскладка кадра не едет. */
   .note {
-    position: absolute; z-index: 2;                 /* выноски всегда поверх телефонов */
-    width: calc(var(--nw, 380) * var(--n));
+    --nw: 380;                                      /* ширина плашки в пикселях макета */
+    position: absolute; z-index: 2;
+    width: calc(40 * var(--n)); height: calc(40 * var(--n));
+    left: var(--nx); right: var(--nr); top: var(--ny); bottom: var(--nb);
+  }
+  .note-tap {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    border-radius: 50%; background: var(--glass);
+    -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
+    transition: opacity .14s var(--ease);
+  }
+  .note-tap img { width: calc(24 * var(--n)); height: calc(24 * var(--n)); }
+  .note-body {
+    position: absolute; top: 0; left: 0; display: none;
+    width: calc(var(--nw) * var(--n));
     padding: calc(16 * var(--n)); border-radius: calc(16 * var(--n));
-    background: var(--glass);                       /* 60%, как у остального стекла */
+    background: var(--glass);
     -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
     color: #fff;                                    /* SF Pro Rounded Medium 16/120% */
     font-size: calc(16 * var(--n)); line-height: 1.2;
-    left: var(--nx); right: var(--nr); top: var(--ny); bottom: var(--nb);
   }
-  .note-tap { display: none; }
+  .note.anch-r .note-body { left: auto; right: 0; }  /* выноска прижата правым краем */
+  .note.open { z-index: 4; }
+  .note.open .note-tap { opacity: 0; }
+  .note.open .note-body { display: block; }
+  @media (hover: hover) {                            /* на компьютере — по наведению */
+    .note:hover { z-index: 4; }
+    .note:hover .note-tap { opacity: 0; }
+    .note:hover .note-body { display: block; }
+  }
   .scr-title { display: none; }                     /* пары подписаны только на телефоне */
 
   .case-bar {
@@ -518,17 +541,15 @@
     /* выноска свёрнута в «жми» и раскрывается по тапу — обе по центру телефона */
     .note {
       top: var(--py); bottom: auto; left: 50%; right: auto; transform: translateX(-50%);
-      width: 83.46%; padding: 23px 16px 16px; border-radius: 20px;
-      font-size: 16px; line-height: 1.2; cursor: pointer;
+      width: 40px; height: 40px; cursor: pointer;
     }
-    /* на телефоне шип всегда сверху по центру — угловые отступы десктопа тут не нужны */
-    .note.tl, .note.tr, .note.bl, .note.br { padding: 23px 16px 16px; }
-    .note:not(.open) {
-      width: 68px; height: 55px; padding: 7px 0 0; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
+    .note-tap img { width: 24px; height: 24px; }
+    /* плашка по центру экрана, шип у неё сверху — ровно там, где была кнопка */
+    .note-body, .note.anch-r .note-body {
+      left: 50%; right: auto; transform: translateX(-50%);
+      width: 85vw; max-width: calc(100vw - 2rem);
+      padding: 23px 16px 16px; border-radius: 20px; font-size: 16px;
     }
-    .note:not(.open) .note-text { display: none; }
-    .note:not(.open) .note-tap { display: inline; }
     .case-bar { display: none !important; }
     .case-desk { order: 3; position: static; display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1.5rem 1rem 2rem; background: #fff; }
     .case-desk:empty { display: none; }               /* пустой стол больше не тянет белую полосу под футер */
@@ -2162,17 +2183,17 @@ Add your own takeaway here` },
           const el = document.createElement('div');
           el.className = 'note';
           if (n.r === 'snd') {                                 // правым краем ровно под кнопкой звука
-            el.classList.add('at-snd');
+            el.classList.add('at-snd', 'anch-r');
           } else if (n.r != null) {                            // r — отступ правого края от края кадра
-            el.style.right = px(n.r, 1400); el.style.left = 'auto';
+            el.style.right = px(n.r, 1400); el.style.left = 'auto'; el.classList.add('anch-r');
           } else {                                             // x — левый край плашки в макете
             el.style.left = px(n.x, 1400); el.style.right = 'auto';
           }
           el.style.top = px(n.y, 1080);
           el.style.bottom = 'auto';
-          el.innerHTML = '<span class="note-text"></span><span class="note-tap"></span>';
+          el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
+                       + '<span class="note-body"><span class="note-text"></span></span>';
           el.querySelector('.note-text').textContent = n[lang] || n.ru;
-          el.querySelector('.note-tap').textContent = T[lang].tap;
           bar.appendChild(el);
         });
         if (bar.children.length) st.appendChild(bar);
@@ -2220,9 +2241,9 @@ Add your own takeaway here` },
         if (sc.note) {
           const el = document.createElement('div');
           el.className = 'note';
-          el.innerHTML = '<span class="note-text"></span><span class="note-tap"></span>';
+          el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
+                       + '<span class="note-body"><span class="note-text"></span></span>';
           el.querySelector('.note-text').textContent = sc.note[lang] || sc.note.ru;
-          el.querySelector('.note-tap').textContent = T[lang].tap;
           stage.appendChild(el);
         }
         row.appendChild(stage);
@@ -2270,24 +2291,24 @@ Add your own takeaway here` },
           // макета она заходит на экран, y — её верх, считая от верха телефона
           const pw = (sc.phone && sc.phone.w) || PH.w, ph = (sc.phone && sc.phone.h) || PH.h;
           if (n.side === 'r') el.style.setProperty('--nx', pc((pw - n.over) / pw * 100));
-          else                el.style.setProperty('--nr', pc((pw - n.over) / pw * 100));
+          else { el.style.setProperty('--nr', pc((pw - n.over) / pw * 100)); el.classList.add('anch-r'); }
           el.style.setProperty('--ny', pc(n.y / ph * 100));
           el.dataset.py = Math.min(Math.max(n.y / ph, .02), .84);
         } else {
         // выноска заходит на телефон ровно на 40px и дальше растёт наружу;
         // средние цепляются хвостиком за то же место, что и в макете
         if (n.at === 'r') el.style.setProperty('--nx', 'calc(100% - 40px)');
-        else if (n.at === 'c') el.style.setProperty('--nr', pc((PH.w - (817 - PH.x)) / PH.w * 100));
-        else el.style.setProperty('--nr', 'calc(100% - 40px)');
+        else if (n.at === 'c') { el.style.setProperty('--nr', pc((PH.w - (817 - PH.x)) / PH.w * 100)); el.classList.add('anch-r'); }
+        else { el.style.setProperty('--nr', 'calc(100% - 40px)'); el.classList.add('anch-r'); }
         if (tail.startsWith('b')) el.style.setProperty('--nb', pc((PH.y + PH.h - (n.y + n.h)) / PH.h * 100));
         else                      el.style.setProperty('--ny', pc((n.y - PH.y) / PH.h * 100));
         // на телефоне выноска всегда по центру, сверху вниз — только доля высоты
         el.dataset.py = Math.min(Math.max((n.y - PH.y) / PH.h, .02), .84);
         }
         el.style.setProperty('--py', (el.dataset.py * 100).toFixed(2) + '%');
-        el.innerHTML = '<span class="note-text"></span><span class="note-tap"></span>';
+        el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
+                       + '<span class="note-body"><span class="note-text"></span></span>';
         el.querySelector('.note-text').textContent = n[lang] || n.ru || n.en || '';
-        el.querySelector('.note-tap').textContent = T[lang].tap;
         // на телефоне выноска живёт внутри своего экрана, на компьютере — поверх всего кадра
         const host = items.length
           ? (n.side ? (items[n.at || 0] || items[0]) : (n.at === 'r' && items[1] ? items[1] : items[0]))
@@ -2311,9 +2332,9 @@ Add your own takeaway here` },
     const box = el.getBoundingClientRect(), w = box.width, h = box.height;
     if (!w || !h) { el.style.clipPath = ''; return; }
     const n2 = v => (Math.round(v * 1000) / 1000);
-    if (mobile.matches) {
-      const d = 7, B = h - d, r = el.classList.contains('open') ? 20 : 12,
-            c = w / 2, hb = el.classList.contains('open') ? 6.624 : 3.816,
+    if (mobile.matches && note.classList.contains('open')) {   // шип только у раскрытой плашки
+      const d = 7, B = h - d, r = 20,
+            c = w / 2, hb = 6.624,
             x = v => n2(v), y = v => n2(h - v);      // шип переезжает наверх
       el.style.clipPath = 'path("' +
         `M ${x(r)} ${y(0)} L ${x(w - r)} ${y(0)} ` +
@@ -2364,10 +2385,10 @@ Add your own takeaway here` },
     feed.querySelectorAll('.scr-item').forEach(item => {
       const ns = [...item.querySelectorAll('.note')], H = item.clientHeight;
       if (!H) return;
-      const open = ns.map(n => {                       // высота в раскрытом виде
+      const open = ns.map(n => {                       // высота плашки в раскрытом виде
         const was = n.classList.contains('open');
         n.classList.add('open');
-        const hh = n.offsetHeight;
+        const hh = (n.querySelector('.note-body') || n).offsetHeight;
         if (!was) n.classList.remove('open');
         return hh;
       });
