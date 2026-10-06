@@ -69,6 +69,8 @@
   .collapsed .card-full { opacity: 0; pointer-events: none; }
   .collapsed .card-mini { opacity: 1; pointer-events: auto; transition-delay: .15s; }
 
+  /* если слово всё-таки не влезает в колонку — переносим его, а не обрезаем */
+  .bio, .case-text { overflow-wrap: break-word; }
   .bio { font-size: 1.75rem; line-height: 1.2; color: var(--dim); }
   .bio p { margin: 0 0 1.25rem; }
   .bio b { font-weight: inherit; color: #fff; }
