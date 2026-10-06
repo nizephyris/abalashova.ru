@@ -424,6 +424,7 @@
   .case-file img { width: 5rem; }
 
   .home-btn { flex: 0 0 auto; margin-left: -.5rem; }   /* шеврон слева от названия кейса */
+  .back-fix { display: none; }                         /* на компьютере хватает шеврона у названия */
   body[data-view="case"] #collapse { display: none; }   /* шеврон внизу панели не нужен */
 
   /* ── Окна с текстом (фрейм 42:20994): 520×496, стекло, шапка 60 светлее,
@@ -493,7 +494,13 @@
     /* на телефоне заголовок остаётся в чёрном блоке, как сейчас */
     .case-title { font-size: 1.5rem; }
     body[data-view="case"] .case-head { margin-bottom: 1.5rem; }
-    body[data-view="case"] .top { top: 1rem; bottom: auto; left: auto; right: 1rem; }
+    /* панель на телефоне прокручивается, поэтому «назад» прибита к верху экрана */
+    .case-head .home-btn { display: none; }
+    body[data-view="case"] .back-fix {
+      display: inline-flex; position: fixed; top: 1rem; left: 1rem; z-index: 50;
+    }
+    /* шапка прибита к экрану — кнопки видно на любой прокрутке */
+    body[data-view="case"] .top { position: fixed; top: 1rem; bottom: auto; left: auto; right: 1rem; }
     /* на телефоне порядок такой: видео, описание проекта, потом экраны с выносками */
     body[data-view="case"] { background: #fff; }
     body[data-view="case"] .case, body.has-feed .case-feed { display: contents; }
@@ -656,6 +663,7 @@
 
 </main>
 
+  <button class="pill back-fix" id="back-fix" type="button" data-i18n="home"></button>
   <div class="top">
     <button class="pill cv" type="button" data-doc="resume" data-i18n="cv"></button>
     <a class="pill" data-link="contact"><span data-i18n="contact"></span></a>
@@ -2547,6 +2555,7 @@ Add your own takeaway here` },
     if (opener) { e.preventDefault(); openCase(opener.dataset.case); }
   });
   document.getElementById('home-btn').onclick = closeCase;
+  document.getElementById('back-fix').onclick = closeCase;
   route();
 
   // ── Файлы на «рабочем столе» можно двигать мышкой; короткий клик открывает окно ──
