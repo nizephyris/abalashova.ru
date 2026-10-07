@@ -338,6 +338,9 @@
     font-size: calc(16 * var(--n)); line-height: 1.2;
   }
   .note.anch-r .note-body { left: auto; right: 0; }  /* выноска прижата правым краем */
+  /* если плашка не помещается в кадр, её сдвигают внутрь — на кадр она просто заходит */
+  .note-body { transform: translateX(var(--bshift, 0px)); }
+  .note.measure .note-body { display: block; visibility: hidden; }
   /* выноска, которая на компьютере всегда раскрыта — кнопка ей не нужна */
   .note.always .note-tap { display: none; }
   .note.always .note-body { display: block; }
@@ -1155,8 +1158,7 @@
           ] },
         // три телефона 354×735, выноски 260 — как нарисовано
         { title: { ru: 'точки входа', en: 'entry points' },
-          // кадр шире пары телефонов: по бокам нужно место под раскрытые плашки
-          phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1870,
+          phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-1.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-2.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-3.webp', w: 101.246, x: -0.519 }],
           notes: [
             { b: [-0.3, 84.5], at: 0, side: 'l', over: 179, y: 612,
@@ -1182,8 +1184,7 @@
               en: 'All the person who starts the group has to do is fill in a short form and send the invites' },
           ] },
         { title: { ru: 'комната поездки', en: 'the trip room' },
-          // кадр шире пары телефонов: по бокам нужно место под раскрытые плашки
-          phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1870,
+          phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-6.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-7.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-8.webp', w: 101.246, x: -0.519 }],
           notes: [
             { b: [0.0, 50.9], at: 0, side: 'l', over: 179, y: 642,
@@ -1950,6 +1951,30 @@
   }
   function shapeNotes() { feed.querySelectorAll('.note').forEach(shapeNote); }
 
+  // Раскрытая плашка не должна уезжать за край ленты: если не влезает,
+  // сдвигаем её внутрь — тогда она заходит на телефон, но её видно целиком.
+  function clampNotes() {
+    if (mobile.matches) { feed.querySelectorAll('.note').forEach(el => el.style.removeProperty('--bshift')); return; }
+    feed.querySelectorAll('.case-screen').forEach(sec => {
+      const box = sec.getBoundingClientRect(), pad = 8;
+      if (!box.width) return;
+      sec.querySelectorAll('.note').forEach(el => {
+        el.style.setProperty('--bshift', '0px');
+        const body = el.querySelector('.note-body');
+        if (!body) return;
+        const open = el.classList.contains('always');
+        if (!open) el.classList.add('measure');
+        const b = body.getBoundingClientRect();
+        if (!open) el.classList.remove('measure');
+        let d = 0;
+        if (b.left < box.left + pad) d = box.left + pad - b.left;
+        else if (b.right > box.right - pad) d = box.right - pad - b.right;
+        if (d) el.style.setProperty('--bshift', Math.round(d) + 'px');
+      });
+    });
+  }
+  addEventListener('resize', clampNotes);
+
   // Окна в колонке стоят на фиксированном расстоянии: первое — по координате макета,
   // следующие — ровно в 80px под предыдущим, какой бы высоты оно ни получилось.
   function layoutWindows() {
@@ -2085,6 +2110,7 @@
     layoutNotes();                       // сперва разводим выноски, потом режем контур
     layoutWindows();
     shapeNotes();                        // контур считаем, когда экран уже показан и выноски измерены
+    clampNotes();                        // и подвигаем те плашки, что не влезают в ленту
     currentCase = id;
     typograph(document.body);
   }
