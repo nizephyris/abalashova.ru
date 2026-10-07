@@ -1958,9 +1958,9 @@
     feed.querySelectorAll('.case-screen').forEach(sec => {
       const box = sec.getBoundingClientRect();
       if (!box.width) return;
-      // справа плашка встаёт ровно под кнопкой языка — тем же отступом в 2,5rem
+      // слева от панели всегда не меньше 40px, справа — ровно под кнопкой языка
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const padL = 8, padR = 2.5 * rem;
+      const padL = Math.max(40, 2.5 * rem), padR = 2.5 * rem;
       sec.querySelectorAll('.note').forEach(el => {
         el.style.setProperty('--bshift', '0px');
         const body = el.querySelector('.note-body');
