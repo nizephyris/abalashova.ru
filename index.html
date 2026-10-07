@@ -1956,8 +1956,11 @@
   function clampNotes() {
     if (mobile.matches) { feed.querySelectorAll('.note').forEach(el => el.style.removeProperty('--bshift')); return; }
     feed.querySelectorAll('.case-screen').forEach(sec => {
-      const box = sec.getBoundingClientRect(), pad = 8;
+      const box = sec.getBoundingClientRect();
       if (!box.width) return;
+      // справа плашка встаёт ровно под кнопкой языка — тем же отступом в 2,5rem
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const padL = 8, padR = 2.5 * rem;
       sec.querySelectorAll('.note').forEach(el => {
         el.style.setProperty('--bshift', '0px');
         const body = el.querySelector('.note-body');
@@ -1967,8 +1970,8 @@
         const b = body.getBoundingClientRect();
         if (!open) el.classList.remove('measure');
         let d = 0;
-        if (b.left < box.left + pad) d = box.left + pad - b.left;
-        else if (b.right > box.right - pad) d = box.right - pad - b.right;
+        if (b.left < box.left + padL) d = box.left + padL - b.left;
+        else if (b.right > box.right - padR) d = box.right - padR - b.right;
         if (d) el.style.setProperty('--bshift', Math.round(d) + 'px');
       });
     });
