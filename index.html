@@ -1021,8 +1021,56 @@
     expedition: {
       plain: true,
       video: '', shot: '',
+      // Экраны собраны по макету: Фигма, Section 146:18467 (пять десктопов)
       screens: [
-        { hold: true },                     // экраны добавим, когда будут
+        { hold: true },                     // первый экран пустой — сюда встанет ролик
+        { title: { ru: 'личный кабинет', en: 'the client account' },
+          frames: [
+            { src: 'assets/exp-home.webp', x: 81, y: 158, w: 1239, h: 766 },
+          ],
+          notes: [
+            { b: [4.71, 34.07], anchor: 'l',
+              ru: 'В кабинете выносим сквозной баннер сверху. Такие используются редко, поэтому должен привлечь внимание',
+              en: 'A full-width banner goes at the very top of the account. We use those rarely, so this one should catch the eye' },
+            { b: [61.64, 80.19], anchor: 'l',
+              ru: 'Ниже выносим справки, погружающие в контекст экспедиции — термин новый даже для крупных клиентов',
+              en: 'Below it we put explainers about forwarding: the term is new even to the large clients' },
+          ] },
+        { title: { ru: 'новый заказ', en: 'a new order' },
+          frames: [
+            { src: 'assets/exp-order.webp', x: 81, y: 158, w: 1239, h: 766 },
+          ],
+          notes: [
+            { b: [67.14, 51.30], anchor: 'l',
+              ru: 'Блокируем грузовую форму, чтобы клиенты не могли её заполнить до подписания договора. Интервью показали, что только при блокере в текст начинают вчитываться',
+              en: 'We lock the freight form so that it cannot be filled in before the contract is signed. Interviews showed that people only start reading the text when something blocks them' },
+          ] },
+        { title: { ru: 'подписание договора', en: 'signing the contract' },
+          frames: [
+            { src: 'assets/exp-sign-b.webp', x: 631, y: 212, w: 637, h: 766 },
+            { src: 'assets/exp-sign-a.webp', x: 131, y: 106, w: 637, h: 766 },
+          ],
+          arrow: { src: 'assets/exp-arrow-1.webp', x: 336, y: 894, w: 262, h: 89 },
+          notes: [
+            { b: [95.29, 65.37], anchor: 'r',
+              ru: 'Пользователь упрощённо подписывает один новый договор. Заполнять для него ничего не нужно — всё подтягиваем сами, чтобы максимально смягчить переход',
+              en: 'Signing comes down to one new contract. There is nothing to fill in — we pull all the data ourselves, to make the switch as painless as possible' },
+          ] },
+        { title: { ru: 'два баланса', en: 'two balances' },
+          frames: [
+            { src: 'assets/exp-fin-a.webp', x: 148, y: 228, w: 386, h: 425 },
+            { src: 'assets/exp-fin-b.webp', x: 850, y: 316, w: 402, h: 250 },
+            { src: 'assets/exp-fin-c.webp', x: 650, y: 604, w: 402, h: 250 },
+          ],
+          arrows: [
+            { src: 'assets/exp-arrow-2.webp', x: 562, y: 394, w: 262, h: 90 },
+            { src: 'assets/exp-arrow-3.webp', x: 366, y: 667, w: 264, h: 126 },
+          ],
+          notes: [
+            { b: [42.79, 17.04], anchor: 'l',
+              ru: 'Балансов стало два: каждый для транспортной экспедиции и услуг доставки. Пришлось переработать старый баланс, чтобы информация по нему воспринималась легче',
+              en: 'There are two balances now, one for forwarding and one for delivery services. The old balance had to be reworked so that its numbers read more easily' },
+          ] },
       ],
       ru: {
         title: 'транспортная экспедиция в личном кабинете доставки',
@@ -1760,13 +1808,13 @@
           el.querySelector('.win-shot').src = f.src;
           st.appendChild(el);
         });
-        if (sc.arrow) {                              // стрелка между окнами
+        (sc.arrows || (sc.arrow ? [sc.arrow] : [])).forEach(ar => {   // стрелки между окнами
           const a = document.createElement('img');
-          a.className = 'stage-arrow'; a.src = sc.arrow.src; a.alt = ''; a.loading = 'lazy';
+          a.className = 'stage-arrow'; a.src = ar.src; a.alt = ''; a.loading = 'lazy';
           a.style.zIndex = sc.frames.length + 1;
-          place(a, sc.arrow);
+          place(a, ar);
           st.appendChild(a);
-        }
+        });
         // на компьютере выноски стоят по координатам, на телефоне собираются в ряд «жми»
         const bar = document.createElement('div'); bar.className = 'note-bar';
         (sc.notes || []).forEach(n => {
@@ -1774,7 +1822,8 @@
           el.className = 'note';
           if (n.b) {                                           // b — центр кнопки в процентах от кадра
             const half = v => 'calc(' + v.toFixed(3) + '% - var(--tap) / 2)';
-            if (n.b[0] >= 50) { el.style.setProperty('--nr', half(100 - n.b[0])); el.classList.add('anch-r'); }
+            const toLeft = n.anchor ? n.anchor === 'r' : n.b[0] >= 50;   // влево растёт плашка или вправо
+            if (toLeft) { el.style.setProperty('--nr', half(100 - n.b[0])); el.classList.add('anch-r'); }
             else el.style.setProperty('--nx', half(n.b[0]));
             el.style.setProperty('--ny', half(n.b[1]));
           } else if (n.r === 'snd') {                          // правым краем ровно под кнопкой звука
