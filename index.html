@@ -292,6 +292,9 @@
     border-radius: 14.7% / 7.13%; overflow: hidden; background: #000;
   }
   .scr-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* первый экран, пока нет ролика: обложка кейса — та же, что в папке */
+  .scr-cover { width: calc(1240 * var(--u)); max-width: 100%; aspect-ratio: 816 / 560; }
+  .scr-cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
   /* ролик, в котором уже нарисовано окно браузера: стоит во всю ширину кадра,
      радиус срезает чёрные углы, оставшиеся от прозрачного фона исходника */
   .scr-row.vid { --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080); --n: var(--u); }
@@ -564,6 +567,7 @@
     .scr-item { width: min(100%, (100svh - 5rem) / 2.0525); }
     .scr-video { width: min(100%, (100svh - 5rem) / 2.0637); }
     .scr-video.wide { width: 100%; border-radius: 1rem; }
+    .scr-cover { width: 100%; height: auto; margin: 0 auto; }
     .scr-item > img { height: auto; }
     .scr-item.bleed > img { position: static; width: 100%; }   /* на телефоне запас вокруг корпуса не нужен */
     .scr-item:last-child, .scr-video { margin-bottom: 0; }
@@ -1719,7 +1723,14 @@
   const feed = document.getElementById('case-feed'), caseBar = document.getElementById('case-bar');
   const PH = { x: 249, x2: 720.333, y: 97, w: 431.333, h: 885.333 };   // телефон в макете 1400×1080
 
-  function buildFeed(c, t) {
+  // обложка кейса — та же картинка, что лежит в папке на главной
+  function coverOf(id) {
+    for (const list of Object.values(PROJECTS))
+      for (const it of list) if (it.case === id && it.cover) return it.cover;
+    return '';
+  }
+
+  function buildFeed(c, t, id) {
     feed.querySelectorAll('video').forEach(v => { v.pause(); v.removeAttribute('src'); v.load(); });
     noteRO.disconnect();
     feed.innerHTML = '';
@@ -1736,10 +1747,20 @@
         h.textContent = sc.title[lang] || sc.title.ru;
         sec.appendChild(h);
       }
-      if (sc.hold) sec.classList.add('is-hold');      // экран оставлен пустым — сюда ляжет ролик
+      const cover = sc.hold ? coverOf(id) : '';       // пока ролика нет, первым идёт обложка кейса
+      if (sc.hold && !cover) sec.classList.add('is-hold');
       const row = document.createElement('div');
       row.className = 'scr-row';
 
+      if (cover) {
+        row.classList.add('fit');                    // масштаб как у экранов с кадрами
+        const box = document.createElement('div');
+        box.className = 'scr-cover';
+        const img = document.createElement('img');
+        img.src = cover; img.alt = '';
+        box.appendChild(img);
+        row.appendChild(box);
+      }
       if (sc.video) {
         const box = document.createElement('div');
         box.className = 'scr-video';
@@ -2159,7 +2180,7 @@
     } else { video.pause(); video.removeAttribute('src'); video.load(); }
     shot.src = !c.video && c.shot ? c.shot : '';
 
-    buildFeed(c, t);
+    buildFeed(c, t, id);
 
     const plain = !!c.plain;
     document.body.classList.toggle('case-plain', plain);
