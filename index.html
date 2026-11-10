@@ -20,6 +20,8 @@
     --font: "SF Pro Rounded", ui-rounded, "Nunito", system-ui, sans-serif;
     --ease: cubic-bezier(.3, .7, .2, 1);
     --tap: 3rem;                                  /* кнопка подсказки, одна на всех экранах */
+    --button-font-size: 1.25rem;
+    --note-width: 19rem;
   }
   html { font-size: clamp(11px, min(1.1111vw, 1.5625vh), 20px); }
   * { box-sizing: border-box; }
@@ -107,7 +109,7 @@
     height: 2.5rem; padding: 0 1.25rem .22rem; border-radius: .5rem;
     display: inline-flex; align-items: center; gap: .5rem;
     background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.9); backdrop-filter: blur(16px) saturate(1.9);
-    font-size: 1.25rem; transition: background .2s;
+    font-size: var(--button-font-size); transition: background .2s;
   }
   .pill:hover { background: rgba(0,0,0,.75); }
   .pill img { width: 1.5rem; }
@@ -123,8 +125,9 @@
   .f-link { position: relative; display: flex; flex-direction: column; align-items: center; gap: .5rem; font-size: 1.25rem; white-space: nowrap; }
   /* подпись висит под папкой и не влияет на высоту ряда: вторая строка не двигает папки */
   .f-link > span { position: absolute; top: calc(100% + .5rem); left: -1rem; right: -1rem; text-align: center; }
+  .folder-date-break, .desktop-notes { display: none; }
   .f-body {
-    position: relative; width: 80%; aspect-ratio: 204 / 140; border-radius: 10% / 14.57%;
+    position: relative; width: 100%; aspect-ratio: 204 / 140; border-radius: 10% / 14.57%;
     container-type: inline-size; --p: calc(100cqw / 204);
     -webkit-backdrop-filter: blur(16px) saturate(1.9); backdrop-filter: blur(16px) saturate(1.9);
     transition: transform .35s var(--ease);
@@ -166,7 +169,7 @@
   .fan { position: absolute; left: 50%; bottom: 100%; width: 0; height: 0; pointer-events: none;
          font-size: calc(var(--k, 1) * 1rem); }
   .fan-item {
-    position: absolute; left: 0; bottom: 0; width: 10.2em;   /* ширина как у папки: 80% от 12,75rem */
+    position: absolute; left: 0; bottom: 0; width: 12.75em;   /* ширина как у папки на десктопе */
     display: flex; flex-direction: column; align-items: center; text-align: center;
     opacity: 0; transform: translate(-50%, 0) scale(.35);
     transition: transform .46s cubic-bezier(.2, 1.18, .32, 1), opacity .22s ease;
@@ -243,7 +246,7 @@
     max-height: calc((100% - (var(--shots) - 1) * 32 * var(--u)) / var(--shots));
   }
   .scr-wide .note { left: calc(40 * var(--u)); top: 50%; transform: translateY(-50%); right: auto; bottom: auto; }
-  /* окна с текстом исследования — координаты из макета 1400×1080 */
+  /* окна с кадрами интерфейса — координаты из макета 1400×1080 */
   .scr-win { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
              /* здесь кадр 1400 — это и есть белая область, без вылетов выносок за край */
              --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080); --n: var(--u);
@@ -256,31 +259,38 @@
     position: absolute; width: calc(600 * var(--u)); border-radius: calc(16 * var(--u)); overflow: hidden;
     background: #d5d5d5; color: #1d1d1d;
   }
-  .win-bar { display: flex; align-items: center; gap: calc(16 * var(--u)); background: #6a6a6a; color: #fff;
-             height: calc(60 * var(--u)); padding: 0 calc(16 * var(--u)); font-size: calc(16 * var(--u)); }
-  .win-dots { display: flex; gap: calc(12 * var(--u)); }
-  .win-dots i { width: calc(24 * var(--u)); height: calc(24 * var(--u)); border-radius: 50%; }
-  .win-dots i:nth-child(1) { background: #a5594c; }
-  .win-dots i:nth-child(2) { background: #a69255; }
-  .win-dots i:nth-child(3) { background: #92a56a; }
-  .win-body { padding: calc(4 * var(--u)) calc(16 * var(--u)) calc(4 * var(--u));
-              font-size: calc(16 * var(--u)); line-height: calc(19 * var(--u)); }
-  .win-body p { margin: 0; padding: calc(12 * var(--u)) 0; }
-  .win-body p + p { border-top: 1px solid #bfbfbf; }
-  /* окно браузера с кадром интерфейса: радиус 24, шапка 60 — ровно как в макете */
+  /* скриншот интерфейса со скруглением */
   .win-img { background: #fff; border: 1px solid #c9c9c9; border-radius: calc(24 * var(--u));
              display: flex; flex-direction: column; }
-  .win-img .win-bar { background: rgba(0, 0, 0, .6); flex: 0 0 calc(60 * var(--u));
-                      padding: 0 calc(19 * var(--u)); gap: calc(12 * var(--u)); }
-  .win-img .win-dots i:nth-child(1) { background: #a25649; }
-  .win-img .win-dots i:nth-child(2) { background: #a48e52; }
-  .win-img .win-dots i:nth-child(3) { background: #90a266; }
+  /* Подрезаем контур в самом скриншоте, чтобы он не дублировал обводку рамки. */
+  .win-stage:has(.win-img + .win-img) .win-shot {
+    clip-path: inset(1px round calc(24 * var(--u)));
+  }
+  .browser-tabs {
+    flex: 0 0 calc(48 * var(--u)); min-height: 0;
+    display: flex; align-items: center; gap: clamp(5px, calc(14 * var(--u)), 14px);
+    padding: 0 clamp(5px, calc(14 * var(--u)), 14px);
+    background: #e9e9ed; border-bottom: 1px solid #d8d8de;
+  }
+  .browser-controls { display: flex; flex: none; gap: clamp(2px, calc(6 * var(--u)), 6px); }
+  .browser-controls i { width: clamp(4px, calc(10 * var(--u)), 10px); aspect-ratio: 1; border-radius: 50%; background: #ff6059; }
+  .browser-controls i:nth-child(2) { background: #ffbd2e; }
+  .browser-controls i:nth-child(3) { background: #28c840; }
+  .browser-tab {
+    min-width: 0; max-width: 72%;
+    padding: calc(3 * var(--u)) clamp(5px, calc(12 * var(--u)), 12px);
+    border-radius: .45em; background: #fbfbfc; color: #42424a;
+    box-shadow: 0 1px 2px #24243016;
+    font-size: clamp(8px, calc(17 * var(--u)), 16px); line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
   .win-shot { flex: 1; min-height: 0; width: 100%; display: block;
               object-fit: cover; object-position: top; }
   .stage-arrow { position: absolute; display: block; }
   /* выноски к окнам стоят по координатам макета 1400×1080, ширина — как в кейсе роботов */
   .note-bar { display: contents; }                   /* на компьютере обёртка ничего не меняет */
   .win-stage .note { position: absolute; transform: none; z-index: 20; }   /* ширину задаёт сама выноска */
+  .win-stage .note:hover, .win-stage .note.open { z-index: 21; }
   /* ноутбук в ленте — та же рамка, что на главном экране кейса */
   .scr-laptop { position: relative; width: calc(1280 * var(--u)); aspect-ratio: 1280 / 776; }
   .scr-item > img { width: 100%; height: 100%; display: block; }   /* сам снимок, не иконка выноски */
@@ -295,6 +305,22 @@
   /* первый экран, пока нет ролика: обложка кейса — та же, что в папке */
   .scr-cover { width: calc(1240 * var(--u)); max-width: 100%; aspect-ratio: 816 / 560; }
   .scr-cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* У всех PNG корпус 6312×3824, различаются только прозрачные поля. */
+  .scr-cover.mac-cover {
+    position: relative; aspect-ratio: 6312 / 3824;
+    width: min(calc(1488 * var(--u)), calc(min(69.6cqh, 100cqh - 18rem) * 6312 / 3824));
+    max-width: calc(100% - 2rem);
+  }
+  .mac-cover-art {
+    position: absolute; top: 0; height: 100%;
+    left: calc(-100% * var(--cover-inset) / 6312);
+    width: calc(100% * var(--cover-width) / 6312);
+  }
+  .mac-cover-art img { max-width: none; }
+  .mac-cover video {
+    position: absolute; left: 12.0122%; top: 10.8787%;
+    width: 76.7683%; height: 78.0858%; display: block; object-fit: fill;
+  }
   /* ролик, в котором уже нарисовано окно браузера: стоит во всю ширину кадра,
      радиус срезает чёрные углы, оставшиеся от прозрачного фона исходника */
   .scr-row.vid { --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080); --n: var(--u); }
@@ -312,13 +338,12 @@
   }
   .scr-phone video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* выноски: ровно 260px, текст 16/17 — как в макете. Координаты заданы долей
+  /* Координаты выносок заданы долей
      от телефона, к которому выноска привязана, поэтому она ложится на тот же элемент */
   /* Выноска — кнопка 40×40 с иконкой тапа; плашка с текстом лежит отдельным слоем
      и выезжает по наведению (на компьютере) или по нажатию (на телефоне).
      Сам блок размер не меняет — поэтому раскладка кадра не едет. */
   .note {
-    --nw: 380;                                      /* ширина плашки в пикселях макета */
     position: absolute; z-index: 2;
     /* кнопка не зависит от масштаба кадра: на всех экранах она одного размера */
     width: var(--tap); height: var(--tap);
@@ -333,13 +358,14 @@
   .note-tap img { width: calc(var(--tap) * .46); height: calc(var(--tap) * .46); }
   .note-body {
     position: absolute; top: 0; left: 0; display: none;
-    width: calc(var(--nw) * var(--n));
+    width: min(var(--note-width), calc(100cqw - 37.5rem));
     padding: calc(16 * var(--n)); border-radius: calc(16 * var(--n));
     background: var(--glass);
     -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
-    color: #fff;                                    /* SF Pro Rounded Medium 16/120% */
-    font-size: calc(16 * var(--n)); line-height: 1.2;
+    color: #fff;
+    font-size: var(--button-font-size); line-height: 1.2;
   }
+  .note-text { display: block; max-height: 4lh; overflow: auto; overflow-wrap: break-word; }
   .note.anch-r .note-body { left: auto; right: 0; }  /* выноска прижата правым краем */
   /* если плашка не помещается в кадр, её сдвигают внутрь — на кадр она просто заходит */
   .note-body { transform: translateX(var(--bshift, 0px)); }
@@ -363,10 +389,6 @@
   .flip-card > img { position: absolute; inset: 0; width: 100%; height: 100%;
                      object-fit: cover; display: block; transition: opacity .35s var(--ease); }
   .flip-card .flip-back { opacity: 0; }
-  .flip-card .note-tap {
-    inset: auto; left: var(--tx); top: var(--ty); transform: translate(-50%, -50%);
-    width: var(--tap); height: var(--tap);
-  }
   /* на этом экране выноски не сворачиваются в кнопку: по наведению на глобус
      сразу видны все плашки целиком, как в макете */
   .flip-stage .note { opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
@@ -374,14 +396,15 @@
   .flip-stage .note .note-body { display: block; }
   .flip-stage.on .flip-front { opacity: 0; }
   .flip-stage.on .flip-back { opacity: 1; }
-  .flip-stage.on .flip-card .note-tap { opacity: 0; }
   .flip-stage.on .note { opacity: 1; pointer-events: auto; }
+  .flip-stage .flip-hint { display: none; }
   .scr-title { display: none; }                     /* пары подписаны только на телефоне */
 
   .case-bar {
-    display: none; position: absolute;              /* 12×40 в 28px от края — как в макете */
-    right: 2.5rem;                                  /* правым краем под кнопкой языка */
-    width: calc(12 * var(--u)); height: calc(40 * var(--u));
+    display: none; position: absolute;
+    /* Полоса индикатора целиком правее минимального отступа выносок в 1rem. */
+    right: .35rem;
+    width: min(.45rem, calc(12 * var(--u))); height: calc(40 * var(--u));
     /* верхняя точка — ниже кнопок, чтобы сразу было видно, что экран прокручивается */
     top: calc(6.25rem + var(--p, 0) * (100% - 6.25rem - 80 * var(--u)));
     border-radius: calc(8 * var(--u)); background: var(--glass); transition: top .12s linear;
@@ -511,12 +534,13 @@
 
   /* ── Телефоны и узкие окна ── */
   @media (max-width: 760px), (max-aspect-ratio: 4/5) {
+    :root { --button-font-size: 1rem; --note-width: min(85vw, 19rem); }
     html { font-size: 16px; }
     .stage { height: 78svh; min-height: 30rem; }
     .bg { object-position: 68% 25%; }
     /* ряд кнопок должен помещаться в ширину телефона вместе с «назад» слева */
     .top { top: 1rem; right: 1rem; gap: .375rem; }
-    .pill { height: 2.25rem; padding: 0 .75rem .18rem; font-size: 1rem; }
+    .pill { height: 2.25rem; padding: 0 .75rem .18rem; }
     .pill img { width: 1.25rem; }
     .lang { width: 2.5rem; padding: 0 0 .18rem; }
     .snd { width: 2.5rem; padding: 0; }
@@ -524,6 +548,9 @@
     .folder { flex: 1; width: auto; min-width: 0; }
     .f-link { font-size: 1rem; white-space: normal; text-align: center; line-height: 1.2; }
     .f-link > span { position: static; left: auto; right: auto; }   /* на телефоне подпись в потоке */
+    .folder-date-break { display: inline; }
+    .bio-break { display: none; }
+    .f-body { width: 80%; }
     .fan-item { width: 8.5rem; }           /* пучок по тапу: карточки компактнее */
     /* на телефоне карточки стоят вплотную — подпись в одну строку наезжала бы на соседнюю */
     .fan-name { white-space: normal; min-width: 0; max-width: 100%; min-height: 2.4em;
@@ -568,6 +595,8 @@
     .scr-video { width: min(100%, (100svh - 5rem) / 2.0637); }
     .scr-video.wide { width: 100%; border-radius: 1rem; }
     .scr-cover { width: 100%; height: auto; margin: 0 auto; }
+    .scr-cover.mac-cover { width: 100%; max-width: 100%; }
+    .scr-row:has(.mac-cover) > .win-stage { margin-top: 1.25rem; }
     .scr-item > img { height: auto; }
     .scr-item.bleed > img { position: static; width: 100%; }   /* на телефоне запас вокруг корпуса не нужен */
     .scr-item:last-child, .scr-video { margin-bottom: 0; }
@@ -580,26 +609,21 @@
     .win { position: static; border-radius: 1rem;
            left: auto !important; top: auto !important;
            width: auto !important; height: auto !important; }
-    .win-bar { height: 2.75rem; gap: .5rem; padding: 0 .75rem; font-size: 1rem; }
-    .win-dots { gap: .5rem; }
-    .win-dots i { width: .875rem; height: .875rem; }
-    .win-body { padding: 0 .75rem; font-size: 1rem; line-height: 1.25; }
-    .win-body p { padding: .75rem 0; }
     .win-img { border-radius: 1rem; }
-    .win-img .win-bar { flex: 0 0 2.75rem; padding: 0 .75rem; gap: .5rem; }
+    .win-stage:has(.win-img + .win-img) .win-shot { clip-path: inset(1px round 1rem); }
+    .browser-tabs { --u: .7px; flex-basis: 2rem; }
     .win-shot { height: auto; object-fit: contain; }
     /* карточка-перевёртыш на телефоне: во всю ширину, кнопка по центру, выноски — после тапа */
     .flip-card { position: relative; border-radius: 1rem; aspect-ratio: 711 / 790;
                  left: auto !important; top: auto !important;
                  width: auto !important; height: auto !important; }
-    .flip-card .note-tap { width: 48px; height: 48px; }
-    .flip-card .note-tap img { width: 22px; height: 22px; }
     .flip-stage:not(.on) .note-bar { display: none; }
     /* на телефоне после тапа плашки идут столбиком, все раскрытые */
     .flip-stage .note-bar { flex-direction: column; align-items: stretch; }
     .flip-stage .note-bar .note { width: 100%; height: auto; }
     .flip-stage .note-bar .note .note-body {
-      position: static; transform: none; width: 100%; max-width: none;
+      position: static; transform: none; width: min(100%, var(--note-width));
+      max-width: none; margin-inline: auto;
     }
     .stage-arrow { display: none; }                  /* стрелка между окнами тут не нужна */
     /* на телефоне выноски к окнам собраны в ряд кнопок под кадром,
@@ -610,10 +634,11 @@
                       width: 48px; height: 48px; flex: 0 0 auto; }
     .note-bar .note.open { width: 100%; height: auto; }
     /* на телефоне и такая выноска сворачивается в кнопку, как все остальные */
-    .note-bar .note.always .note-tap { display: grid; }
-    .note-bar .note.always:not(.open) .note-body { display: none; }
+    .note.always .note-tap { display: grid; }
+    .note.always:not(.open) .note-body { display: none; }
     .note-bar .note.open .note-body {
-      position: static; transform: none; width: 100%; max-width: none; margin-top: .75rem;
+      position: static; transform: none; width: min(100%, var(--note-width));
+      max-width: none; margin: .75rem auto 0;
     }
     .wide-shots { margin: 0; height: auto; gap: 1rem; }
     .wide-shots img { max-height: none; width: 100%; }
@@ -627,9 +652,10 @@
     /* плашка по центру экрана, шип у неё сверху — ровно там, где была кнопка */
     .note-body, .note.anch-r .note-body {
       left: 50%; right: auto; transform: translateX(-50%);
-      width: 85vw; max-width: calc(100vw - 2rem);
-      padding: 16px; border-radius: 20px; font-size: 16px;
+      width: var(--note-width); max-width: calc(100vw - 2rem);
+      padding: 16px; border-radius: 20px;
     }
+    .note-text { max-height: none; overflow: visible; }
     .case-bar { display: none !important; }
     .case-desk { order: 3; position: static; display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1.5rem 1rem 2rem; background: #fff; }
     .case-desk:empty { display: none; }               /* пустой стол больше не тянет белую полосу под футер */
@@ -666,6 +692,113 @@
     .desk-item { position: static; font-size: 1rem; }
     .resume img { width: 3.5rem; }
     .cat { width: 7rem; }
+  }
+
+  @media (width > 760px) and (aspect-ratio > 4/5) {
+    .diagram-row {
+      --u: min(1.15px, (100cqw - 32.5rem - 3rem) / 1220, 100cqh / 1000);
+    }
+    .diagram-row .win-stage {
+      max-width: none; flex: none;
+      transform: translateX(calc(var(--center-x, 0) * var(--u)));
+    }
+    .case-screen.has-desktop-notes {
+      display: grid;
+      grid-template: "media notes" minmax(0, 1fr) / minmax(0, 1fr) var(--note-width);
+      min-height: 100%; height: auto;
+      gap: 1.25rem;
+      padding: 5.5rem 3.5rem 2rem 1.5rem;
+      align-items: center;
+    }
+    .has-desktop-notes > :is(.scr-row, .scr-win, .scr-wide) {
+      position: relative; inset: auto; grid-area: media; align-self: stretch;
+      min-width: 0; min-height: 0; container-type: size;
+      --u: min(1px, 100cqw / var(--frame-width, 1400), 100cqh / 1080);
+      --n: var(--u);
+    }
+    .web-frame .win-stage {
+      transform: translate(calc(var(--center-x, 0) * var(--u)), calc(var(--center-y, 0) * var(--u)));
+    }
+    .has-desktop-notes .note { display: none; }
+    .desktop-notes { display: grid; grid-area: notes; gap: .75rem; min-width: 0; }
+    .desktop-note-group { display: grid; gap: .75rem; min-width: 0; }
+    .desktop-note {
+      width: min(100%, var(--note-width));
+      justify-self: center;
+      padding: .75rem .85rem; border-radius: .75rem;
+      background: #666; color: #fff;
+      font-size: var(--button-font-size); line-height: 1.2;
+    }
+  }
+  @media (min-width: 1280px) and (aspect-ratio > 4/5) {
+    .case-screen.has-two-note-groups:not(.go-pair, .web-frame) {
+      grid-template: "left media right" minmax(0, 1fr) / 14.5rem minmax(0, 1fr) 14.5rem;
+      column-gap: .75rem;
+    }
+    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-notes { display: contents; }
+    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group { width: var(--note-width); z-index: 1; }
+    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group:first-child { grid-area: left; justify-self: start; }
+    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group:last-child { grid-area: right; justify-self: end; }
+    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group:has(.desktop-note:only-child) {
+      transform: translateY(clamp(-4rem, calc((var(--note-y, .5) - .5) * 48svh), 7rem));
+    }
+  }
+  @media (min-width: 1100px) and (aspect-ratio > 4/5) {
+    .case-screen:is(.go-pair, .web-frame) {
+      grid-template: "left media right" minmax(0, 1fr) / 14.5rem minmax(0, 1fr) 14.5rem;
+      column-gap: .75rem;
+      padding: 5rem 2.5rem;
+    }
+    :is(.go-pair, .web-frame) .desktop-notes { display: contents; }
+    :is(.go-pair, .web-frame) .desktop-note-group:empty { display: none; }
+    :is(.go-pair, .web-frame) .desktop-note-group { width: var(--note-width); z-index: 1; }
+    :is(.go-pair, .web-frame) .desktop-note-group:first-child { grid-area: left; justify-self: start; }
+    :is(.go-pair, .web-frame) .desktop-note-group:last-child { grid-area: right; justify-self: end; }
+    :is(.go-pair, .web-frame) .desktop-note-group:has(.desktop-note:only-child) {
+      transform: translateY(clamp(-4rem, calc((var(--note-y, .5) - .5) * 48svh), 7rem));
+    }
+  }
+  @media (760px < width < 1100px) and (aspect-ratio > 4/5) {
+    .case-screen.has-desktop-notes {
+      grid-template: "media" clamp(15rem, 52svh, 34rem) "notes" auto / minmax(0, 1fr);
+      padding-inline: 1.5rem 3rem;
+    }
+    .desktop-notes { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--note-width)), 1fr)); }
+    .desktop-note-group { display: contents; }
+    .case-screen:is(.go-pair, .web-frame) { padding-inline: 1.5rem; }
+  }
+
+  @media (width > 760px) and (aspect-ratio > 4/5) {
+    .flip-stage:not(.on) .flip-hint { display: block; opacity: 1; }
+    .case-screen.mac-screen.has-desktop-notes { display: block; height: 100%; padding: 0; }
+    .mac-screen.has-desktop-notes > .scr-row.fit {
+      position: absolute; inset: 0; container-type: normal;
+      --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080);
+    }
+    .mac-screen .win-stage { display: none; }
+    .mac-screen .desktop-notes {
+      position: absolute; right: 2.5rem; bottom: 1.25rem;
+      max-width: calc(100% - 4rem);
+      grid-auto-flow: column; grid-auto-columns: minmax(0, var(--note-width));
+    }
+    .mac-screen .desktop-note-group { display: contents; }
+  }
+  @media (760px < width < 1100px) and (aspect-ratio > 4/5) {
+    .mac-note-alternate .desktop-notes { right: 1rem; max-width: calc(100% - 2rem); }
+  }
+  @media (min-width: 1100px) and (aspect-ratio > 4/5) {
+    .mac-note-overlay .desktop-notes {
+      top: 50%; right: 1.5rem; bottom: auto; transform: translateY(-50%);
+    }
+    .mac-note-alternate .desktop-notes {
+      display: block; inset: 0; max-width: none; pointer-events: none;
+    }
+    .mac-note-alternate .desktop-note {
+      position: absolute; left: 1.5rem; top: 35%; width: var(--note-width);
+      transform: translateY(-50%); pointer-events: auto;
+    }
+    .mac-note-alternate .desktop-note:nth-child(2) { left: auto; right: 1.5rem; top: 50%; }
+    .mac-note-alternate .desktop-note:nth-child(3) { top: 65%; }
   }
 
   /* низкое окно: шесть блоков кейса должны помещаться без прокрутки */
@@ -869,47 +1002,19 @@
       shot: 'assets/case-otp-screen.jpg', // статичный экран, пока видео нет
       // Экраны собраны по макету: Фигма, Section 3 (Desktop 31…35)
       screens: [
-        { hold: true },                     // первый экран пустой — сюда встанет ролик
-        { windows: [
-            { x: 60, y: 230, title: { ru: 'гипотезы', en: 'hypotheses' }, items: [
-              { ru: 'Сейчас параметры добавляют заранее и в другом разделе, и только потом открывают форму продукта. Если дать добавлять их прямо в карточке, дело пойдёт быстрее',
-                en: 'To create a product you first add parameters and only then open the product form itself. Adding new parameters right inside the product card will speed that up' },
-              { ru: 'Настройки готовых продуктов копируют костылями. Если разрешить дублировать продукт и править копию, создавать станет быстрее',
-                en: 'Employees copy the settings of finished products through workarounds. Being able to duplicate an existing product and edit the copy will speed creation up' },
-              { ru: 'По ходу заполнения данные никто не проверяет: ошибки всплывают, только когда продукт уходит в банковские системы. Если проверять каждый раздел сразу, они найдутся раньше',
-                en: 'There is no validation step while a product is being added, so mistakes only surface when it goes into the bank systems. Validating each section as it is filled in will catch them earlier' },
-            ] },
-            { x: 740, y: 430, title: { ru: 'джобы', en: 'jobs' }, items: [
-              { ru: 'Когда я нанимаю новых сотрудников, я не хочу задействовать на их обучение много ресурсов и времени, чтобы они сразу начинали работать',
-                en: 'When I hire new people, I do not want to spend much time and effort on training them, so that they start working right away' },
-              { ru: 'Когда я добавляю продукт, похожий на уже существующий, я не хочу заполнять информацию заново, чтобы не тратить время на одно и то же',
-                en: 'When I add a product similar to an existing one, I do not want to fill everything in again, so as not to spend time on the same thing twice' },
-              { ru: 'Когда я добавляю продукт, я хочу чувствовать себя уверенным в правильности заполненных карточек, чтобы не исправлять их после релиза',
-                en: 'When I add a product, I want to be confident the cards are filled in correctly, so that I do not fix them after the release' },
-            ] },
-            { x: 60, y: 640, title: { ru: 'инсайты после интервью', en: 'interview insights' }, items: [
-              { ru: 'Работники жалуются, что создание продукта съедает уйму времени, а ради параметров приходится прыгать из приложения в приложение',
-                en: 'Employees are bothered by how much time creation takes and by switching between apps to add parameters' },
-              { ru: 'Путь часто срезают: скачивают настройки готового продукта, загружают обратно и правят пару полей',
-                en: 'They often shortcut the process: they download and upload the settings of existing products and then edit only some of the fields' },
-            ] },
-          ] },
-        // Desktop-33 — кадр как в макете. Таблица на нём занимает 357…1043 по x и 433…771 по y,
-        // поэтому выноски по 380 разведены не вбок, а по вертикали: одна над карточкой, две под таблицей
-        { title: { ru: 'карточка продукта', en: 'product card' },
-          frames: [
-            { src: 'assets/otp-s3.webp', x: 81, y: 148, w: 1239, h: 785 },
-          ],
+        { hold: true, cover: 'assets/otp-cover-mac.png', coverWidth: 6612, coverInset: 199 },
+        { title: { ru: 'создание продукта', en: 'creating a product' }, noteOverlay: 'alternate',
+          cover: 'assets/otp-create-mac.png', coverWidth: 6612, coverInset: 199,
           notes: [
-            { b: [18.06, 48.15], x: 0, y: 775, ru: 'Разделила форму на разделы, чтобы сфокусировать внимание работника на группах связанных параметров',
-              en: 'I split the form into sections to keep the employee focused on groups of related parameters' },
-            { b: [81.94, 37.34], r: 'snd', y: 258, ru: 'Прямо над формой добавляем кнопку для загрузки настроек файлом, чтобы ускорить добавление похожих продуктов',
-              en: 'Right above the form we add a button that uploads the settings as a file, to speed up adding similar products' },
-            { b: [81.94, 58.79], r: 'snd', y: 775, ru: 'Каждый блок проверяется системой последовательно, чтобы не допустить ошибок в заполненной карточке',
-              en: 'The system checks each block in turn, so the finished card has no mistakes' },
+            { always: true, b: [18.06, 48.15], x: 0, y: 775, ru: 'Сгруппировала связанные параметры, чтобы сотрудник мог заполнять и проверять их по частям',
+              en: 'I grouped related fields so staff could fill in and check one section at a time' },
+            { b: [81.94, 37.34], r: 'snd', y: 258, ru: 'Настройки можно загрузить из файла, чтобы не заполнять похожую карточку с нуля',
+              en: 'Staff can import settings from a file to avoid filling out a similar product form from scratch' },
+            { b: [81.94, 58.79], r: 'snd', y: 775, ru: 'Проверяем данные по разделам, чтобы найти ошибки до отправки в банковские системы',
+              en: 'We validate each section to catch errors before the data reaches the bank’s systems' },
           ] },
         // Desktop-34 — два окна внахлёст и стрелка между ними
-        { title: { ru: 'добавление параметров', en: 'adding parameters' },
+        { title: { ru: 'добавление параметров', en: 'adding parameters' }, diagram: true,
           frames: [
             { src: 'assets/otp-s4a.webp', x: 60,  y: 137, w: 800, h: 397 },
             { src: 'assets/otp-s4b.webp', x: 480, y: 432, w: 800, h: 537 },
@@ -917,37 +1022,33 @@
           arrow: { src: 'assets/otp-arrow.svg', x: 883, y: 265.529, w: 264.375, h: 121.335 },
           notes: [
             // 137+397 = 534 — низ верхнего окна, 480 — левый край правого: по 40 от обоих
-            { always: true, x: 60, y: 574, ru: 'Нового партнёра заводим не отходя от формы: выбираешь «Нет подходящего варианта» — и поля подгружаются прямо здесь',
-              en: 'A new partner is added without leaving the form: pick “None of these fits” and the extra fields load right there' },
+            { always: true, x: 60, y: 574, ru: 'Если партнёра нет в списке, его можно добавить прямо в форме и продолжить настройку',
+              en: 'If a partner is missing from the list, staff can add them in the form and carry on' },
           ] },
         // Desktop-35 — карточка готового продукта с меню операций
-        { title: { ru: 'дублирование продукта', en: 'duplicating a product' },
-          frames: [
-            { src: 'assets/otp-s5.webp', x: 81, y: 148, w: 1239, h: 835 },
-          ],
+        { title: { ru: 'дублирование продукта', en: 'duplicating a product' }, noteOverlay: true,
+          cover: 'assets/otp-duplicate-mac.png', coverWidth: 6612, coverInset: 199,
           notes: [
-            { x: 837, y: 591, ru: 'Если в системе уже есть продукт с похожими данными, работник может дублировать его и редактировать копию',
-              en: 'If the system already has a product with similar data, the employee can duplicate it and edit the copy' },
+            { always: true, x: 837, y: 591, ru: 'Похожий продукт можно взять за основу. Сотрудник меняет нужные поля в копии',
+              en: 'Staff can duplicate a similar product and edit only the fields that need to change' },
           ] },
       ],
       ru: {
-        title: 'админка отп банка',
+        title: 'Создание продуктов в админке ОТП Банка',
         blocks: [
-          ['контекст', 'Раньше продукты заводили в банковскую систему через несколько устаревших разделов, не связанных между собой. Интерфейсы были перегружены, и настроить профиль продукта было непросто'],
-          ['проблема', 'Параметры приходилось заводить заранее и в другом разделе, а сама карточка продукта была ничем не разделена — отсюда ошибки и затянутый процесс'],
-          ['аудитория', 'Банковские работники'],
-          ['моя роль', 'На мне были продуктовая проработка, исследование, редизайн добавления продуктов и взаимодействие с командой разработки'],
-          ['статус и что измерили', 'Полный процесс добавления нового продукта в среднем сократился на 30% — с 30 минут до 20, а число ошибок при заполнении упало вдвое'],
+          ['задача', 'Сотрудники банка создавали продукты через несколько разрозненных разделов. Параметры приходилось заводить заранее, а ошибки обнаруживались при передаче данных в банковские системы. Нужно было сократить время настройки и помочь сотрудникам проверять данные раньше'],
+          ['моя работа', 'Провела исследование и спроектировала новый сценарий добавления продукта. Прорабатывала решение вместе с командой разработки'],
+          ['ключевое решение', 'Сгруппировала параметры в разделы с проверкой данных. Добавила создание параметров внутри формы, дублирование готового продукта и импорт настроек, чтобы ускорить работу с похожими продуктами'],
+          ['результат', 'Среднее время создания продукта сократилось с 30 до 20 минут. Количество ошибок при заполнении снизилось вдвое'],
         ],
       },
       en: {
-        title: 'otp bank admin panel',
+        title: 'Creating products in OTP Bank’s admin panel',
         blocks: [
-          ['context', 'Adding products to the bank system used to happen across several outdated, disconnected sections. The interfaces were overloaded and setting up a product profile was hard'],
-          ['problem', 'Parameters had to be entered in advance, in a different section, and the product card itself had no structure at all — hence the mistakes and the dragging'],
-          ['audience', 'Bank employees'],
-          ['my role', 'Product work, research, the redesign of adding products and working with the development team were on me'],
-          ['status and what we measured', 'The full process of adding a new product got about 30% shorter — from 30 minutes to 20 — and the number of errors in the forms dropped by half'],
+          ['the challenge', 'Bank employees created products across several disconnected sections. Parameters had to be added in advance, and errors only surfaced when data was sent to the bank’s systems. The goal was to reduce setup time and help employees validate data earlier'],
+          ['my work', 'I conducted research and designed a new product creation flow, working with the development team'],
+          ['the key decision', 'I grouped parameters into sections with data validation. I added in-form parameter creation, product duplication and settings import to speed up work on similar products'],
+          ['the outcome', 'Average product creation time dropped from 30 to 20 minutes. Form errors fell by half'],
         ],
       },
     },
@@ -966,58 +1067,48 @@
         // Фигма, Desktop-50 (124:13513): телефоны стоят на 249 и 720,33 — как и везде
         { title: { ru: 'что рассматривали', en: 'what we weighed up' },
           shots: ['assets/go-1a.webp', 'assets/go-1b.webp'], notes: [
-          { b: [0.8, 42.0], at: 'l', tail: 'tr', x: 81, y: 436, h: 146,
-            ru: 'Был вариант вынести роботов в свою форму. Отказались, ведь это усложняет выбор пользователя. Его цель — выгодно оформить доставку, а не заказать робота',
-            en: 'One option was to give robots a form of their own. We dropped it: it only makes the choice harder. The person wants a good deal on a delivery, not to order a robot' },
-          { b: [99.4, 19.5], at: 'r', tail: 'tl', x: 1055, y: 237, h: 165,
-            ru: 'Было много вариантов внедрения роботов в экспресс. Нужно было, чтобы цены на тарифы экспресса и роботов можно было сравнить, не переключаясь',
-            en: 'There were many ways to fit robots into express delivery. What mattered was that the prices of express and robot tariffs could be compared without switching screens' },
+          { always: true, b: [0.8, 42.0], at: 'l', tail: 'tr', x: 81, y: 436, h: 146,
+            ru: 'Добавили робота в «Экспресс», чтобы сравнить цены с курьером на одном экране',
+            en: 'We added the rover to Express so customers could compare prices on one screen' },
         ] },
         { title: { ru: 'форма экспресса и роботы', en: 'express form and robots' },
           shots: ['assets/go-2a.webp', 'assets/go-2b.webp'], notes: [
-          { b: [0.8, 37.8], at: 'l', tail: 'tr', x: 40, y: 410, h: 117, ru: 'Форму почти не трогаем, но учитываем, чего робот не умеет. Мультидоставку, например, он не потянет', en: 'We barely change the form, but we allow for the robots\u2019 limits. A multi-stop order, for example, is not possible' },
-          { b: [113.4, 49.2], at: 'c', tail: 'tr', x: 557, y: 611, h: 66, ru: 'Сразу предупреждаем, что к роботу придётся спуститься: об этом лучше узнать до оплаты', en: 'We say up front that you will have to come down to the robot — better to learn that before paying, not after' },
-          { b: [126.0, 98.1], at: 'c', tail: 'tr', x: 557, y: 938, h: 83, ru: 'Корпоративного клиента узнаём по оплате с корпоративного счёта', en: 'We tell business clients by payment from a corporate account' },
-          { b: [99.4, 23.2], at: 'r', tail: 'tl', x: 1100, y: 301, h: 100, ru: 'Форму роботов показываем, только если оба адреса попали в зону рободоставки', en: 'We show the robot form only if the addresses entered earlier are inside the rover delivery zones' },
-          { b: [99.4, 70.0], at: 'r', tail: 'tl', x: 1100, y: 681, h: 100, ru: 'Робота ставим рядом с курьером, а не отдельно: он берёт ценой, а цену видно только в сравнении', en: 'We put the robot next to the courier, not somewhere apart: it sells on price, and price only shows in a comparison' },
+          { b: [0.8, 37.8], at: 'l', tail: 'tr', x: 40, y: 410, h: 117, ru: 'Сохранили привычную форму заказа. Робота предлагаем для доставки с одной остановкой', en: 'We kept the familiar order form and limited the rover option to single-stop deliveries' },
+          { always: true, b: [113.4, 49.2], at: 'c', tail: 'tr', x: 557, y: 611, h: 66, ru: 'До оплаты предупреждаем, что к роботу нужно выйти. Так у отправителя есть время выбрать курьера', en: 'We flag before payment that the sender needs to meet the rover, while there’s still time to choose a courier' },
+          { b: [99.4, 23.2], at: 'r', tail: 'tl', x: 1100, y: 301, h: 100, ru: 'Робот доступен при оплате с корпоративного счёта, если оба адреса в зоне рободоставки', en: 'The rover is available for corporate payments when both addresses are in its delivery area' },
         ] },
         { title: { ru: 'завершение заказа', en: 'finishing the order' },
           shots: ['assets/go-3a.webp', 'assets/go-3b.webp'], notes: [
-          { b: [1.5, 53.6], at: 'l', tail: 'tr', x: 40, y: 792, h: 117, ru: 'Предупреждаем, что робот возит не всё. При заказе энергетика роботу паспорт не покажешь', en: 'We warn the client that a robot cannot deliver everything. With an energy drink, for example, you cannot show a robot your ID' },
-          { b: [99.4, 39.6], at: 'r', tail: 'tl', x: 1100, y: 421, h: 117, ru: 'У роботов не ставим галочку заранее — до подъезда или до двери. Пусть человек увидит обе цены и выберет сам', en: 'For robots we do not preselect how to deliver, to the entrance or to the door, so that the client compares the prices and chooses deliberately' },
+          { b: [1.5, 53.6], at: 'l', tail: 'tr', x: 40, y: 792, h: 117, ru: 'Заранее предупреждаем об ограничениях. Например, робот не может проверить возраст получателя', en: 'We flag delivery restrictions up front. For example, the rover can’t verify the recipient’s age' },
+          { always: true, b: [99.4, 39.6], at: 'r', tail: 'tl', x: 1100, y: 421, h: 117, ru: 'Показываем цены до подъезда и до двери. Вариант доставки человек выбирает сам', en: 'We show both prices and let customers choose delivery to the building entrance or to the door' },
         ] },
         { title: { ru: 'общение с роботом', en: 'talking to the robot' },
           shots: ['assets/go-4a.webp', 'assets/go-4b.webp'], notes: [
-          { b: [1.5, 82.3], at: 'l', tail: 'tr', x: 40, y: 755, h: 117, ru: 'Отправителю выходить к роботу приходится всегда. Получателю — только если выбрали до подъезда: тогда он и открывает крышку сам', en: 'The sender always has to come out to the robot. The recipient comes out and opens it only for delivery to the entrance' },
-          { b: [99.4, 65.5], at: 'r', tail: 'bl', x: 1100, y: 607, h: 100, ru: 'Добавляем схему и короткую инструкцию, чтобы с роботом было проще разобраться', en: 'We add a diagram and short instructions, so that dealing with the robot is easier' },
-          { b: [79.9, 98.9], at: 'r', tail: 'tl', x: 1100, y: 940, h: 83, ru: 'Крышка открыта ровно минуту, поэтому переспрашиваем: точно готов?', en: 'The robot stays open for one minute only, so we check that the client is really ready' },
+          { b: [1.5, 82.3], at: 'l', tail: 'tr', x: 40, y: 755, h: 117, ru: 'Отправитель встречает робота всегда, получатель — при доставке до подъезда', en: 'The sender always meets the rover. The recipient meets it outside for delivery to the building entrance' },
+          { b: [99.4, 65.5], at: 'r', tail: 'bl', x: 1100, y: 607, h: 100, ru: 'Схема помогает найти кнопку на крышке, когда робот уже подъехал', en: 'The diagram points out the button on the lid so it’s easier to find when the rover arrives' },
+          { always: true, b: [79.9, 98.9], at: 'r', tail: 'tl', x: 1100, y: 940, h: 83, ru: 'На загрузку есть минута. Просим подтвердить открытие, когда отправитель уже рядом', en: 'The sender has one minute to load the parcel. We ask them to confirm they’re ready before opening the lid' },
         ] },
         { title: { ru: 'доставка до двери', en: 'delivery to the door' },
           shots: ['assets/go-5a.webp', 'assets/go-5b.webp'], notes: [
-          { b: [1.9, 63.8], at: 'l', tail: 'tr', x: 40, y: 635, h: 100, ru: 'При доставке до двери последний отрезок берёт курьер — на этаж робот не поднимется', en: 'For delivery to the door a courier takes the last stretch — a robot cannot climb the stairs' },
-          { b: [98.8, 72.1], at: 'r', tail: 'tl', x: 1100, y: 708, h: 83, ru: 'Как только курьер забирает заказ, добавляем кнопки связи с ним', en: 'As soon as the courier picks the order up, we add buttons to contact them' },
+          { always: true, b: [98.8, 72.1], at: 'r', tail: 'tl', x: 1100, y: 708, h: 83, ru: 'Когда курьер забирает посылку у робота, в трекинге появляется кнопка звонка', en: 'Once the courier collects the parcel from the rover, the tracking screen shows a button to call them' },
         ] },
       ],
       ru: {
-        title: 'роботы в го',
+        title: 'Доставка роботами для бизнеса в Яндекс Go',
         blocks: [
-          ['контекст', 'Яндекс Доставка запустила доставку роботами-роверами для корпоративных клиентов в Go как ещё один тариф внутри экспресса'],
-          ['проблема', 'К роверу нужно выйти самому — и отправителю, и получателю, а люди к роботам пока не привыкли'],
-          ['аудитория', 'Корпоративные клиенты, которые отправляют заказ ровером, и их получатели'],
-          ['моя роль', 'Веду проект роверов в Доставке как дизайнер — вместе с продактом и командой разработки'],
-          ['статус', 'В августе 2026 запустили рободоставку в крупных районах Москвы'],
-          ['что мерим', 'Сколько людей из тех, кому ровер доступен, его выбирают. Сколько форм доходит до оформления. Сколько обращений в поддержку в момент передачи и получения'],
+          ['задача', 'Яндекс Доставка готовила запуск роверов для корпоративных клиентов в Go. Нужно было встроить новый вариант доставки в привычный сценарий заказа и объяснить отправителям и получателям, как взаимодействовать с роботом'],
+          ['моя работа', 'Веду проект как дизайнер вместе с продактом и командой разработки. Спроектировала форму заказа и трекинг для отправителя и получателя'],
+          ['ключевое решение', 'Встроила робота в «Экспресс», чтобы его стоимость и условия можно было сравнить с курьером. До оформления объясняем необходимость выйти к роверу. При доставке до двери последний участок выполняет курьер'],
+          ['статус', 'В августе 2026 года запустили рободоставку в крупных районах Москвы. Отслеживаем выбор робота среди доступных вариантов, конверсию в заказ и обращения в поддержку при передаче и получении посылки'],
         ],
       },
       en: {
-        title: 'robots in go',
+        title: 'Robot delivery for businesses in Yandex Go',
         blocks: [
-          ['context', 'Yandex Delivery launched delivery by rover robots for business clients in Go — one more tariff inside express'],
-          ['problem', 'You have to come out to the rover yourself, both the sender and the recipient, and people are not used to robots yet'],
-          ['audience', 'Business clients who send orders by rover, and the people waiting for those orders'],
-          ['my role', 'I lead the rover project in Delivery as its designer, together with a product manager and the development team'],
-          ['status', 'In August 2026 we launched robot delivery in major districts of Moscow'],
-          ['what we measure', 'The share of orders that pick the rover among those who can; the share of forms taken through to checkout; support requests at the moment of handover and pickup'],
+          ['the challenge', 'Yandex Delivery was preparing to launch rover deliveries for business clients in Go. The new option had to fit the existing order flow and explain how senders and recipients would interact with the robot'],
+          ['my work', 'I lead the design with the product manager and developers. I designed the order form and tracking for both senders and recipients'],
+          ['the key decision', 'I placed the rover alongside couriers in Express to make prices and conditions easy to compare. Before checkout, we explain who needs to meet the rover. For doorstep deliveries, a courier handles the final stretch'],
+          ['status', 'Launched in major Moscow districts in August 2026. We track rover selection among eligible orders, order conversion and support requests during handover and collection'],
         ],
       },
     },
@@ -1027,75 +1118,67 @@
       video: '', shot: '',
       // Экраны собраны по макету: Фигма, Section 146:18467 (пять десктопов)
       screens: [
-        { hold: true },                     // первый экран пустой — сюда встанет ролик
-        { title: { ru: 'личный кабинет', en: 'the client account' },
-          frames: [
-            { src: 'assets/exp-home.webp', x: 81, y: 158, w: 1239, h: 766 },
-          ],
+        { hold: true, cover: 'assets/expedition-cover-mac.png', coverWidth: 6472, coverInset: 59 },
+        { title: { ru: 'личный кабинет', en: 'the client account' }, noteOverlay: 'alternate',
+          cover: 'assets/expedition-home-mac.png', coverWidth: 6472, coverInset: 59,
           notes: [
-            { b: [4.71, 34.07], anchor: 'l',
-              ru: 'В кабинете выносим сквозной баннер сверху. Такие используются редко, поэтому должен привлечь внимание',
-              en: 'A full-width banner goes at the very top of the account. We use those rarely, so this one should catch the eye' },
+            { always: true, b: [4.71, 34.07], anchor: 'l',
+              ru: 'Баннер предупреждает об ограничении ещё на главной и сразу ведёт к договору',
+              en: 'The dashboard banner flags the restriction early and gives customers a direct route to the contract' },
             { b: [61.64, 80.19], anchor: 'l',
-              ru: 'Ниже выносим справки, погружающие в контекст экспедиции — термин новый даже для крупных клиентов',
-              en: 'Below it we put explainers about forwarding: the term is new even to the large clients' },
+              ru: 'Справки на главной объясняют, что такое экспедиция и какие условия меняются',
+              en: 'The dashboard guides explain what freight forwarding means and which terms are changing' },
           ] },
-        { title: { ru: 'новый заказ', en: 'a new order' },
-          frames: [
-            { src: 'assets/exp-order.webp', x: 81, y: 158, w: 1239, h: 766 },
-          ],
+        { title: { ru: 'новый заказ', en: 'a new order' }, noteOverlay: true,
+          cover: 'assets/expedition-order-mac.png', coverWidth: 6472, coverInset: 59,
           notes: [
-            { b: [67.14, 51.30], anchor: 'l',
-              ru: 'Блокируем грузовую форму, чтобы клиенты не могли её заполнить до подписания договора. Интервью показали, что только при блокере в текст начинают вчитываться',
-              en: 'We lock the freight form so that it cannot be filled in before the contract is signed. Interviews showed that people only start reading the text when something blocks them' },
+            { always: true, b: [67.14, 51.30], anchor: 'l',
+              ru: 'Клиенты замечали ограничение при заказе. Добавили переход к договору прямо в форму',
+              en: 'Clients noticed the restriction at checkout, so we linked to signing from the form' },
           ] },
-        { title: { ru: 'подписание договора', en: 'signing the contract' },
+        { title: { ru: 'подписание договора', en: 'signing the contract' }, diagram: true,
           frames: [
             { src: 'assets/exp-sign-b.webp', x: 631, y: 212, w: 637, h: 766 },
             { src: 'assets/exp-sign-a.webp', x: 131, y: 106, w: 637, h: 766 },
           ],
-          arrow: { src: 'assets/exp-arrow-1.webp', x: 336, y: 894, w: 262, h: 89 },
+          arrow: { src: 'assets/exp-arrow-1.svg', x: 336, y: 894, w: 262, h: 89 },
           notes: [
-            { b: [95.29, 65.37], anchor: 'r',
-              ru: 'Пользователь упрощённо подписывает один новый договор. Заполнять для него ничего не нужно — всё подтягиваем сами, чтобы максимально смягчить переход',
-              en: 'Signing comes down to one new contract. There is nothing to fill in — we pull all the data ourselves, to make the switch as painless as possible' },
+            { always: true, b: [95.29, 65.37], anchor: 'r',
+              ru: 'Данные уже в договоре. Клиенту остаётся подтвердить ИНН',
+              en: 'We prefill the contract details. At this step, the customer verifies their tax ID' },
           ] },
-        { title: { ru: 'два баланса', en: 'two balances' },
+        { title: { ru: 'два баланса', en: 'two balances' }, diagram: true,
           frames: [
             { src: 'assets/exp-fin-a.webp', x: 148, y: 228, w: 386, h: 425 },
             { src: 'assets/exp-fin-b.webp', x: 850, y: 316, w: 402, h: 250 },
             { src: 'assets/exp-fin-c.webp', x: 650, y: 604, w: 402, h: 250 },
           ],
           arrows: [
-            { src: 'assets/exp-arrow-2.webp', x: 562, y: 394, w: 262, h: 90 },
-            { src: 'assets/exp-arrow-3.webp', x: 366, y: 667, w: 264, h: 126 },
+            { src: 'assets/exp-arrow-2.svg', x: 562, y: 394, w: 262, h: 90 },
+            { src: 'assets/exp-arrow-3.svg', x: 366, y: 667, w: 264, h: 126 },
           ],
           notes: [
-            { b: [42.79, 17.04], anchor: 'l',
-              ru: 'Балансов стало два: каждый для транспортной экспедиции и услуг доставки. Пришлось переработать старый баланс, чтобы информация по нему воспринималась легче',
-              en: 'There are two balances now, one for forwarding and one for delivery services. The old balance had to be reworked so that its numbers read more easily' },
+            { always: true, b: [4, 72], anchor: 'l',
+              ru: 'Для доставки показываем баланс и лимит, для экспедиции — оплату актов',
+              en: 'The delivery card puts the balance and credit limit up front. The freight forwarding card highlights payment status' },
           ] },
       ],
       ru: {
-        title: 'транспортная экспедиция в личном кабинете доставки',
+        title: 'Переход на транспортную экспедицию в Яндекс Доставке',
         blocks: [
-          ['контекст', 'С 1 сентября 2026 года экспедиторские документы в России можно оформлять только электронно — через государственную систему перевозочных документов'],
-          ['проблема', 'Закон накрывает пункты выдачи, фуры и грузовую доставку: без электронного документооборота в личном кабинете половину тарифов просто не оформить'],
-          ['аудитория', 'B2B-клиенты, оформляющие доставку в личном кабинете'],
-          ['моя роль', 'Я доработала балансы, флоу регистрации и подписания нового договора, форму создания заказов и трекинг'],
-          ['статус', 'За первый месяц на новый договор перевели 300 крупных предпринимателей. Электронный документооборот внедрён в личный кабинет, число доставок не упало'],
-          ['что будем мерить', 'Соотношение количества доставок до 1 сентября и после, конверсию в новые заказы, долю крупных клиентов, подписавших договор транспортной экспедиции'],
+          ['задача', 'При переходе на электронные перевозочные документы B2B-клиентам потребовалось подписать договор транспортной экспедиции. Нужно было провести их через изменения и сохранить возможность оформлять доставки в привычном личном кабинете'],
+          ['моя работа', 'Переработала сценарии регистрации и подписания договора, форму создания заказа, трекинг и раздел финансов'],
+          ['ключевое решение', 'Встроила подписание договора в личный кабинет с автоматической подстановкой данных. Разделила балансы доставки и транспортной экспедиции, чтобы клиент понимал, какие услуги он оплачивает и сколько средств доступно'],
+          ['результат', 'За первый месяц на новый договор перешли 300 крупных клиентов. При переходе сохранили объём доставок через личный кабинет'],
         ],
       },
       en: {
-        title: 'freight forwarding in Yandex Delivery Account',
+        title: 'Moving Yandex Delivery clients to freight forwarding',
         blocks: [
-          ['context', 'From 1 September 2026 Russia requires forwarding paperwork to be issued electronically, through the state system for electronic transport documents'],
-          ['problem', 'The law covers pickup points, lorries and freight delivery. Without electronic document flow inside the client account, half of the tariffs cannot be used at all'],
-          ['audience', 'B2B clients who arrange deliveries in the client account'],
-          ['my role', 'I reworked the balances, the flow for signing up to and signing the new contract, the order form and the tracking'],
-          ['status', 'In the first month 300 large business clients moved to the new contract. Electronic document flow is live in the client account and the number of deliveries has not dropped'],
-          ['what we will measure', 'The number of deliveries before and after 1 September, conversion into new orders, and the share of large clients who signed the forwarding contract'],
+          ['the challenge', 'Moving to electronic transport documents meant B2B clients needed to sign a freight forwarding contract. We needed to guide them through the change while keeping delivery ordering available in the existing client dashboard'],
+          ['my work', 'I redesigned registration and contract signing, the order form, tracking and the finance section'],
+          ['the key decision', 'I integrated contract signing into the dashboard with client details filled in automatically. I separated the delivery and freight forwarding balances so clients could see which services they were paying for and how much money was available'],
+          ['the outcome', 'In the first month, 300 large business clients moved to the new contract. We maintained delivery volumes through the client dashboard during the transition'],
         ],
       },
     },
@@ -1105,80 +1188,40 @@
       video: '', shot: '',
       // Экраны собраны по макету: Фигма, Section 117:12274 (четыре десктопа)
       screens: [
-        { video: 'assets/tg-intro.mp4', ar: '1984 / 1216' },
-        { windows: [
-            { x: 60, y: 226, title: { ru: 'исследовательские вопросы', en: 'research questions' }, items: [
-              { ru: 'Что аудитория знает о Центральном Телеграфе и будущем кампусе?',
-                en: 'What does the audience know about the Central Telegraph and the future campus?' },
-              { ru: 'Какие страхи вызывает смена функции здания?',
-                en: 'What fears does the change in the building’s function raise?' },
-              { ru: 'Какие ожидания есть у студентов и будущих пользователей?',
-                en: 'What do students and future users expect?' },
-              { ru: 'Какие примеры ревитализации помогают объяснить проект?',
-                en: 'Which examples of revitalisation help explain the project?' },
-            ] },
-            { x: 740, y: 400, title: { ru: 'дизайнерские вопросы', en: 'design questions' }, items: [
-              { ru: 'Как превратить сложную историю здания в понятный сайт?',
-                en: 'How do you turn the building’s complicated history into a site people understand?' },
-              { ru: 'Как показать преемственность между Телеграфом и Университетом?',
-                en: 'How do you show the continuity between the Telegraph and the University?' },
-              { ru: 'Как объяснить открытость кампуса без рекламного тона?',
-                en: 'How do you explain that the campus is open without sounding like an advert?' },
-              { ru: 'Какие разделы и сценарии нужны разным аудиториям?',
-                en: 'Which sections and flows do the different audiences need?' },
-              { ru: 'Как визуально связать темы связи, истории, технологий и образования?',
-                en: 'How do you visually tie together communication, history, technology and education?' },
-            ] },
-            { x: 60, y: 546, title: { ru: 'принципы работы', en: 'working principles' }, items: [
-              { ru: 'Дух авангарда: продукт должен нести на себе приметы здания — сетку колонн, знаковые детали интерьера, символы на фасаде',
-                en: 'The avant-garde spirit: the product has to carry the marks of the building — the grid of columns, the signature interiors, the symbols on the facade' },
-              { ru: 'Люди, а не стены: телеграфная связь и связь поколений — это про опыт, который передают друг другу. Продукт должен остаться про человека',
-                en: 'People, not walls: telegraph lines and the link between generations are both about the experience people pass on to each other. The product has to stay about the person' },
-              { ru: 'Гибридная инфраструктура: ЦУ — это лаборатории, проектные зоны и технологические площадки, и продукт должен говорить на языке ИТ',
-                en: 'Hybrid infrastructure: the University means modern labs, project zones and technology spaces, so the product has to speak the language of IT' },
-            ] },
-          ] },
+        { video: 'assets/tg-intro-screen.mp4', cover: 'assets/telegraph-cover-mac.png', coverWidth: 6560, coverInset: 147 },
         // карточка 711×790 в центре кадра: глобус с фасада переворачивается в граф
-        { title: { ru: 'метафора связи', en: 'the metaphor of connection' },
-          flip: { x: 365, y: 145, w: 711, h: 790, tx: 477, ty: 414,
-                  front: 'assets/tg-globe.webp', back: 'assets/tg-graph.webp' },
+        { title: { ru: 'метафора связи', en: 'the metaphor of connection' }, diagram: true,
+          flip: { x: 365, y: 145, w: 711, h: 790,
+                  front: 'assets/tg-globe-clean.png', back: 'assets/tg-graph.webp' },
           notes: [
-            { x: 223, y: 229, ru: 'Телеграф 1927 года соединял людей через медные провода и радиоволны',
-              en: 'The Telegraph of 1927 connected people through copper wires and radio waves' },
-            { r: 114, y: 306, ru: 'Университет 2027 года соединяет людей через алгоритмы, код и фундаментальные знания',
-              en: 'The University of 2027 connects people through algorithms, code and fundamental knowledge' },
-            { x: 183, y: 689, ru: 'Технология сменилась, а суть здания — нет: ровно сто лет это центр связи',
-              en: 'The technology has changed, the building has not: a hundred years on, it is still a centre of connection' },
-            { r: 154, y: 777, ru: 'Метафора — связь студентов и преподавателей, поколений, сфер. Образ — глобус с центральной части Телеграфа',
-              en: 'The metaphor is the link between students and teachers, generations and fields. The image is the globe from the centre of the Telegraph facade' },
+            { hint: true, x: 75, y: 735, ru: 'Наведи на глобус, чтобы увидеть, как он превращается в граф',
+              en: 'Hover over the globe to see it turn into a graph' },
+            { r: 154, y: 777, ru: 'Взяла глобус с фасада и превратила его в граф. Идею связи продолжили через истории студентов',
+              en: 'The facade’s globe becomes a graph linking the stories of students on the new campus' },
           ] },
-        { title: { ru: 'главный экран', en: 'the home screen' },
-          frames: [
-            { src: 'assets/tg-hero.webp', x: 80, y: 147, w: 1241, h: 787 },
-          ],
+        { title: { ru: 'главный экран', en: 'the home screen' }, noteOverlay: true,
+          cover: 'assets/telegraph-final-mac.png', coverWidth: 6560, coverInset: 147,
           notes: [
-            { b: [5.61, 71.69], x: 40, y: 749, ru: 'Телеграфу 100 лет. Мы задали 100 студентам 100 вопросов об образовании, опыте и связи — и собрали из ответов граф',
-              en: 'The Telegraph turns 100. We asked 100 students 100 questions about education, sharing experience and connection, and built a graph out of the answers' },
+            { always: true, b: [5.61, 71.69], x: 40, y: 749, ru: 'По точкам графа можно читать ответы студентов об образовании, опыте и общении',
+              en: 'Explore the graph to read students’ answers about education, experience and communication' },
           ] },
       ],
       ru: {
-        title: 'артпроект к открытию центрального телеграфа',
+        title: 'Арт-проект к открытию кампуса в Центральном телеграфе',
         blocks: [
-          ['контекст', 'Центральный Телеграф, построенный в 1927 году по проекту Ивана Рерберга, — главный информационный узел страны и сердце связи. В 2027 году, к юбилею, в отреставрированном здании открывается главный кампус Центрального Университета'],
-          ['проблема', 'Памятник архитектуры купил коммерческий холдинг под частный вуз — и это вызывает скепсис у горожан, градозащитников и профессионального сообщества'],
-          ['аудитория', 'Те, кому небезразлична судьба Телеграфа, и студенты Центрального Университета'],
-          ['моя роль', 'Исследование, принципы продукта, метафора и дизайн сайта — делала одна'],
-          ['статус', 'Сайт будет запущен к сентябрю 2027'],
+          ['задача', 'К открытию кампуса Центрального университета нужно было показать связь между историей Телеграфа и его новой ролью. Сайт адресован студентам и людям, которым важна судьба здания'],
+          ['моя работа', 'Провела исследование, сформулировала принципы проекта, придумала визуальную метафору и разработала дизайн сайта. Работала над проектом самостоятельно'],
+          ['ключевое решение', 'Взяла за основу идею связи между людьми. Глобус с фасада Телеграфа превращается в граф — образ связей между студентами, преподавателями и поколениями. На сайте эту идею продолжают ответы студентов об образовании, опыте и общении'],
+          ['статус', 'Подготовлены концепция и дизайн сайта. Планируемый запуск — сентябрь 2027 года'],
         ],
       },
       en: {
-        title: 'an art project for the opening of the central telegraph',
+        title: 'An art project for the Central Telegraph campus opening',
         blocks: [
-          ['context', 'The Central Telegraph, built in 1927 to Ivan Rerberg’s design, was the country’s main information hub and the heart of its communications. In 2027, for its anniversary, the restored building opens as the main campus of Central University'],
-          ['problem', 'A commercial holding buying an architectural landmark for a private university is met with scepticism from the city’s residents, heritage campaigners and the professional community'],
-          ['audience', 'People who care about the fate of the Central Telegraph building, and students of Central University'],
-          ['my role', 'The research, the product principles, the metaphor and the design of the site — all mine'],
-          ['status', 'The site launches by September 2027'],
+          ['the challenge', 'For the opening of Central University’s campus, we needed to show how the Telegraph’s history connects with its new role. The site is for students and people who care about the building’s future'],
+          ['my work', 'I conducted the research, defined the project principles, developed the visual metaphor and designed the site. I worked on the project independently'],
+          ['the key decision', 'I built the concept around connections between people. The globe on the Telegraph’s facade transforms into a graph, representing connections between students, teachers and generations. The site extends this idea through students’ responses about education, experience and communication'],
+          ['status', 'The concept and site design are complete. The planned launch is September 2027'],
         ],
       },
     },
@@ -1189,49 +1232,20 @@
       // Экраны собраны по макету: Фигма, Section 4 (пять десктопов)
       screens: [
         { hold: true },                     // первый экран пустой — сюда встанет ролик
-        // окна исследования: две колонки, 600 шириной, вертикальный шаг 80 считается сам
-        { windows: [
-            { x: 80, y: 255, title: { ru: 'сегментация по контекстам', en: 'segments by context' }, items: [
-              { ru: 'Двадцати-тридцатилетние из больших городов: летают часто, деньги и гибкий график есть, друзья рядом — собраться можно спонтанно',
-                en: 'Young adults from big cities: they fly often, have money and flexibility, their friends live nearby, so it is easy to get together on a whim' },
-              { ru: 'Заядлые путешественники в группах: знают схему «один платит, остальные догонят», но устали быть тем, кто каждый раз платит первым',
-                en: 'Seasoned group travellers: they know the “one pays, the rest will chip in later” pattern, but are tired of being the one who fronts the money' },
-              { ru: 'Те, кто не может договориться: внутри группы нет единого мнения ни по направлению, ни по тому, кто платит — нужен инструмент, который решает это за них',
-                en: 'Those who cannot agree: the group has no common view on the destination or on who pays — they need a tool that settles it for them' },
-              { ru: 'Новички в групповых поездках: не знают, как собрать поездку, и хотят готовый инструмент, а не изобретать процесс с нуля',
-                en: 'Newcomers to group travel: they do not know how to organise a trip and want a ready-made tool instead of inventing the process' },
-            ] },
-            { x: 750, y: 420, title: { ru: 'боли', en: 'pains' }, items: [
-              { ru: 'Один платит за всех: организатор ищет варианты, всех согласовывает, платит со своей карты и потом месяцами собирает долги',
-                en: 'One pays for everyone: the organiser spends time picking and agreeing on options, fronts the payment and then collects debts for months' },
-              { ru: 'Цена уходит: пока группа голосует в чате, выбранный рейс дорожает',
-                en: 'Prices move: while the group votes in the chat, the chosen flight gets more expensive. Nobody likes paying more and losing the deal' },
-              { ru: 'Хаос: ссылки в чате, разные версии цен, непонятно, кто что видел. Один человек работает за менеджера проекта',
-                en: 'Chaotic agreement: links in messengers, different versions of the prices, no idea who saw what, and one person doing the manager’s job' },
-              { ru: 'Куча сервисов: Aviasales + чат + сервис для сплита + заметки + таблица. Чтобы спланировать, нужно много переключаться',
-                en: 'A pile of services: Aviasales + a chat + a split-payment app + notes + a spreadsheet. Planning means constant switching' },
-            ] },
-            { x: 80, y: 667, title: { ru: 'фокусировка на задачах', en: 'what to focus on' }, items: [
-              { ru: 'Для бизнеса рост среднего чека: группа из 4 человек = 4 билета + отель. Конверсия группы выше, чем у одиночки, и больше шансов, что все оплатят в одном месте',
-                en: 'For the business — a bigger order: a group of four means four tickets plus a hotel. A group converts better than a single traveller, and all of them are more likely to pay in one place' },
-              { ru: 'Для людей — меньше стресса: собрать группу тяжело. Кто-то один тащит всю организацию, мнение каждого учесть сложно, платить приходится с одной карты',
-                en: 'For users — less stress: herding a group is hard, one person organises everything, it is tricky to account for everyone, and someone has to pay for all — that load could be lifted' },
-            ] },
-          ] },
         // три телефона 354×735, выноски 260 — как нарисовано
         { title: { ru: 'точки входа', en: 'entry points' },
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-1.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-2.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-3.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { b: [-0.3, 84.5], at: 0, side: 'l', over: 179, y: 612,
-              ru: 'У aviasales гибкая лента на главной — промобаннер там и станет главной точкой входа',
-              en: 'Aviasales has a flexible feed, so a promo banner on the home screen can be the main entry point' },
+            { always: true, b: [-0.3, 84.5], at: 0, side: 'l', over: 179, y: 612,
+              ru: 'Баннер на главной знакомит с групповыми поездками ещё до поиска билетов',
+              en: 'The home screen banner introduces group trips before travellers start searching for tickets' },
             { b: [47.7, 50.7], at: 1, side: 'l', over: 232, y: 356,
-              ru: 'Умный поиск в приложении уже есть — групповую поездку можно включать прямо из запроса',
-              en: 'The app already has smart search, so a group trip can be triggered from what the person typed' },
+              ru: 'Из поискового запроса можно сразу перейти к планированию поездки с друзьями',
+              en: 'Travellers can start planning a trip with friends directly from their search' },
             { b: [99.0, 16.9], at: 2, side: 'r', over: 179, y: 318,
-              ru: 'И предлагать её же, когда ищут билеты на двоих и больше',
-              en: 'A group trip can also be offered when someone searches tickets for two or more people' },
+              ru: 'Предлагаем создать поездку, когда человек уже ищет билеты на двоих или больше',
+              en: 'We suggest starting a group trip when someone searches for tickets for two or more people' },
           ] },
         // два телефона обычного размера
         { title: { ru: 'создание поездки', en: 'creating a trip' },
@@ -1239,25 +1253,25 @@
           shots: [{ src: 'assets/av-4.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-5.webp', w: 101.246, x: -0.519 }],
           notes: [
             { b: [0.0, 77.3], at: 0, side: 'l', over: 54, y: 711,
-              ru: 'ИИ-турагенту отдаём не только счёт, но и само планирование поездки',
-              en: 'We hand over not just splitting the bill but the whole trip planning to the Aviasales AI agent' },
-            { b: [97.1, 47.7], at: 1, side: 'r', over: 73, y: 390,
-              ru: 'От того, кто собирает группу, нужна короткая форма и ссылка друзьям',
-              en: 'All the person who starts the group has to do is fill in a short form and send the invites' },
+              ru: 'ИИ подбирает варианты поездки и помогает разделить оплату',
+              en: 'The AI suggests trip options and helps split the payment' },
+            { always: true, b: [97.1, 47.7], at: 1, side: 'r', over: 73, y: 390,
+              ru: 'Организатор заполняет короткую форму и отправляет друзьям одну ссылку',
+              en: 'The organiser fills in a short form and shares one link with friends' },
           ] },
         { title: { ru: 'комната поездки', en: 'the trip room' },
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-6.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-7.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-8.webp', w: 101.246, x: -0.519 }],
           notes: [
             { b: [0.0, 50.9], at: 0, side: 'l', over: 179, y: 642,
-              ru: 'Направление, билеты и жильё предлагаем на выбор, чтобы группа не уходила покупать куда-то ещё',
-              en: 'We offer the group destinations, tickets and places to stay, so that every purchase happens inside the app' },
-            { b: [96.1, 65.5], at: 1, side: 'l', over: 230, y: 471,
-              ru: 'Пока не выбрали и не оплатили все, покупка не проходит. Отстающим летят пуши',
-              en: 'Nothing is bought until everyone has chosen and paid; whoever has not gets a push' },
+              ru: 'Собрали направления, билеты и жильё в комнате поездки, чтобы обсуждать варианты всей группой',
+              en: 'We put destinations, flights and stays in the trip room so the whole group can discuss the options' },
+            { always: true, b: [96.1, 65.5], at: 1, side: 'l', over: 230, y: 471,
+              ru: 'Покупка проходит после выбора и оплаты всеми. Остальным напоминаем',
+              en: 'Everyone confirms and pays before booking. Pending members get a reminder' },
             { b: [99.5, 50.9], at: 2, side: 'r', over: 179, y: 681,
-              ru: 'Вся поездка в одном месте: даты, брони, билеты. Работает и без сети',
-              en: 'Everything about the trip lives in one place: dates, bookings and tickets, available offline' },
+              ru: 'Даты, брони и билеты доступны без интернета, чтобы их можно было открыть и в дороге',
+              en: 'Dates, bookings and tickets are available offline so travellers can open them on the go' },
           ] },
       ],
       ru: {
@@ -1298,7 +1312,7 @@
       { ru: 'админка отп', en: 'otp admin', case: 'otp', cover: 'assets/cover-otp.webp' },
     ],
     folder3: [
-      { ru: 'группы в aviasales', en: 'groups in aviasales', case: 'aviasales', cover: 'assets/cover-aviasales.webp' },
+      { ru: 'группы в aviasales', en: 'groups in aviasales', case: 'aviasales', cover: 'assets/cover-aviasales.webp', hidden: true },
       { ru: 'телеграф', en: 'telegraph', case: 'telegraph', cover: 'assets/cover-telegraph.webp' },
     ],
   };
@@ -1316,11 +1330,11 @@
   const T = {
     ru: {
       lang: 'ру', name: 'Настя Балашова', contact: 'связь',
-      bio: `<p>Привет! <b>Я Настя Балашова, продуктовый дизайнер<br>с 3+ годами опыта</b>${heart}</p>
+      bio: `<p>Привет! <b>Я Настя Балашова, продуктовый&nbsp;дизайнер<br class="bio-break"> с 3+ годами опыта</b>${heart}</p>
             <p>Начинала в финтехе и эдтехе, сейчас — <b>в B2B-команде Яндекс Доставки</b>${truck}. Параллельно учусь в <b>магистратуре ЦУ</b></p>
             <p>В остальное время: рисую, играю в D&amp;D, веду <a class="ext" data-link="telegram">телеграм-канал${ext}</a></p>`,
       foot: '2026, всё своими лапками 🦦',
-      f1: '02.2026 → сейчас', f2: '08.2024 → 02.2026', f3: 'приколы с учёбы',
+      f1: '02.2026 → <br class="folder-date-break">сейчас', f2: '08.2024 → <br class="folder-date-break">02.2026', f3: 'творческие проекты',
       resume: 'резюме.мяу', cat: 'мой.кот', cv: 'резюме',
       collapse: 'Свернуть', expand: 'Развернуть', tap: 'жми', photoAlt: 'Настя Балашова', sound: 'Звук', back: 'Назад', close: 'Закрыть', home: 'назад',
       videoSoon: 'Здесь будет видео с полным сценарием',
@@ -1331,7 +1345,7 @@
             <p>Started out in fintech and edtech, <b>currently on the B2B team at Yandex Delivery</b>${truck}. Also, studying for <b>a master's at Central University</b></p>
             <p>In my free time: drawing, playing D&amp;D, running a <a class="ext" data-link="telegram">Telegram channel${ext}</a></p>`,
       foot: '2026, all made with my own paws 🦦',
-      f1: '02.2026 → now', f2: '08.2024 → 02.2026', f3: 'studying stuff',
+      f1: '02.2026 → <br class="folder-date-break">now', f2: '08.2024 → <br class="folder-date-break">02.2026', f3: 'creative projects',
       resume: 'cv.meow', cat: 'my.cat', cv: 'CV',
       collapse: 'Collapse', expand: 'Expand', tap: 'tap', photoAlt: 'Nastya Balashova', sound: 'Sound', back: 'Back', close: 'Close', home: 'back',
       videoSoon: 'A video with the full scenario goes here',
@@ -1351,9 +1365,9 @@
     });
   }
 
-  // Привязываем короткие слова (предлоги, союзы, «3+») к следующему слову
-  // и тире к предыдущему, чтобы они не висели в конце строки
-  const SHORT = /(?<=^|[\s\u00A0«(])([\dA-Za-zА-Яа-яЁё+]{1,3}[,;:]?) /g;
+  // Привязываем короткие слова и предлоги RU/EN к следующему слову,
+  // а тире — к предыдущему, чтобы они не висели в конце строки.
+  const SHORT = /(?<=^|[\s\u00A0«(])((?:[\dA-Za-zА-Яа-яЁё+]{1,3}|через|между|перед|после|внутри|вместо|среди|около|вокруг|ради|кроме|вдоль|против|благодаря|согласно|with|from|into|onto|over|under|about|after|before|during|between|through|across|around|among|alongside)[,;:]?) /gi;
   function typograph(root) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode: n => /^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)
@@ -1556,7 +1570,7 @@
   // ── Веер проектов: раскладываем карточки по дуге над папкой ──
   function buildFans() {
     document.querySelectorAll('.folder').forEach(folder => {
-      const key = folder.querySelector('[data-link]').dataset.link, items = PROJECTS[key] || [];
+      const key = folder.querySelector('[data-link]').dataset.link, items = (PROJECTS[key] || []).filter(it => !it.hidden);
       folder.querySelector('.fan')?.remove();
       if (!items.length) return;
 
@@ -1741,36 +1755,52 @@
     screens.forEach(sc => {
       const sec = document.createElement('section');
       sec.className = 'case-screen';
+      if (sc.noteOverlay) sec.classList.add(sc.noteOverlay === 'alternate' ? 'mac-note-alternate' : 'mac-note-overlay');
       if (sc.title) {                                // заголовок пары — только на телефоне
         const h = document.createElement('h3');
         h.className = 'scr-title';
         h.textContent = sc.title[lang] || sc.title.ru;
         sec.appendChild(h);
       }
-      const cover = sc.hold ? coverOf(id) : '';       // пока ролика нет, первым идёт обложка кейса
+      const cover = sc.cover || (sc.hold ? coverOf(id) : '');
       if (sc.hold && !cover) sec.classList.add('is-hold');
       const row = document.createElement('div');
       row.className = 'scr-row';
 
+      let coverBox;
       if (cover) {
         row.classList.add('fit');                    // масштаб как у экранов с кадрами
         const box = document.createElement('div');
         box.className = 'scr-cover';
+        coverBox = box;
+        if (sc.coverWidth) {
+          sec.classList.add('mac-screen');
+          box.classList.add('mac-cover');
+          box.style.setProperty('--cover-width', sc.coverWidth);
+          box.style.setProperty('--cover-inset', sc.coverInset);
+          coverBox = document.createElement('div');
+          coverBox.className = 'mac-cover-art';
+          box.appendChild(coverBox);
+        }
         const img = document.createElement('img');
         img.src = cover; img.alt = '';
-        box.appendChild(img);
+        coverBox.appendChild(img);
         row.appendChild(box);
       }
       if (sc.video) {
-        const box = document.createElement('div');
-        box.className = 'scr-video';
-        if (sc.ar) {                                 // ролик с готовым окном — во всю ширину кадра
-          row.classList.add('vid'); box.classList.add('wide');
-          box.style.setProperty('--ar', sc.ar);
+        const box = coverBox || document.createElement('div');
+        if (!coverBox) {
+          box.className = 'scr-video';
+          if (sc.ar) {
+            row.classList.add('vid'); box.classList.add('wide');
+            box.style.setProperty('--ar', sc.ar);
+          }
+          row.appendChild(box);
         }
-        box.innerHTML = '<video playsinline muted loop autoplay controls preload="metadata"></video>';
-        row.appendChild(box);
-        const v = box.querySelector('video');
+        const v = document.createElement('video');
+        v.playsInline = v.muted = v.loop = v.autoplay = v.controls = true;
+        v.preload = 'metadata';
+        box.appendChild(v);
         v.src = sc.video;
         v.addEventListener('loadeddata', () => v.play().catch(() => {}), { once: true });
       }
@@ -1782,11 +1812,8 @@
         card.className = 'flip-card';
         card.style.left = pc(sc.flip.x, 1400); card.style.top = pc(sc.flip.y, 1080);
         card.style.width = pc(sc.flip.w, 1400); card.style.height = pc(sc.flip.h, 1080);
-        card.style.setProperty('--tx', pc(sc.flip.tx, sc.flip.w));   // кнопка стоит там же, где в макете
-        card.style.setProperty('--ty', pc(sc.flip.ty, sc.flip.h));
         card.innerHTML = '<img class="flip-front" alt="" loading="lazy">'
-                       + '<img class="flip-back" alt="" loading="lazy">'
-                       + '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>';
+                       + '<img class="flip-back" alt="" loading="lazy">';
         card.querySelector('.flip-front').src = sc.flip.front;
         card.querySelector('.flip-back').src = sc.flip.back;
         st.appendChild(card);
@@ -1794,6 +1821,7 @@
         (sc.notes || []).forEach(n => {
           const el = document.createElement('div');
           el.className = 'note';
+          if (n.hint) el.classList.add('flip-hint');
           if (n.r != null) { el.style.setProperty('--nr', pc(n.r, 1400)); el.classList.add('anch-r'); }
           else { el.style.setProperty('--nx', pc(n.x, 1400)); }
           el.style.setProperty('--ny', pc(n.y, 1080));
@@ -1811,28 +1839,45 @@
         card.addEventListener('click', () => { if (!hoverable()) st.classList.toggle('on'); });
         row.appendChild(st);
       }
-      if ((sc.frames || []).length) {                // окна браузера с кадрами интерфейса
-        row.className = 'scr-win';
+      const frames = sc.frames || [];
+      if (frames.length || (sc.cover && sc.notes?.length)) {
+        if (frames.length) row.className = sc.diagram ? 'scr-win diagram-row' : 'scr-win';
         const st = document.createElement('div'); st.className = 'win-stage';
+        if (sc.diagram) {
+          const left = Math.min(...frames.map(frame => frame.x));
+          const right = Math.max(...frames.map(frame => frame.x + frame.w));
+          st.style.setProperty('--center-x', 700 - (left + right) / 2);
+        }
         const px = (v, base) => (v / base * 100).toFixed(3) + '%';
         const place = (el, o) => {                   // координаты прямо из макета 1400×1080
           el.style.left = px(o.x, 1400); el.style.top = px(o.y, 1080);
           el.style.width = px(o.w, 1400); el.style.height = px(o.h, 1080);
         };
-        sc.frames.forEach((f, i) => {                // порядок в массиве — порядок чтения, первое окно сверху
+        frames.forEach((f, i) => {                // порядок в массиве — порядок чтения, первое окно сверху
           const el = document.createElement('div');
           el.className = 'win win-img';
-          el.style.zIndex = sc.frames.length - i;
-          place(el, f);
-          el.innerHTML = '<div class="win-bar"><span class="win-dots"><i></i><i></i><i></i></span></div>'
-                       + '<img class="win-shot" alt="" loading="lazy">';
-          el.querySelector('.win-shot').src = f.src;
+          el.style.zIndex = frames.length - i;
+          // Координаты в макете включали шапку высотой 60.
+          const inset = sc.diagram ? 60 : 12;
+          place(el, { ...f, y: f.y + inset, h: f.h - inset });
+          if (!sc.diagram) {
+            el.innerHTML = '<div class="browser-tabs" aria-hidden="true">'
+                       + '<span class="browser-controls"><i></i><i></i><i></i></span>'
+                       + '<span class="browser-tab"></span></div>';
+            el.querySelector('.browser-tab').textContent = sc.title?.[lang] || t.title;
+          }
+          const shot = document.createElement('img');
+          shot.className = 'win-shot';
+          shot.alt = '';
+          shot.loading = 'lazy';
+          shot.src = f.src;
+          el.appendChild(shot);
           st.appendChild(el);
         });
         (sc.arrows || (sc.arrow ? [sc.arrow] : [])).forEach(ar => {   // стрелки между окнами
           const a = document.createElement('img');
           a.className = 'stage-arrow'; a.src = ar.src; a.alt = ''; a.loading = 'lazy';
-          a.style.zIndex = sc.frames.length + 1;
+          a.style.zIndex = frames.length + 1;
           place(a, ar);
           st.appendChild(a);
         });
@@ -1863,26 +1908,6 @@
         });
         if (bar.children.length) st.appendChild(bar);
         row.appendChild(st);
-      }
-      if ((sc.windows || []).length) {               // окна с текстом исследования
-        row.className = 'scr-win';
-        const stage = document.createElement('div'); stage.className = 'win-stage';
-        sc.windows.forEach(w => {
-          const el = document.createElement('div');
-          el.className = 'win';
-          el.style.left = (w.x / 1400 * 100).toFixed(3) + '%';
-          el.style.top = (w.y / 1080 * 100).toFixed(3) + '%';
-          el.dataset.y = w.y;
-          const items = (w.items || []).map(it => '<p></p>').join('');
-          el.innerHTML = '<div class="win-bar"><span class="win-dots"><i></i><i></i><i></i></span>'
-                       + '<span class="win-title"></span></div><div class="win-body">' + items + '</div>';
-          el.querySelector('.win-title').textContent = w.title[lang] || w.title.ru;
-          el.querySelectorAll('.win-body p').forEach((pEl, i) => {
-            pEl.textContent = w.items[i][lang] || w.items[i].ru;
-          });
-          stage.appendChild(el);
-        });
-        row.appendChild(stage);
       }
       if (sc.laptop) {                               // ноутбук с кадром интерфейса
         const box = document.createElement('div');
@@ -1923,7 +1948,6 @@
           row.classList.add('fit');                  // масштаб считается от ширины всей композиции
           if (sc.span) row.style.setProperty('--span', sc.span);
         }
-        if (sc.nw) sec.style.setProperty('--nw', sc.nw);
         sc.shots.forEach(src => {
           const item = document.createElement('div');
           item.className = 'scr-item';
@@ -1948,6 +1972,7 @@
         const el = document.createElement('div');
         const tail = n.tail || 'tr';
         el.className = 'note ' + (n.side ? 'p' + (n.at || 0) : (n.at || 'l')) + ' ' + tail;
+        if (n.always) el.classList.add('always');
         // В макете телефон стоит на (249 или 720,333; 97) и занимает 431,333×885,333.
         // Выноску цепляем тем углом, где хвостик, — долей от своего телефона.
         const pc = v => v.toFixed(3) + '%';
@@ -1990,6 +2015,51 @@
         host.appendChild(el);
         noteRO.observe(el);
       });
+      const notes = sc.notes || (sc.note ? [sc.note] : []);
+      if (notes.length && !sc.diagram) {
+        sec.classList.add('has-desktop-notes');
+        const goPair = id === 'go' && items.length > 0;
+        const webFrame = Boolean(sc.frames?.length || sc.flip);
+        sec.classList.toggle('go-pair', goPair);
+        sec.classList.toggle('web-frame', webFrame);
+        if (webFrame) {
+          const frames = sc.frames || [sc.flip];
+          const stage = row.querySelector('.win-stage');
+          const leftEdge = Math.min(...frames.map(frame => frame.x));
+          const rightEdge = Math.max(...frames.map(frame => frame.x + frame.w));
+          const topEdge = Math.min(...frames.map(frame => frame.y + (sc.flip ? 0 : 12)));
+          const bottomEdge = Math.max(...frames.map(frame => frame.y + frame.h));
+          stage.style.setProperty('--center-x', 700 - (leftEdge + rightEdge) / 2);
+          stage.style.setProperty('--center-y', 540 - (topEdge + bottomEdge) / 2);
+        }
+        const desktopNotes = document.createElement('div');
+        desktopNotes.className = 'desktop-notes';
+        const left = document.createElement('div');
+        const right = document.createElement('div');
+        left.className = right.className = 'desktop-note-group';
+        notes.forEach(n => {
+          const card = document.createElement('div');
+          card.className = 'desktop-note';
+          const copy = document.createElement('span');
+          copy.className = 'note-text';
+          copy.textContent = n[lang] || n.ru || n.en || '';
+          card.appendChild(copy);
+          const onLeft = webFrame
+            ? (n.b?.[0] ?? ((n.x ?? 1400) / 14)) < 50
+            : items.length && (n.side || n.at) === 'l';
+          const group = onLeft ? left : right;
+          group.appendChild(card);
+          if (n.y != null) group.style.setProperty('--note-y', n.y / 1080);
+        });
+        if (goPair || webFrame || left.childElementCount) desktopNotes.appendChild(left);
+        if (goPair || webFrame || right.childElementCount) desktopNotes.appendChild(right);
+        if (left.childElementCount && right.childElementCount) sec.classList.add('has-two-note-groups');
+        if (items.length) {
+          const frameWidth = items.length * (sc.phone?.w || PH.w) + (items.length - 1) * 40 + 12;
+          row.style.setProperty('--frame-width', frameWidth);
+        }
+        sec.appendChild(desktopNotes);
+      }
       feed.appendChild(sec);
     });
     typograph(feed);
@@ -2001,7 +2071,8 @@
   // На компьютере хвостик острым крючком в углу: тело поджимается, остриё выходит на 5,107px.
   // На телефоне — шип по центру верхней грани, 7px глубиной (у «жми» он уже).
   const K = .4477;                                   // плечо скругления
-  function shapeNote(el) {
+  function shapeNote(note) {
+    const el = note.querySelector('.note-body');
     // дробные размеры: offsetWidth округляет, и остриё, стоящее ровно в углу, срезается
     const box = el.getBoundingClientRect(), w = box.width, h = box.height;
     if (!w || !h) { el.style.clipPath = ''; return; }
@@ -2057,27 +2128,6 @@
     });
   }
   addEventListener('resize', clampNotes);
-
-  // Окна в колонке стоят на фиксированном расстоянии: первое — по координате макета,
-  // следующие — ровно в 80px под предыдущим, какой бы высоты оно ни получилось.
-  function layoutWindows() {
-    feed.querySelectorAll('.win-stage').forEach(st => {
-      const u = st.offsetWidth / 1400;
-      if (!u) return;
-      const cols = {};
-      st.querySelectorAll('.win:not(.win-img)').forEach(w => {   // окна с кадрами стоят по макету
-        const k = w.style.left;
-        (cols[k] = cols[k] || []).push(w);
-      });
-      Object.values(cols).forEach(list => {
-        if (!list[0].dataset.y) return;
-        list.sort((a, b) => a.dataset.y - b.dataset.y);
-        let top = list[0].dataset.y * u;
-        list.forEach(w => { w.style.top = Math.round(top) + 'px'; top += w.offsetHeight + 80 * u; });
-      });
-    });
-  }
-  addEventListener('resize', layoutWindows);
 
   // На телефоне выноски раскрываются по тапу и могут налезть друг на друга.
   // Разводим их по высоте телефона так, чтобы хватило места всем раскрытым сразу.
@@ -2184,14 +2234,13 @@
 
     const plain = !!c.plain;
     document.body.classList.toggle('case-plain', plain);
-    if (plain) document.body.classList.remove('collapsed');
+    document.body.classList.remove('collapsed');
     document.getElementById('collapse').setAttribute('aria-label', T[lang].back);
 
     document.body.dataset.view = 'case';
     feed.scrollTop = 0;                  // кейс всегда открывается с первого экрана
     scrollTo(0, 0);
     layoutNotes();                       // сперва разводим выноски, потом режем контур
-    layoutWindows();
     shapeNotes();                        // контур считаем, когда экран уже показан и выноски измерены
     clampNotes();                        // и подвигаем те плашки, что не влезают в ленту
     currentCase = id;
