@@ -326,6 +326,7 @@
   .flip-stage.on .note { opacity: 1; pointer-events: auto; }
   .flip-stage .flip-hint { display: none; }
   .scr-title { display: none; }                     /* пары подписаны только на телефоне */
+  .mobile-demo { display: none; }
 
   .case-bar {
     position: absolute; pointer-events: none;
@@ -456,6 +457,59 @@
       font-size: 1.125rem; line-height: 1.25; overflow-wrap: break-word;
     }
     .screen-notes h4 { font-size: 1rem; color: #626267; }
+
+    .has-mobile-demo > .win-stage { display: none; }
+    .mobile-demo { display: block; color: #1b1b1d; }
+    .demo-button {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 2.75rem; padding: .5rem .875rem; border-radius: .625rem;
+      background: #f1f1f2; font-size: var(--button-font-size); line-height: 1.2;
+    }
+    .demo-button[aria-disabled="true"] { opacity: .5; cursor: default; }
+    .mobile-demo :focus-visible, .balance-demo:focus-visible {
+      outline: 2px solid #1b1b1d; outline-offset: 3px;
+    }
+    .demo-shot { display: block; overflow: hidden; border: 1px solid #c9c9c9; border-radius: 1rem; }
+    .demo-shot img { width: 100%; height: auto; clip-path: inset(3px round 1rem); }
+
+    .balance-demo { width: 100%; text-align: left; -webkit-tap-highlight-color: transparent; }
+    .balance-demo .demo-button { margin-bottom: .75rem; }
+    .balance-faces { display: grid; }
+    .balance-face {
+      grid-area: 1 / 1; display: grid; align-content: start; gap: .5rem;
+      transition: opacity .25s var(--ease);
+    }
+    .balance-face[aria-hidden="true"] { opacity: 0; }
+
+    .contract-nav {
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+      gap: .5rem; margin-bottom: .75rem;
+    }
+    .contract-position { margin: 0; color: #626267; text-align: center; }
+    .contract-steps {
+      display: flex; overflow-x: auto; overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none;
+    }
+    .contract-steps::-webkit-scrollbar { display: none; }
+    .contract-step { flex: 0 0 100%; min-width: 0; margin: 0; scroll-snap-align: start; }
+    .contract-step figcaption { margin: 0 .25rem .75rem; font-size: 1rem; line-height: 1.3; }
+
+    .partner-demo {
+      display: grid; gap: 1rem; margin: 0; padding: 1rem;
+      border: 1px solid #c9c9c9; border-radius: 1rem;
+    }
+    .partner-demo .demo-fill { justify-self: start; }
+    .partner-demo label { display: grid; gap: .375rem; min-width: 0; }
+    .partner-demo :is(input, select) {
+      width: 100%; min-width: 0; min-height: 2.75rem; padding: .5rem .75rem;
+      border: 1px solid #bdbdc2; border-radius: .5rem; background: #fff;
+      color: #1b1b1d; font: inherit;
+    }
+    .partner-details { display: grid; gap: 1rem; min-width: 0; margin: 0; padding: 0; border: 0; }
+    .partner-save { width: 100%; background: #08763d; color: #fff; }
+    .partner-status { margin: 0; color: #08763d; }
+    .partner-status:not(:empty) { margin-top: .5rem; }
+
     .case-bar { display: none !important; }
     body[data-view="case"] .card { background: #1b1b1d; }
     .card, .collapsed .card {
@@ -649,6 +703,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
+    .contract-steps { scroll-behavior: auto; }
   }
 </style>
 </head>
@@ -762,6 +817,42 @@
 
 <div class="page-foot" id="page-foot"></div>
 
+<template id="partner-demo-template">
+  <form class="mobile-demo partner-demo" autocomplete="off">
+    <button type="button" class="demo-button demo-fill" data-copy="example"></button>
+    <label>
+      <span data-copy="product"></span>
+      <input name="product" required>
+    </label>
+    <label>
+      <span data-copy="partner"></span>
+      <select name="partner" aria-controls="partner-demo-details" required>
+        <option value="" selected disabled data-copy="choose"></option>
+        <option value="existing" data-copy="existing"></option>
+        <option value="new" data-copy="newPartner"></option>
+      </select>
+    </label>
+    <fieldset class="partner-details" id="partner-demo-details" hidden disabled>
+      <label>
+        <span data-copy="company"></span>
+        <input name="company" required>
+      </label>
+      <label>
+        <span data-copy="taxId"></span>
+        <input name="taxId" inputmode="numeric" required>
+      </label>
+      <label>
+        <span data-copy="taxCode"></span>
+        <input name="taxCode" inputmode="numeric" required>
+      </label>
+    </fieldset>
+    <div>
+      <button type="submit" class="demo-button partner-save" data-copy="save"></button>
+      <p class="partner-status" role="status"></p>
+    </div>
+  </form>
+</template>
+
 <script>
   // ▼ Сюда вставь свои ссылки
   const LINKS = {
@@ -787,7 +878,7 @@
               en: 'We validate each section to catch errors before the data reaches the bank’s systems' },
           ] },
         // Desktop-34 — два окна внахлёст и стрелка между ними
-        { title: { ru: 'добавление параметров', en: 'adding parameters' },
+        { title: { ru: 'добавление параметров', en: 'adding parameters' }, mobileDemo: createPartnerDemo,
           frames: [
             { src: 'assets/otp-s4a.webp', size: [1920, 810], x: 60,  y: 137, w: 800, h: 397 },
             { src: 'assets/otp-s4b.webp', size: [1920, 1146], x: 480, y: 432, w: 800, h: 537 },
@@ -919,7 +1010,7 @@
               ru: 'Клиенты замечали ограничение при заказе. Добавили переход к договору прямо в форму',
               en: 'Clients noticed the restriction at checkout, so we linked to signing from the form' },
           ] },
-        { title: { ru: 'подписание договора', en: 'signing the contract' },
+        { title: { ru: 'подписание договора', en: 'signing the contract' }, mobileDemo: createContractDemo,
           frames: [
             { src: 'assets/exp-sign-b.webp', size: [1274, 1414], x: 631, y: 212, w: 637, h: 766 },
             { src: 'assets/exp-sign-a.webp', size: [1300, 1440], x: 131, y: 106, w: 637, h: 766 },
@@ -930,7 +1021,7 @@
               ru: 'Данные уже в договоре. Клиенту остаётся подтвердить ИНН',
               en: 'We prefill the contract details. At this step, the customer verifies their tax ID' },
           ] },
-        { title: { ru: 'два баланса', en: 'two balances' },
+        { title: { ru: 'два баланса', en: 'two balances' }, mobileDemo: createBalanceDemo,
           frames: [
             { src: 'assets/exp-fin-a.webp', size: [772, 730], x: 148, y: 228, w: 386, h: 425 },
             { src: 'assets/exp-fin-b.webp', size: [804, 380], x: 850, y: 316, w: 402, h: 250 },
@@ -1746,6 +1837,159 @@
     return stage;
   }
 
+  function setDemoText(element, copy) {
+    caseCopy.set(element, copy);
+    element.textContent = copy[lang];
+    typograph(element);
+  }
+
+  function createDemoShot(frame) {
+    const box = document.createElement('span');
+    box.className = 'demo-shot';
+    const shot = createImage(frame.src, '');
+    [shot.width, shot.height] = frame.size;
+    if (mobile.matches) shot.loading = 'eager';
+    box.appendChild(shot);
+    return box;
+  }
+
+  function createBalanceDemo({ frames }) {
+    const button = document.createElement('button');
+    button.className = 'mobile-demo balance-demo';
+    button.type = 'button';
+    const label = document.createElement('span');
+    label.className = 'demo-button';
+    const pictures = document.createElement('span');
+    pictures.className = 'balance-faces';
+    const faces = [[frames[0]], frames.slice(1)].map(group => {
+      const face = document.createElement('span');
+      face.className = 'balance-face';
+      face.append(...group.map(createDemoShot));
+      return face;
+    });
+    pictures.append(...faces);
+    button.append(label, pictures);
+
+    let after = false;
+    function update() {
+      faces[0].setAttribute('aria-hidden', String(after));
+      faces[1].setAttribute('aria-hidden', String(!after));
+      setDemoText(label, after
+        ? { ru: 'Показать, как было', en: 'Show before' }
+        : { ru: 'Показать, как стало', en: 'Show after' });
+    }
+    button.addEventListener('click', () => { after = !after; update(); });
+    update();
+    return button;
+  }
+
+  function createContractDemo({ frames }) {
+    const demo = document.createElement('div');
+    demo.className = 'mobile-demo contract-demo';
+    const nav = document.createElement('div');
+    nav.className = 'contract-nav';
+    const previous = document.createElement('button');
+    const next = document.createElement('button');
+    previous.type = next.type = 'button';
+    previous.className = next.className = 'demo-button';
+    caseCopy.set(previous, { ru: '← Назад', en: '← Back' });
+    caseCopy.set(next, { ru: 'Далее →', en: 'Next →' });
+    const position = document.createElement('p');
+    position.className = 'contract-position';
+    position.setAttribute('aria-live', 'polite');
+    nav.append(previous, position, next);
+
+    const track = document.createElement('div');
+    track.className = 'contract-steps';
+    // В композиции для десктопа второй шаг рисуется поверх первого.
+    const steps = [
+      { frame: frames[1], caption: {
+        ru: 'Договор нужен для доставки через ПВЗ, на склад и грузовых перевозок кузовами XL+ и фурами',
+        en: 'The contract covers pickup-point and warehouse deliveries, and shipments by XL+ vehicles or heavy trucks',
+      } },
+      { frame: frames[0], caption: {
+        ru: 'Клиент подтверждает ИНН через Диадок или Saby либо пополняет баланс',
+        en: 'The customer verifies their tax ID through Diadoc or Saby, or by topping up the balance',
+      } },
+    ];
+    const slides = steps.map(({ frame, caption }) => {
+      const slide = document.createElement('figure');
+      slide.className = 'contract-step';
+      const text = document.createElement('figcaption');
+      caseCopy.set(text, caption);
+      slide.append(text, createDemoShot(frame));
+      return slide;
+    });
+    track.append(...slides);
+    demo.append(nav, track);
+
+    let index = -1;
+    function showStep(step) {
+      if (index === step) return;
+      index = step;
+      previous.setAttribute('aria-disabled', String(index === 0));
+      next.setAttribute('aria-disabled', String(index === slides.length - 1));
+      slides.forEach((slide, i) => slide.setAttribute('aria-hidden', String(i !== index)));
+      setDemoText(position, { ru: `Шаг ${index + 1} из ${slides.length}`, en: `Step ${index + 1} of ${slides.length}` });
+    }
+    function move(offset) {
+      const step = index + offset;
+      if (step >= 0 && step < slides.length) track.scrollTo({ left: step * track.clientWidth });
+    }
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
+    track.addEventListener('scroll', () => {
+      if (!track.clientWidth) return;
+      showStep(Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / track.clientWidth))));
+    }, { passive: true });
+    showStep(0);
+    return demo;
+  }
+
+  function createPartnerDemo() {
+    const template = document.getElementById('partner-demo-template');
+    const form = template.content.firstElementChild.cloneNode(true);
+    const copy = {
+      example: { ru: 'Заполнить пример', en: 'Fill in an example' },
+      product: { ru: 'Название продукта', en: 'Product name' },
+      partner: { ru: 'Партнёр', en: 'Partner' },
+      choose: { ru: 'Выберите партнёра', en: 'Choose a partner' },
+      existing: { ru: 'Демо Страхование', en: 'Demo Insurance' },
+      newPartner: { ru: 'Нет подходящего варианта', en: 'No matching partner' },
+      company: { ru: 'Название партнёра', en: 'Partner name' },
+      taxId: { ru: 'ИНН', en: 'Tax ID' },
+      taxCode: { ru: 'КПП', en: 'Tax registration code' },
+      save: { ru: 'Сохранить пример', en: 'Save example' },
+      saved: { ru: 'Пример сохранён', en: 'Example saved' },
+    };
+    form.querySelectorAll('[data-copy]').forEach(element => caseCopy.set(element, copy[element.dataset.copy]));
+
+    const fields = form.elements;
+    const details = form.querySelector('.partner-details');
+    const status = form.querySelector('.partner-status');
+    function syncDetails() { details.hidden = details.disabled = fields.partner.value !== 'new'; }
+    function clearStatus() {
+      status.textContent = '';
+      caseCopy.delete(status);
+    }
+    fields.partner.addEventListener('change', syncDetails);
+    form.addEventListener('input', clearStatus);
+    form.querySelector('.demo-fill').addEventListener('click', () => {
+      fields.product.value = lang === 'ru' ? 'Самый лучший продукт' : 'The very best product';
+      fields.partner.value = 'new';
+      syncDetails();
+      fields.company.value = lang === 'ru' ? 'Демо-партнёр' : 'Demo Partner';
+      fields.taxId.value = '0000000000';
+      fields.taxCode.value = '000000000';
+      clearStatus();
+    });
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      setDemoText(status, copy.saved);
+    });
+    return form;
+  }
+
   function createPhones(screen, first) {
     const pair = document.createElement('div');
     pair.className = 'scr-pair';
@@ -1854,6 +2098,10 @@
       if (screen.frames?.length) {
         row.className = 'scr-win diagram-row';
         row.appendChild(createWindows(screen, first));
+        if (screen.mobileDemo) {
+          row.classList.add('has-mobile-demo');
+          row.appendChild(screen.mobileDemo(screen));
+        }
       }
       if (screen.shots) {
         if (screen.phone) {
