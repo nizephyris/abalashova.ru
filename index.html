@@ -585,14 +585,14 @@
     .go-pair .desktop-notes { display: contents; }
     .go-pair .desktop-note-group:empty { display: none; }
     .go-pair .desktop-note-group {
-      --group-position: clamp(0%, calc(var(--note-y, .5) * 100%), 100%);
+      --group-position: clamp(0, var(--note-y, .5), 1);
       display: grid;
       position: relative;
       align-self: start;
-      top: var(--group-position);
+      top: calc(var(--go-phone-height) * var(--group-position));
       width: var(--note-width);
       z-index: 1;
-      transform: translateY(calc(-1 * var(--group-position)));
+      transform: translateY(calc(-100% * var(--group-position)));
     }
     .go-pair .desktop-note-group:first-child {
       grid-area: left; justify-self: end; margin-inline-end: calc(-1 * var(--go-note-overlap));
