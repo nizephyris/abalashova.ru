@@ -365,9 +365,9 @@
   .case-text { flex-direction: column; gap: 1.25rem; width: 27.5rem; font-size: 1.25rem; line-height: 1.19;
                overflow-y: auto; scrollbar-width: thin; }
   .screen-notes { display: none; }
-  :is(.case-text, .screen-notes) section { display: flex; flex-direction: column; gap: .25rem; }
-  .case-text h2, .screen-notes h4 { margin: 0; font-size: inherit; font-weight: inherit; color: var(--dim); }
-  :is(.case-text, .screen-notes) p { margin: 0; }
+  .case-text section { display: flex; flex-direction: column; gap: .25rem; }
+  .case-text h2 { margin: 0; font-size: inherit; font-weight: inherit; color: var(--dim); }
+  .case-text p { margin: 0; }
 
   .desk-item { cursor: grab; user-select: none; -webkit-user-select: none; }
   .desk-item img { -webkit-user-drag: none; pointer-events: none; }
@@ -455,11 +455,9 @@
                  width: auto !important; height: auto !important; }
     .stage-arrow, .note { display: none; }
     .screen-notes {
-      display: flex; flex-direction: column; gap: 1rem;
-      margin: 0 0 1.5rem; color: #1b1b1d;
+      display: block; margin: 0 0 1.5rem; color: #1b1b1d;
       font-size: 1.125rem; line-height: 1.25; overflow-wrap: break-word;
     }
-    .screen-notes h4 { font-size: 1rem; color: #626267; }
 
     .has-mobile-demo > .win-stage { display: none; }
     .mobile-demo { display: block; color: #1b1b1d; }
@@ -869,14 +867,18 @@
         { hold: true, cover: 'assets/otp-cover-mac.png', coverWidth: 6612, coverInset: 199 },
         { title: { ru: 'создание продукта', en: 'creating a product' }, noteOverlay: 'alternate',
           cover: 'assets/otp-create-mac.png', coverWidth: 6612, coverInset: 199,
+          mobileNote: {
+            ru: 'Разбила форму на разделы со связанными параметрами. Проверка в каждом разделе помогает заметить ошибки ещё до отправки данных в банковские системы. Для похожих продуктов настройки можно загрузить из файла.',
+            en: 'I grouped related fields into sections so staff can catch errors before sending the data to the bank’s systems. When setting up a similar product, they can import settings from a file.',
+          },
           notes: [
-            { b: [18.06, 48.15], x: 0, y: 775, heading: { ru: 'параметры по разделам', en: 'section by section' },
+            { b: [18.06, 48.15], x: 0, y: 775,
               ru: 'Сгруппировала связанные параметры, чтобы сотрудник мог заполнять и проверять их по частям',
               en: 'I grouped related fields so staff could fill in and check one section at a time' },
-            { b: [81.94, 37.34], r: 'snd', y: 258, heading: { ru: 'импорт настроек', en: 'importing settings' },
+            { b: [81.94, 37.34], r: 'snd', y: 258,
               ru: 'Настройки можно загрузить из файла, чтобы не заполнять похожую карточку с нуля',
               en: 'Staff can import settings from a file to avoid filling out a similar product form from scratch' },
-            { b: [81.94, 58.79], r: 'snd', y: 775, heading: { ru: 'ранняя проверка', en: 'early validation' },
+            { b: [81.94, 58.79], r: 'snd', y: 775,
               ru: 'Проверяем данные по разделам, чтобы найти ошибки до отправки в банковские системы',
               en: 'We validate each section to catch errors before the data reaches the bank’s systems' },
           ] },
@@ -889,7 +891,7 @@
           arrow: { src: 'assets/otp-arrow.svg', x: 883, y: 265.529, w: 264.375, h: 121.335 },
           notes: [
             // 137+397 = 534 — низ верхнего окна, 480 — левый край правого: по 40 от обоих
-            { x: 60, y: 574, heading: { ru: 'добавление партнёра', en: 'adding a partner' },
+            { x: 60, y: 574,
               ru: 'Если партнёра нет в списке, его можно добавить прямо в форме и продолжить настройку',
               en: 'If a partner is missing from the list, staff can add them in the form and carry on' },
           ] },
@@ -897,7 +899,7 @@
         { title: { ru: 'дублирование продукта', en: 'duplicating a product' }, noteOverlay: true,
           cover: 'assets/otp-duplicate-mac.png', coverWidth: 6612, coverInset: 199,
           notes: [
-            { x: 837, y: 591, heading: { ru: 'готовые настройки', en: 'starting from a copy' },
+            { x: 837, y: 591,
               ru: 'Похожий продукт можно взять за основу. Сотрудник меняет нужные поля в копии',
               en: 'Staff can duplicate a similar product and edit only the fields that need to change' },
           ] },
@@ -928,46 +930,58 @@
         // Фигма, Desktop-50 (124:13513): телефоны стоят на 249 и 720,33 — как и везде
         { title: { ru: 'что рассматривали', en: 'what we weighed up' },
           shots: ['assets/go-1a.webp', 'assets/go-1b.webp'], notes: [
-          { at: 'l', y: 436, h: 146, heading: { ru: 'сравнение тарифов', en: 'comparing rates' },
+          { at: 'l', y: 436, h: 146,
             ru: 'Добавили робота в «Экспресс», чтобы сравнить цены с курьером на одном экране',
             en: 'We added the rover to Express so customers could compare prices on one screen' },
         ] },
         { title: { ru: 'форма экспресса и роботы', en: 'express form and robots' },
+          mobileNote: {
+            ru: 'В привычной форме «Экспресса» робот доступен для заказа с одной остановкой, если оба адреса в зоне рободоставки и оплата идёт с корпоративного счёта. Заранее объясняем, что робота нужно встретить. Так отправитель ещё до оплаты может выбрать курьера.',
+            en: 'The familiar Express form offers a rover for single-stop deliveries when both addresses are in range and the customer pays from a corporate account. We explain that the sender needs to meet the rover while they can still switch to a courier before payment.',
+          },
           shots: ['assets/go-2a.webp', 'assets/go-2b.webp'], notes: [
-          { at: 'l', y: 410, h: 117, heading: { ru: 'знакомая форма заказа', en: 'familiar order form' },
+          { at: 'l', y: 410, h: 117,
             ru: 'Сохранили привычную форму заказа. Робота предлагаем для доставки с одной остановкой',
             en: 'We kept the familiar order form and limited the rover option to single-stop deliveries' },
-          { at: 'c', y: 611, h: 66, heading: { ru: 'предупреждение до оплаты', en: 'notice before checkout' },
+          { at: 'c', y: 611, h: 66,
             ru: 'До оплаты предупреждаем, что к роботу нужно выйти. Так у отправителя есть время выбрать курьера',
             en: 'We flag before payment that the sender needs to meet the rover, while there’s still time to choose a courier' },
-          { at: 'r', y: 301, h: 100, heading: { ru: 'доступность ровера', en: 'rover availability' },
+          { at: 'r', y: 301, h: 100,
             ru: 'Робот доступен при оплате с корпоративного счёта, если оба адреса в зоне рободоставки',
             en: 'The rover is available for corporate payments when both addresses are in its delivery area' },
         ] },
         { title: { ru: 'завершение заказа', en: 'finishing the order' },
+          mobileNote: {
+            ru: 'Перед оформлением объясняем, что для товаров 18+ нужен курьер, который сможет проверить возраст получателя. Если робот подходит для заказа, показываем цены до подъезда и до двери, чтобы клиент сам выбрал вариант.',
+            en: 'Before checkout, we explain that age-restricted items need a courier who can check the recipient’s age. For rover deliveries, we show prices for the building entrance and the doorstep so customers can choose.',
+          },
           shots: ['assets/go-3a.webp', 'assets/go-3b.webp'], notes: [
-          { at: 'l', y: 792, h: 117, heading: { ru: 'что нельзя отправить', en: 'delivery restrictions' },
+          { at: 'l', y: 792, h: 117,
             ru: 'Заранее предупреждаем об ограничениях. Например, робот не может проверить возраст получателя',
             en: 'We flag delivery restrictions up front. For example, the rover can’t verify the recipient’s age' },
-          { at: 'r', y: 421, h: 117, heading: { ru: 'подъезд или дверь', en: 'entrance or doorstep' },
+          { at: 'r', y: 421, h: 117,
             ru: 'Показываем цены до подъезда и до двери. Вариант доставки человек выбирает сам',
             en: 'We show both prices and let customers choose delivery to the building entrance or to the door' },
         ] },
         { title: { ru: 'общение с роботом', en: 'talking to the robot' },
+          mobileNote: {
+            ru: 'Отправитель всегда встречает робота. При доставке до подъезда к нему выходит и получатель. Когда робот приезжает, схема в трекинге показывает, где кнопка на крышке. На загрузку есть минута, поэтому просим подтвердить открытие, когда отправитель уже рядом.',
+            en: 'The sender always meets the rover, and the recipient does too for deliveries to the building entrance. On arrival, the tracking screen points out the lid button. There’s one minute to load the parcel, so we ask the sender to confirm they’re ready before opening the lid.',
+          },
           shots: ['assets/go-4a.webp', 'assets/go-4b.webp'], notes: [
-          { at: 'l', y: 755, h: 117, heading: { ru: 'кто встречает робота', en: 'who meets the rover' },
+          { at: 'l', y: 755, h: 117,
             ru: 'Отправитель встречает робота всегда, получатель — при доставке до подъезда',
             en: 'The sender always meets the rover. The recipient meets it outside for delivery to the building entrance' },
-          { at: 'r', y: 607, h: 100, heading: { ru: 'кнопка на крышке', en: 'the lid button' },
+          { at: 'r', y: 607, h: 100,
             ru: 'Схема помогает найти кнопку на крышке, когда робот уже подъехал',
             en: 'The diagram points out the button on the lid so it’s easier to find when the rover arrives' },
-          { at: 'r', y: 940, h: 83, heading: { ru: 'минута на загрузку', en: 'one minute to load' },
+          { at: 'r', y: 940, h: 83,
             ru: 'На загрузку есть минута. Просим подтвердить открытие, когда отправитель уже рядом',
             en: 'The sender has one minute to load the parcel. We ask them to confirm they’re ready before opening the lid' },
         ] },
         { title: { ru: 'доставка до двери', en: 'delivery to the door' },
           shots: ['assets/go-5a.webp', 'assets/go-5b.webp'], notes: [
-          { at: 'r', y: 708, h: 83, heading: { ru: 'звонок курьеру', en: 'calling the courier' },
+          { at: 'r', y: 708, h: 83,
             ru: 'Когда курьер забирает посылку у робота, в трекинге появляется кнопка звонка',
             en: 'Once the courier collects the parcel from the rover, the tracking screen shows a button to call them' },
         ] },
@@ -998,18 +1012,22 @@
         { hold: true, cover: 'assets/expedition-cover-mac.png', coverWidth: 6472, coverInset: 59 },
         { title: { ru: 'личный кабинет', en: 'the client account' }, noteOverlay: 'alternate',
           cover: 'assets/expedition-home-mac.png', coverWidth: 6472, coverInset: 59,
+          mobileNote: {
+            ru: 'Баннер на главной заранее предупреждает об ограничениях доставки и ведёт к договору. Там же можно открыть справку об экспедиции и разобраться в новых условиях.',
+            en: 'A banner on the dashboard flags the delivery restrictions and takes customers straight to the contract. The same page has guides that explain freight forwarding and what’s changing.',
+          },
           notes: [
-            { b: [4.71, 34.07], anchor: 'l', heading: { ru: 'баннер о договоре', en: 'contract banner' },
+            { b: [4.71, 34.07], anchor: 'l',
               ru: 'Баннер предупреждает об ограничении ещё на главной и сразу ведёт к договору',
               en: 'The dashboard banner flags the restriction early and gives customers a direct route to the contract' },
-            { b: [61.64, 80.19], anchor: 'l', heading: { ru: 'справка об экспедиции', en: 'freight forwarding guides' },
+            { b: [61.64, 80.19], anchor: 'l',
               ru: 'Справки на главной объясняют, что такое экспедиция и какие условия меняются',
               en: 'The dashboard guides explain what freight forwarding means and which terms are changing' },
           ] },
         { title: { ru: 'новый заказ', en: 'a new order' }, noteOverlay: true,
           cover: 'assets/expedition-order-mac.png', coverWidth: 6472, coverInset: 59,
           notes: [
-            { b: [67.14, 51.30], anchor: 'l', heading: { ru: 'договор из формы заказа', en: 'signing from the order form' },
+            { b: [67.14, 51.30], anchor: 'l',
               ru: 'Клиенты замечали ограничение при заказе. Добавили переход к договору прямо в форму',
               en: 'Clients noticed the restriction at checkout, so we linked to signing from the form' },
           ] },
@@ -1020,7 +1038,7 @@
           ],
           arrow: { src: 'assets/exp-arrow-1.svg', x: 336, y: 894, w: 262, h: 89 },
           notes: [
-            { b: [95.29, 65.37], anchor: 'r', heading: { ru: 'подтверждение ИНН', en: 'tax ID verification' },
+            { b: [95.29, 65.37], anchor: 'r',
               ru: 'Данные уже в договоре. Клиенту остаётся подтвердить ИНН',
               en: 'We prefill the contract details. At this step, the customer verifies their tax ID' },
           ] },
@@ -1035,7 +1053,7 @@
             { src: 'assets/exp-arrow-3.svg', x: 366, y: 667, w: 264, h: 126 },
           ],
           notes: [
-            { b: [4, 72], anchor: 'l', heading: { ru: 'баланс и оплата актов', en: 'balance and payment status' },
+            { b: [4, 72], anchor: 'l',
               ru: 'Для доставки показываем баланс и лимит, для экспедиции — оплату актов',
               en: 'The delivery card puts the balance and credit limit up front. The freight forwarding card highlights payment status' },
           ] },
@@ -1071,14 +1089,14 @@
           notes: [
             { hint: true, x: 75, y: 735, ru: 'Наведи на глобус, чтобы увидеть, как он превращается в граф',
               en: 'Hover over the globe to see it turn into a graph' },
-            { r: 154, y: 777, heading: { ru: 'от глобуса к графу', en: 'from globe to graph' },
+            { r: 154, y: 777,
               ru: 'Взяла глобус с фасада и превратила его в граф. Идею связи продолжили через истории студентов',
               en: 'The facade’s globe becomes a graph linking the stories of students on the new campus' },
           ] },
         { title: { ru: 'главный экран', en: 'the home screen' }, noteOverlay: true,
           cover: 'assets/telegraph-final-mac.png', coverWidth: 6560, coverInset: 147,
           notes: [
-            { b: [5.61, 71.69], x: 40, y: 749, heading: { ru: 'ответы студентов', en: 'student responses' },
+            { b: [5.61, 71.69], x: 40, y: 749,
               ru: 'По точкам графа можно читать ответы студентов об образовании, опыте и общении',
               en: 'Explore the graph to read students’ answers about education, experience and communication' },
           ] },
@@ -1109,42 +1127,54 @@
         { hold: true },                     // первый экран пустой — сюда встанет ролик
         // три телефона 354×735, выноски 260 — как нарисовано
         { title: { ru: 'точки входа', en: 'entry points' },
+          mobileNote: {
+            ru: 'Баннер на главной знакомит с групповыми поездками ещё до поиска билетов. Начать планирование можно и из поиска. Когда человек ищет билеты на двоих или больше, предлагаем создать поездку с друзьями.',
+            en: 'The home screen banner introduces group trips before travellers start looking for tickets. They can also start planning from their search. When they look for tickets for two or more, we suggest creating a trip with friends.',
+          },
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-1.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-2.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-3.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { at: 0, side: 'l', y: 612, heading: { ru: 'баннер на главной', en: 'home screen banner' },
+            { at: 0, side: 'l', y: 612,
               ru: 'Баннер на главной знакомит с групповыми поездками ещё до поиска билетов',
               en: 'The home screen banner introduces group trips before travellers start searching for tickets' },
-            { at: 1, side: 'l', y: 356, heading: { ru: 'переход из поиска', en: 'from search to planning' },
+            { at: 1, side: 'l', y: 356,
               ru: 'Из поискового запроса можно сразу перейти к планированию поездки с друзьями',
               en: 'Travellers can start planning a trip with friends directly from their search' },
-            { at: 2, side: 'r', y: 318, heading: { ru: 'билеты на двоих и больше', en: 'flights for two or more' },
+            { at: 2, side: 'r', y: 318,
               ru: 'Предлагаем создать поездку, когда человек уже ищет билеты на двоих или больше',
               en: 'We suggest starting a group trip when someone searches for tickets for two or more people' },
           ] },
         // два телефона обычного размера
         { title: { ru: 'создание поездки', en: 'creating a trip' },
+          mobileNote: {
+            ru: 'Организатор заполняет короткую форму и приглашает друзей по одной ссылке. ИИ предлагает варианты поездки и помогает разделить оплату.',
+            en: 'The organiser fills in a short form and invites friends with one link. The AI suggests trip options and helps split the payment.',
+          },
           phone: { w: 426.4, h: 885.333, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-4.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-5.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { at: 0, side: 'l', y: 711, heading: { ru: 'подбор вариантов', en: 'trip suggestions' },
+            { at: 0, side: 'l', y: 711,
               ru: 'ИИ подбирает варианты поездки и помогает разделить оплату',
               en: 'The AI suggests trip options and helps split the payment' },
-            { at: 1, side: 'r', y: 390, heading: { ru: 'одна ссылка для друзей', en: 'one link to share' },
+            { at: 1, side: 'r', y: 390,
               ru: 'Организатор заполняет короткую форму и отправляет друзьям одну ссылку',
               en: 'The organiser fills in a short form and shares one link with friends' },
           ] },
         { title: { ru: 'комната поездки', en: 'the trip room' },
+          mobileNote: {
+            ru: 'В комнате поездки друзья обсуждают направления, билеты и жильё. Покупка проходит, когда все подтвердят выбор и оплатят свою часть. Если от участника ждём подтверждение или оплату, отправляем напоминание. Даты, брони и билеты можно открыть без интернета.',
+            en: 'Friends use the trip room to discuss destinations, tickets and accommodation. Booking goes ahead once everyone confirms and pays their share. We remind anyone whose confirmation or payment is pending. Dates, bookings and tickets are available offline.',
+          },
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-6.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-7.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-8.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { at: 0, side: 'l', y: 642, heading: { ru: 'обсуждение вариантов', en: 'discussing options' },
+            { at: 0, side: 'l', y: 642,
               ru: 'Собрали направления, билеты и жильё в комнате поездки, чтобы обсуждать варианты всей группой',
               en: 'We put destinations, flights and stays in the trip room so the whole group can discuss the options' },
-            { at: 1, side: 'l', y: 471, heading: { ru: 'подтверждение и оплата', en: 'confirmation and payment' },
+            { at: 1, side: 'l', y: 471,
               ru: 'Покупка проходит после выбора и оплаты всеми. Остальным напоминаем',
               en: 'Everyone confirms and pays before booking. Pending members get a reminder' },
-            { at: 2, side: 'r', y: 681, heading: { ru: 'билеты без интернета', en: 'offline access' },
+            { at: 2, side: 'r', y: 681,
               ru: 'Даты, брони и билеты доступны без интернета, чтобы их можно было открыть и в дороге',
               en: 'Dates, bookings and tickets are available offline so travellers can open them on the go' },
           ] },
@@ -1728,19 +1758,15 @@
     return note;
   }
 
-  function createScreenNotes(notes) {
-    const block = document.createElement('div');
-    block.className = 'screen-notes';
-    for (const copy of notes) {
-      const section = document.createElement('section');
-      const heading = document.createElement('h4');
-      const text = document.createElement('p');
-      caseCopy.set(heading, copy.heading);
-      caseCopy.set(text, copy);
-      section.append(heading, text);
-      block.appendChild(section);
-    }
-    return block;
+  function createScreenNote(notes) {
+    const paragraph = document.createElement('p');
+    paragraph.className = 'screen-notes';
+    const prose = language => notes.map(copy => {
+      const text = copy[language] || copy.ru;
+      return /[.!?…]$/.test(text) ? text : text + '.';
+    }).join(' ');
+    caseCopy.set(paragraph, { ru: prose('ru'), en: prose('en') });
+    return paragraph;
   }
 
   function positionWindow(el, frame) {
@@ -2064,8 +2090,8 @@
         caseCopy.set(title, screen.title);
         section.appendChild(title);
       }
-      const notes = screen.notes?.filter(copy => !copy.hint);
-      if (notes?.length) section.appendChild(createScreenNotes(notes));
+      const notes = screen.mobileNote ? [screen.mobileNote] : screen.notes?.filter(copy => !copy.hint);
+      if (notes?.length) section.appendChild(createScreenNote(notes));
 
       const row = document.createElement('div');
       row.className = 'scr-row';
