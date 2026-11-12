@@ -634,10 +634,12 @@
   }
   .art-tile-title {
     position: absolute; z-index: 1; bottom: .75rem; left: .75rem; max-width: calc(100% - 1.5rem);
+    display: grid; gap: .2rem; overflow-wrap: anywhere;
     padding: .4rem .65rem; border-radius: .45rem; background: var(--glass);
     color: #fff; font-size: 1rem; line-height: 1.2; opacity: 0; pointer-events: none;
     transition: opacity .18s ease;
   }
+  .art-tile-credit { color: #e4e4e7; font-size: .9em; }
   .art-tile:focus-visible .art-tile-title { opacity: 1; }
   @media (hover: hover) and (pointer: fine) {
     .art-tile:hover .art-tile-title { opacity: 1; }
@@ -662,7 +664,7 @@
   .art-viewer-image { width: 100%; height: 100%; min-height: 0; object-fit: scale-down; }
   .art-viewer-caption {
     display: grid; align-content: center; gap: .2rem;
-    min-height: 2.75rem; padding-inline: 3rem; text-align: center;
+    min-height: 2.75rem; padding-inline: 3rem; text-align: center; overflow-wrap: anywhere;
   }
   .art-viewer-caption h3 { margin: 0; font-size: clamp(1rem, 2vw, 1.375rem); font-weight: 600; }
   .art-viewer-credit { margin: 0; color: #c7c7cc; font-size: .95rem; }
@@ -686,6 +688,12 @@
     body[data-case-id="art"] .page-foot { width: 100%; margin: 0; border-radius: 0; }
     .art-gallery { --art-gap: 3px; }
     .art-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 420px) {
+    .art-tile-title {
+      bottom: .375rem; left: .375rem; max-width: calc(100% - .75rem);
+      padding: .3rem .45rem; font-size: .8125rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1158,18 +1166,20 @@
     art: {
       screens: [
         { title: { ru: '«Утро» и «Завтрак»', en: 'Morning and Breakfast' },
-          credit: { ru: 'По песням «Дайте танк (!)»', en: 'Inspired by songs by Daite Tank (!)' },
+          credit: { ru: 'Коллажи по песням «Дайте танк (!)»', en: 'Collages inspired by songs by Daite Tank (!)' },
           artwork: [
             ['breakfast', 600, 800, { ru: 'Красный рассвет и рукописные строки из песни «Завтрак»', en: 'A red sunrise and handwritten lyrics from Breakfast' }, [92, 40, 508, 720]],
             ['morning', 600, 800, { ru: 'Рассвет в маленьком окне и рукописные строки из песни «Утро»', en: 'A sunrise in a small window and handwritten lyrics from Morning' }, [0, 40, 508, 720]],
           ] },
-        { title: { ru: 'Cardio Killer', en: 'Cardio Killer' },
-          credit: { ru: 'Развороты журнала LOCAL', en: 'Spreads for LOCAL magazine' },
+        { title: { ru: 'Интервью с Cardio Killer', en: 'Interview with Cardio Killer' },
+          credit: { ru: 'Развороты журнала LOCAL. Фото Марка Григорьева', en: 'Spreads for LOCAL magazine. Photography by Mark Grigoryev' },
           artwork: [
             ['cardio-killer', 990, 1400, { ru: 'Первая страница интервью с Cardio Killer с зелёным рукописным заголовком', en: 'The opening page of the Cardio Killer interview with a green handwritten headline' }],
-            ['cardio-killer-print', 600, 800, { ru: 'Печатный разворот с двумя портретами, которые сходятся на сгибе', en: 'A printed spread with two portraits meeting at the fold' }],
+            ['cardio-killer-left', 918, 1300, { ru: 'Левая страница разворота с чёрно-белым портретом справа и текстом слева', en: 'The left page of the spread with interview text on the left and a black-and-white portrait on the right' }],
+            ['cardio-killer-right', 916, 1296, { ru: 'Правая страница разворота с чёрно-белым портретом слева и текстом справа', en: 'The right page of the spread with a black-and-white portrait on the left and interview text on the right' }],
           ] },
         { title: { ru: 'Fantastic Yarn', en: 'Fantastic Yarn' },
+          credit: { ru: 'Айдентика и дизайн сайта магазина пряжи', en: 'Visual identity and website design for a yarn shop' },
           artwork: [
             ['fantastic-yarn-cover', 2048, 1152, { ru: 'Логотип с овечкой на фоне оранжевой пряжи', en: 'The sheep logo against orange yarn' }],
             ['fantastic-yarn-logo-variants', 2048, 1152, { ru: 'Логотип и отдельный знак на оранжевом градиенте', en: 'The wordmark and standalone symbol on an orange gradient' }],
@@ -1195,8 +1205,14 @@
             ['charm-shop-app', 2048, 1165, { ru: 'Три карточки брелоков-персонажей на фоне звёзд', en: 'Three product screens for character charms against a starry backdrop' }],
           ] },
         { title: { ru: 'Дейтинг в стиле Пикассо', en: 'Picasso-inspired dating app' },
+          credit: { ru: 'Концепт мобильного приложения', en: 'Mobile app concept' },
           artwork: [
             ['picasso-dating-app', 2048, 1165, { ru: 'Профиль и экран мэтча с кубистическими портретами в рамах', en: 'A dating profile and a match screen with framed Cubist portraits' }],
+          ] },
+        { title: { ru: 'Видеозвонок с аватаром', en: 'Video call with an avatar' },
+          credit: { ru: 'Шот интерфейса', en: 'Interface design shot' },
+          artwork: [
+            ['video-call-avatar', 1582, 900, { ru: 'Видеозвонок с розовым 3D-аватаром, чатом и демонстрацией игры', en: 'A video call with a pink 3D avatar, a chat panel and a shared game' }],
           ] },
         { title: { ru: '«Кресты и башни»', en: 'Crosses and Towers' },
           credit: { ru: 'Развороты журнала LOCAL', en: 'Spreads for LOCAL magazine' },
@@ -1206,6 +1222,7 @@
             ['crosses-and-towers-rooftop', 904, 1280, { ru: 'Страница с рисунком арки и фотографией башни на крыше телефонной станции', en: 'A page featuring an arch drawing and a photo of the exchange’s rooftop tower' }],
           ] },
         { title: { ru: 'Эльфийский гротеск', en: 'An Elvish sans serif' },
+          credit: { ru: 'Шрифт, книжные обложки и выставочный буклет', en: 'Typeface, book covers and an exhibition booklet' },
           artwork: [
             ['tolkien-ring', 2048, 1152, { ru: 'Золотое кольцо на цепочке с эльфийской надписью изнутри', en: 'A gold ring on a chain with Elvish lettering on the inside' }],
             ['tolkien-books', 2048, 1152, { ru: 'Три обложки «Властелина колец» с золотыми эльфийскими надписями', en: 'Three Lord of the Rings book covers with gold Elvish lettering' }],
@@ -1213,11 +1230,11 @@
             ['tolkien-map', 2048, 1152, { ru: 'Сторона выставочного буклета с картой Средиземья и образцом эльфийского письма', en: 'The exhibition booklet with a map of Middle-earth and an Elvish type sample' }],
             ['tolkien-alphabet', 2048, 1152, { ru: 'Сторона выставочного буклета со строением букв и таблицей алфавита', en: 'The other side of the booklet, showing letter structure and the alphabet' }],
           ] },
-        { title: { ru: 'Плакат по Ахматовой', en: 'A poster inspired by Akhmatova' },
+        { title: { ru: 'Плакат по стихотворению Анны Ахматовой', en: 'A poster inspired by a poem by Anna Akhmatova' },
           artwork: [
             ['akhmatova-poster', 800, 450, { ru: 'Стихотворение Ахматовой и пиксельный одуванчик на плакате', en: 'A poster pairing Akhmatova’s poem with a pixelated dandelion' }],
           ] },
-        { title: { ru: 'Плакаты по Бродскому', en: 'Posters inspired by Brodsky' },
+        { title: { ru: 'Типографические плакаты по стихотворению Иосифа Бродского', en: 'Typographic posters inspired by a poem by Joseph Brodsky' },
           artwork: [
             ['brodsky-type', 904, 1280, { ru: 'Белые строки на чёрном фоне образуют силуэт и три дуги над ним', en: 'White lettering on black forms a figure with three arcs of text above it' }],
             ['brodsky-pieta', 904, 1280, { ru: 'Скульптура Марии и силуэт Христа из белых букв', en: 'A sculpture of Mary holding a figure of Christ formed from white type' }],
@@ -1227,10 +1244,11 @@
             ['hse-ux-stickers', 1920, 1080, { ru: 'Пять стикеров с котёнком Юхом на жёлтом фоне', en: 'Five stickers of the kitten mascot Yukh on a yellow background' }],
           ] },
         { title: { ru: 'Влюблённая лягушка', en: 'A Frog in Love' },
+          credit: { ru: 'Графическая композиция', en: 'Graphic artwork' },
           artwork: [
             ['frog-in-love', 907, 1280, { ru: 'Скелет лягушки и белое сердце на зелёном фоне', en: 'A frog skeleton with a white heart on a textured green background' }],
           ] },
-        { title: { ru: 'Триптих по D&D', en: 'D&D poster triptych' },
+        { title: { ru: 'Триптих плакатов по D&D', en: 'D&D poster triptych' },
           artwork: [
             ['dnd-paladin', 853, 1280, { ru: 'Силуэт паладинки с белым мечом и узкие строки на бордовом фоне', en: 'A paladin with a white sword and condensed lettering on a burgundy background' }],
             ['dnd-flowers', 853, 1280, { ru: 'Красные и синие цветы на чёрном фоне', en: 'Red and blue flowers against a near-black background' }],
@@ -1247,6 +1265,7 @@
             ['shop-shop-analog', 896, 1280, { ru: 'Журнал, кассета, пластинки и радиола с подписями на голубом фоне', en: 'A magazine, cassette, records and radiogram with labels on a blue background' }],
           ] },
         { title: { ru: 'Rostok', en: 'Rostok' },
+          credit: { ru: 'Дизайн приложения, айдентика и промоматериалы', en: 'App design, visual identity and promotional materials' },
           artwork: [
             ['rostok-onboarding', 1920, 1080, { ru: 'Экраны знакомства с Rostok и иллюстрации роста цветка', en: 'Rostok onboarding screens with illustrations of a flower growing' }],
             ['rostok-app', 1920, 1080, { ru: 'Вопрос дня, ответы близких, общий сад и статьи в приложении Rostok', en: 'The daily question, family responses, shared garden and articles in the Rostok app' }],
@@ -2208,9 +2227,11 @@
     const listeners = new AbortController();
     const works = CASES.art.screens.flatMap(({ title, credit, artwork }) =>
       artwork.map(([file, width, height, alt, crop], part) => ({
-        src: 'assets/art/' + file + '.webp', width, height, alt, crop, title, credit, part,
+        src: 'assets/art/' + file + '.webp', width, height, wide: width > height, alt, crop, title, credit, part,
       })));
     const gridOrder = works.map((_, index) => index).sort((a, b) => works[a].part - works[b].part);
+    const landscapeOrder = gridOrder.filter(index => works[index].wide);
+    const portraitOrder = gridOrder.filter(index => !works[index].wide);
     let activeWork = 0;
     let drag = null;
     let suppressClick = false;
@@ -2248,7 +2269,10 @@
       viewerControls.forEach(control => control.setAttribute('aria-label', T[lang].art[control.dataset.artControl]));
       grid.querySelectorAll('.art-tile').forEach(tile => {
         const work = works[tile.dataset.artIndex];
-        tile.querySelector('.art-tile-title').textContent = work.title[lang];
+        tile.querySelector('.art-tile-name').textContent = work.title[lang];
+        const credit = tile.querySelector('.art-tile-credit');
+        credit.textContent = work.credit?.[lang] || '';
+        credit.hidden = !work.credit;
         tile.querySelector('img').alt = work.alt[lang];
       });
       typograph(grid);
@@ -2256,10 +2280,10 @@
     }
 
     function createTile(index, first) {
-      const { src, width, height, crop } = works[index];
+      const { src, width, height, wide, crop } = works[index];
       const tile = document.createElement('button');
       tile.className = 'art-tile';
-      tile.classList.toggle('wide', width > height);
+      tile.classList.toggle('wide', wide);
       tile.type = 'button';
       tile.dataset.artIndex = index;
       const image = createImage(src, '', first);
@@ -2269,6 +2293,11 @@
       image.height = height;
       const label = document.createElement('span');
       label.className = 'art-tile-title';
+      const title = document.createElement('span');
+      title.className = 'art-tile-name';
+      const credit = document.createElement('span');
+      credit.className = 'art-tile-credit';
+      label.append(title, credit);
       if (crop) {
         const [x, y, cropWidth, cropHeight] = crop;
         image.style.left = percent(-x, cropWidth);
@@ -2322,7 +2351,10 @@
       stopWheel();
       finishDrag();
       const still = reducedMotion.matches;
-      const columnCount = mobile.matches ? 2 : 4;
+      const desktopColumns = 4;
+      const columnCount = mobile.matches ? 2 : desktopColumns;
+      // Сдвигаем каждую четвёрку работ по колонкам, чтобы разнести кадры одной серии.
+      const columnFor = position => (position + Math.floor(position / desktopColumns)) % columnCount;
       const columns = [];
       gallery.classList.remove('ready');
       gallery.classList.toggle('still', still);
@@ -2334,7 +2366,18 @@
         const track = document.createElement('div');
         track.className = 'art-track';
         track.style.setProperty('--art-delay', [0, -6, -2, -8][i] + 's');
-        const indices = gridOrder.filter((_, order) => order % columnCount === i);
+        const landscapes = landscapeOrder.filter((_, position) => columnFor(position) === i);
+        const portraits = portraitOrder.filter((_, position) => columnFor(position) === i);
+        let indices = landscapes;
+        if (portraits.length) {
+          // Равномерно заполняем промежутки между вертикальными работами.
+          indices = portraits.flatMap((index, position) => {
+            const start = Math.round(position * landscapes.length / portraits.length);
+            const end = Math.round((position + 1) * landscapes.length / portraits.length);
+            const interval = landscapes.slice(start, end);
+            return i % 2 === 0 ? [index, ...interval] : [...interval, index];
+          });
+        }
         const cycle = document.createElement('div');
         cycle.className = 'art-cycle';
         indices.forEach((index, position) => cycle.appendChild(createTile(index, position === 0)));
