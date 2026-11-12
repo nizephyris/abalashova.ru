@@ -681,8 +681,9 @@
   .art-gallery.still .art-cycle { flex: 1; }
 
   @media (max-width: 760px), (max-aspect-ratio: 4/5) {
+    body[data-case-id="art"] { background: #1b1b1d; }
     body[data-case-id="art"] .case { padding-top: 0; }
-    body[data-case-id="art"] .page-foot { margin-top: 0; }
+    body[data-case-id="art"] .page-foot { width: 100%; margin: 0; border-radius: 0; }
     .art-gallery { --art-gap: 3px; }
     .art-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
@@ -1170,9 +1171,32 @@
           ] },
         { title: { ru: 'Fantastic Yarn', en: 'Fantastic Yarn' },
           artwork: [
-            ['fantastic-yarn', 800, 450, { ru: 'Логотип с овечкой на фоне оранжевой пряжи', en: 'A sheep logo against orange yarn' }],
-            ['fantastic-yarn-tags', 800, 450, { ru: 'Бирки для пряжи с фирменным знаком', en: 'Yarn tags with the sheep logo' }],
-            ['fantastic-yarn-pattern', 800, 450, { ru: 'Овечка повторяется в узоре из вязаных квадратов', en: 'The sheep motif repeats across crocheted squares' }],
+            ['fantastic-yarn-cover', 2048, 1152, { ru: 'Логотип с овечкой на фоне оранжевой пряжи', en: 'The sheep logo against orange yarn' }],
+            ['fantastic-yarn-logo-variants', 2048, 1152, { ru: 'Логотип и отдельный знак на оранжевом градиенте', en: 'The wordmark and standalone symbol on an orange gradient' }],
+            ['fantastic-yarn-labels', 2048, 1152, { ru: 'Бирки для пряжи с фирменным знаком', en: 'Yarn tags with the sheep logo' }],
+            ['fantastic-yarn-store', 2048, 1152, { ru: 'Главная страница магазина с каталогом пряжи', en: 'The storefront with a yarn catalogue' }],
+            ['fantastic-yarn-sheep', 2048, 1152, { ru: 'Овечка держит открытку с надписью из цветной пряжи', en: 'A sheep holding a card with lettering made from colourful yarn' }],
+          ] },
+        { title: { ru: 'Раф и гав', en: 'Raf & Gav' },
+          credit: { ru: 'Айдентика события в поддержку бездомных животных', en: 'Visual identity for an event supporting homeless animals' },
+          artwork: [
+            ['raf-and-gav-cover', 2048, 1152, { ru: 'Салатовый логотип «Раф и гав» поверх фотографии собачьего носа', en: 'The lime-green Raf & Gav wordmark over a close-up of a dog’s nose' }],
+            ['raf-and-gav-typeface', 2048, 1152, { ru: 'Кириллица фирменного шрифта', en: 'The Cyrillic alphabet in the event’s display typeface' }],
+            ['raf-and-gav-symbol', 2048, 1152, { ru: 'Крупный фирменный знак поверх фотографии собачьего носа', en: 'The event symbol over a close-up of a dog’s nose' }],
+            ['raf-and-gav-social', 2048, 1152, { ru: 'Макет профиля «Раф и гав» в соцсетях', en: 'A mockup of the Raf & Gav social media feed' }],
+            ['raf-and-gav-dogs-shirt', 2048, 1152, { ru: 'Футболка с надписью «Люди любят собак»', en: 'A T-shirt with the phrase “People love dogs”' }],
+            ['raf-and-gav-grey-dog-shirt', 2048, 1152, { ru: 'Футболка с надписью «Серый пёс»', en: 'A T-shirt with the phrase “Grey dog”' }],
+            ['raf-and-gav-merch', 2048, 1152, { ru: 'Парные свитеры для человека и собаки и кепка «Кусачий»', en: 'Matching sweaters for a person and a dog, and an embroidered cap' }],
+            ['raf-and-gav-posters', 2048, 1152, { ru: 'Два уличных плаката с собаками и салатовым леттерингом', en: 'Two street posters with dogs and lime-green lettering' }],
+          ] },
+        { title: { ru: 'Магазин обвесов', en: 'Charm shop' },
+          credit: { ru: 'Концепт мобильного приложения', en: 'Mobile app concept' },
+          artwork: [
+            ['charm-shop-app', 2048, 1165, { ru: 'Три карточки брелоков-персонажей на фоне звёзд', en: 'Three product screens for character charms against a starry backdrop' }],
+          ] },
+        { title: { ru: 'Дейтинг в стиле Пикассо', en: 'Picasso-inspired dating app' },
+          artwork: [
+            ['picasso-dating-app', 2048, 1165, { ru: 'Профиль и экран мэтча с кубистическими портретами в рамах', en: 'A dating profile and a match screen with framed Cubist portraits' }],
           ] },
         { title: { ru: '«Кресты и башни»', en: 'Crosses and Towers' },
           credit: { ru: 'Развороты журнала LOCAL', en: 'Spreads for LOCAL magazine' },
