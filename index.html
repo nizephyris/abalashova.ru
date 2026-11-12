@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link rel="preload" as="image" href="assets/photo.jpg">
 <style>
   /* Все размеры из макета 1440×1024 записаны в rem (1rem = 16px на 1440×1024)
@@ -19,7 +19,7 @@
     --dim: rgba(255, 255, 255, .5);
     --font: "SF Pro Rounded", ui-rounded, "Nunito", system-ui, sans-serif;
     --ease: cubic-bezier(.3, .7, .2, 1);
-    --tap: 3rem;                                  /* кнопка подсказки, одна на всех экранах */
+    --note-anchor: 3rem;
     --button-font-size: 1.25rem;
     --note-width: 19rem;
   }
@@ -47,7 +47,7 @@
     font-size: 1.25rem; text-shadow: 0 1px 8px rgba(0,0,0,.35);
     transition: transform .25s var(--ease);
   }
-  .resume:hover { transform: translateY(-.25rem); }
+  .resume:focus-visible { transform: translateY(-.25rem); }
   .resume { left: 20.625rem; top: 12.5rem; }
   .resume img { width: 5rem; }
   .cat { left: 9.625rem; top: 25.4rem; width: 11.5rem; gap: 0; }
@@ -57,7 +57,11 @@
   .cat-pic img { position: absolute; left: 7.07%; }
   .cat-away { top: 14.96%; width: 84.7%; }
   .cat-look { top: 0; width: 90.49%; visibility: hidden; }
-  .cat:hover .cat-look, .cat:focus-visible .cat-look, .cat.look .cat-look { visibility: visible; }
+  .cat:focus-visible .cat-look, .cat.look .cat-look { visibility: visible; }
+  @media (hover: hover) and (pointer: fine) {
+    .resume:hover { transform: translateY(-.25rem); }
+    .cat:hover .cat-look { visibility: visible; }
+  }
 
   /* ── Карточка ── */
   .card {
@@ -86,7 +90,7 @@
   .ext:hover { color: #fff; }
   .ext:hover img { opacity: 1; }
 
-  .card-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 1.25rem; }
+  .card-foot { flex: none; margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 1.25rem; }
   .toggle {
     width: 2.5rem; height: 2.5rem; border-radius: .5rem; display: grid; place-items: center;
     transition: background .2s;
@@ -122,9 +126,10 @@
   /* ── Папки ── */
   .folders { position: absolute; right: 2.5rem; bottom: 6.5rem; display: flex; gap: 2.5rem; }  /* +2rem: подпись теперь вне потока */
   .folder { position: relative; width: 12.75rem; }
-  .f-link { position: relative; display: flex; flex-direction: column; align-items: center; gap: .5rem; font-size: 1.25rem; white-space: nowrap; }
+  .folder.open { z-index: 1; }
+  .f-link { position: relative; display: flex; width: 100%; flex-direction: column; align-items: center; gap: .5rem; font-size: 1.25rem; white-space: nowrap; }
   /* подпись висит под папкой и не влияет на высоту ряда: вторая строка не двигает папки */
-  .f-link > span { position: absolute; top: calc(100% + .5rem); left: -1rem; right: -1rem; text-align: center; }
+  .folder-label { position: absolute; top: calc(100% + .5rem); left: -1rem; right: -1rem; text-align: center; }
   .folder-date-break, .desktop-notes { display: none; }
   .f-body {
     position: relative; width: 100%; aspect-ratio: 204 / 140; border-radius: 10% / 14.57%;
@@ -132,12 +137,12 @@
     -webkit-backdrop-filter: blur(16px) saturate(1.9); backdrop-filter: blur(16px) saturate(1.9);
     transition: transform .35s var(--ease);
   }
-  .folder:hover .f-body { transform: translateY(-.4rem) rotate(-1.5deg); }
+  .folder.open .f-body { transform: translateY(-.4rem) rotate(-1.5deg); }
   .f-body > * { position: absolute; }
   .f-front { left: 0; bottom: 0; width: 100%; height: 76.36%; transition: transform .35s var(--ease); transform-origin: bottom; }
-  .folder:hover .f-front { transform: perspective(40rem) rotateX(-14deg); }
+  .folder.open .f-front { transform: perspective(40rem) rotateX(-14deg); }
   .f-icons { inset: 0; transition: transform .35s var(--ease); transform-origin: bottom; }
-  .folder:hover .f-icons { transform: perspective(40rem) rotateX(-14deg); }
+  .folder.open .f-icons { transform: perspective(40rem) rotateX(-14deg); }
   .f-icons > * { position: absolute; }
   .red   { background: rgba(160, 69, 52, .2); }
   .green { background: rgba(82, 120, 0, .4); }
@@ -173,7 +178,6 @@
     display: flex; flex-direction: column; align-items: center; text-align: center;
     opacity: 0; transform: translate(-50%, 0) scale(.35);
     transition: transform .46s cubic-bezier(.2, 1.18, .32, 1), opacity .22s ease;
-    transition-delay: calc(var(--i) * 45ms);
   }
   .fan-cover {
     position: relative; width: 100%; aspect-ratio: 204 / 140; overflow: hidden;
@@ -192,21 +196,24 @@
     white-space: nowrap;      /* подпись всегда в одну строку, даже если шире карточки */
     text-shadow: 0 1px 8px rgba(0,0,0,.5);
   }
-  .folder:hover .fan, .folder:focus-within .fan, .folder.open .fan { pointer-events: auto; }
+  .folder.open .fan { pointer-events: auto; }
   /* невидимый мостик, чтобы веер не закрывался, пока курсор идёт к карточкам */
-  .folder:hover .fan::before, .folder:focus-within .fan::before, .folder.open .fan::before {
+  .folder.open .fan::before {
     content: ""; position: absolute; left: var(--bl, -12rem); width: var(--bw, 24rem);
     bottom: -1rem; height: var(--h, 0px);
   }
-  .folder:hover .fan-item, .folder:focus-within .fan-item, .folder.open .fan-item {
+  .folder.open .fan-item {
     opacity: 1;
     transform: translate(calc(-50% + var(--x)), calc(-1 * var(--y))) rotate(var(--a));
+    transition-delay: calc(var(--i) * 45ms);
   }
-  .fan-item:hover .fan-cover { transform: translateY(-.35em) scale(1.06); }
+  .fan-item:focus-visible .fan-cover { transform: translateY(-.35em) scale(1.06); }
+  @media (hover: hover) and (pointer: fine) {
+    .fan-item:hover .fan-cover { transform: translateY(-.35em) scale(1.06); }
+  }
 
   /* ── Заголовок кейса и кнопки внутри карточки (макет 85:19987) ── */
-  .case-title { display: none; margin: 0; font-size: 1.75rem; line-height: 1.19; font-weight: 600; }
-  body[data-view="case"] .case-title { display: block; }   /* название кейса — вверху панели */
+  .case-title { margin: 0; min-width: 0; overflow-wrap: break-word; font-size: 1.75rem; line-height: 1.19; font-weight: 600; }
   /* кнопка «назад» стоит слева от названия кейса */
   .case-head { display: none; }
   body[data-view="case"] .case-head { display: flex; align-items: flex-start; gap: .75rem; margin: 0 0 2.5rem; }
@@ -215,12 +222,10 @@
 
   /* ── Лента экранов кейса: прокрутка справа со своим индикатором ── */
   .case-feed {
-    display: none; position: absolute; left: 32.5rem; top: 0; right: 0; bottom: 0;
+    position: absolute; left: 32.5rem; top: 0; right: 0; bottom: 0;
     overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none;   /* экран всегда дотягивается целиком */
   }
   .case-feed::-webkit-scrollbar { display: none; }
-  body.has-feed .case-feed { display: block; }
-  body.has-feed .case-phone, body.has-feed .case-laptop { display: none; }   /* устройство живёт в ленте */
   .case-screen { position: relative; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; }
   /* экраны стоят по центру белой области — того, что осталось правее карточки */
   .scr-row { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
@@ -233,19 +238,6 @@
   .scr-item.bleed { overflow: visible; }
   .scr-item.bleed > img { position: absolute; top: var(--sy, 0); left: var(--sx, 0);
                         width: var(--sw, 100%); height: auto; }
-  /* широкий экран: один-два кадра интерфейса и выноска слева — для десктопных кейсов */
-  .scr-wide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-  .wide-stage { position: relative; width: calc(1400 * var(--u)); max-width: 100%; height: 100%; display: flex; align-items: center; }
-  .wide-shots {
-    margin: 0 calc(40 * var(--u)) 0 calc(460 * var(--u)); flex: 1; min-width: 0;
-    height: calc(880 * var(--u)); display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: calc(32 * var(--u));
-  }
-  .wide-shots img {
-    max-width: 100%; min-height: 0; object-fit: contain; border-radius: calc(12 * var(--u));
-    max-height: calc((100% - (var(--shots) - 1) * 32 * var(--u)) / var(--shots));
-  }
-  .scr-wide .note { left: calc(40 * var(--u)); top: 50%; transform: translateY(-50%); right: auto; bottom: auto; }
   /* окна с кадрами интерфейса — координаты из макета 1400×1080 */
   .scr-win { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
              /* здесь кадр 1400 — это и есть белая область, без вылетов выносок за край */
@@ -266,35 +258,12 @@
   .win-stage:has(.win-img + .win-img) .win-shot {
     clip-path: inset(1px round calc(24 * var(--u)));
   }
-  .browser-tabs {
-    flex: 0 0 calc(48 * var(--u)); min-height: 0;
-    display: flex; align-items: center; gap: clamp(5px, calc(14 * var(--u)), 14px);
-    padding: 0 clamp(5px, calc(14 * var(--u)), 14px);
-    background: #e9e9ed; border-bottom: 1px solid #d8d8de;
-  }
-  .browser-controls { display: flex; flex: none; gap: clamp(2px, calc(6 * var(--u)), 6px); }
-  .browser-controls i { width: clamp(4px, calc(10 * var(--u)), 10px); aspect-ratio: 1; border-radius: 50%; background: #ff6059; }
-  .browser-controls i:nth-child(2) { background: #ffbd2e; }
-  .browser-controls i:nth-child(3) { background: #28c840; }
-  .browser-tab {
-    min-width: 0; max-width: 72%;
-    padding: calc(3 * var(--u)) clamp(5px, calc(12 * var(--u)), 12px);
-    border-radius: .45em; background: #fbfbfc; color: #42424a;
-    box-shadow: 0 1px 2px #24243016;
-    font-size: clamp(8px, calc(17 * var(--u)), 16px); line-height: 1.2;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
   .win-shot { flex: 1; min-height: 0; width: 100%; display: block;
               object-fit: cover; object-position: top; }
   .stage-arrow { position: absolute; display: block; }
   /* выноски к окнам стоят по координатам макета 1400×1080, ширина — как в кейсе роботов */
-  .note-bar { display: contents; }                   /* на компьютере обёртка ничего не меняет */
   .win-stage .note { position: absolute; transform: none; z-index: 20; }   /* ширину задаёт сама выноска */
-  .win-stage .note:hover, .win-stage .note.open { z-index: 21; }
-  /* ноутбук в ленте — та же рамка, что на главном экране кейса */
-  .scr-laptop { position: relative; width: calc(1280 * var(--u)); aspect-ratio: 1280 / 776; }
   .scr-item > img { width: 100%; height: 100%; display: block; }   /* сам снимок, не иконка выноски */
-  .scr-phone { width: 26%; min-width: 16rem; max-height: 72%; }
   /* первый экран: видео стоит само по себе — телефон уже внутри ролика.
      Радиус 120px от ширины 816 и высоты 1684 обрезает чёрные углы кадра */
   .scr-video {
@@ -304,6 +273,7 @@
   .scr-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* первый экран, пока нет ролика: обложка кейса — та же, что в папке */
   .scr-cover { width: calc(1240 * var(--u)); max-width: 100%; aspect-ratio: 816 / 560; }
+  .scr-cover picture { display: block; width: 100%; height: 100%; }
   .scr-cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
   /* У всех PNG корпус 6312×3824, различаются только прозрачные поля. */
   .scr-cover.mac-cover {
@@ -321,43 +291,14 @@
     position: absolute; left: 12.0122%; top: 10.8787%;
     width: 76.7683%; height: 78.0858%; display: block; object-fit: fill;
   }
-  /* ролик, в котором уже нарисовано окно браузера: стоит во всю ширину кадра,
-     радиус срезает чёрные углы, оставшиеся от прозрачного фона исходника */
-  .scr-row.vid { --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080); --n: var(--u); }
-  .scr-video.wide {
-    height: auto; width: calc(1241 * var(--u)); max-width: 100%;
-    aspect-ratio: var(--ar); background: #efedea;
-    /* снизу углы ролика скруглены сильнее — там в исходник затесалась тень */
-    border-radius: calc(30 * var(--u)) calc(30 * var(--u)) calc(40 * var(--u)) calc(40 * var(--u));
-  }
-  .scr-phone { position: relative; aspect-ratio: 431.33 / 885.33; }
-  .scr-phone .ph-body { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .scr-phone .ph-scr {
-    position: absolute; left: 4.4%; right: 4.48%; top: 1.88%; bottom: 1.88%;
-    border-radius: 7%; overflow: hidden; background: #000;
-  }
-  .scr-phone video { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  /* Координаты выносок заданы долей
-     от телефона, к которому выноска привязана, поэтому она ложится на тот же элемент */
-  /* Выноска — кнопка 40×40 с иконкой тапа; плашка с текстом лежит отдельным слоем
-     и выезжает по наведению (на компьютере) или по нажатию (на телефоне).
-     Сам блок размер не меняет — поэтому раскладка кадра не едет. */
+  /* Десктопные выноски к схемам и графу привязаны к координатам макета. */
   .note {
     position: absolute; z-index: 2;
-    /* кнопка не зависит от масштаба кадра: на всех экранах она одного размера */
-    width: var(--tap); height: var(--tap);
-    left: var(--nx); right: var(--nr); top: var(--ny); bottom: var(--nb);
+    width: var(--note-anchor); height: var(--note-anchor);
+    left: var(--nx); right: var(--nr); top: var(--ny);
   }
-  .note-tap {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    border-radius: 50%; background: var(--glass);
-    -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
-    transition: opacity .14s var(--ease);
-  }
-  .note-tap img { width: calc(var(--tap) * .46); height: calc(var(--tap) * .46); }
   .note-body {
-    position: absolute; top: 0; left: 0; display: none;
+    position: absolute; top: 0; left: 0; display: block;
     width: min(var(--note-width), calc(100cqw - 37.5rem));
     padding: calc(16 * var(--n)); border-radius: calc(16 * var(--n));
     background: var(--glass);
@@ -369,31 +310,17 @@
   .note.anch-r .note-body { left: auto; right: 0; }  /* выноска прижата правым краем */
   /* если плашка не помещается в кадр, её сдвигают внутрь — на кадр она просто заходит */
   .note-body { transform: translateX(var(--bshift, 0px)); }
-  .note.measure .note-body { display: block; visibility: hidden; }
-  /* выноска, которая на компьютере всегда раскрыта — кнопка ей не нужна */
-  .note.always .note-tap { display: none; }
-  .note.always .note-body { display: block; }
-  .note.open { z-index: 4; }
-  .note.open .note-tap { opacity: 0; }
-  .note.open .note-body { display: block; }
-  @media (hover: hover) {                            /* на компьютере — по наведению */
-    .note:hover { z-index: 4; }
-    .note:hover .note-tap { opacity: 0; }
-    .note:hover .note-body { display: block; }
-  }
   /* карточка-перевёртыш: по наведению глобус сменяется графом и проявляются выноски */
   .flip-card {
     position: absolute; overflow: hidden; cursor: pointer;
     border-radius: calc(45 * var(--u)); background: #efedea;
   }
-  .flip-card > img { position: absolute; inset: 0; width: 100%; height: 100%;
+  .flip-card img { position: absolute; inset: 0; width: 100%; height: 100%;
                      object-fit: cover; display: block; transition: opacity .35s var(--ease); }
   .flip-card .flip-back { opacity: 0; }
   /* на этом экране выноски не сворачиваются в кнопку: по наведению на глобус
      сразу видны все плашки целиком, как в макете */
   .flip-stage .note { opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
-  .flip-stage .note .note-tap { display: none; }
-  .flip-stage .note .note-body { display: block; }
   .flip-stage.on .flip-front { opacity: 0; }
   .flip-stage.on .flip-back { opacity: 1; }
   .flip-stage.on .note { opacity: 1; pointer-events: auto; }
@@ -401,16 +328,16 @@
   .scr-title { display: none; }                     /* пары подписаны только на телефоне */
 
   .case-bar {
-    display: none; position: absolute;
+    position: absolute; pointer-events: none;
     /* Полоса индикатора целиком правее минимального отступа выносок в 1rem. */
     right: .35rem;
     width: min(.45rem, calc(12 * var(--u))); height: calc(40 * var(--u));
     /* верхняя точка — ниже кнопок, чтобы сразу было видно, что экран прокручивается */
-    top: calc(6.25rem + var(--p, 0) * (100% - 6.25rem - 80 * var(--u)));
-    border-radius: calc(8 * var(--u)); background: var(--glass); transition: top .12s linear;
+    top: 6.25rem;
+    transform: translateY(calc(var(--p, 0) * (100cqh - 6.25rem - 80 * var(--u))));
+    border-radius: calc(8 * var(--u)); background: var(--glass);
     -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
   }
-  body.has-feed .case-bar { display: block; }
 
   /* ── Экран кейса (по макету 1440×1024) ── */
   .case {
@@ -428,113 +355,32 @@
   body[data-view="case"] .case-text { animation: screen-in .26s var(--ease) .03s both; }
   body[data-view="home"] .stage { animation: screen-in .24s var(--ease) both; }
   body[data-view="case"] .stage, body[data-view="case"] .desk { display: none; }
-  body[data-view="case"] .bio,
-  body[data-view="case"] .mini-name:not(.mini-case) { display: none; }
-  body[data-view="case"] .mini-case { display: inline-flex; }
+  body[data-view="case"] .bio { display: none; }
+  body[data-view="case"] .card { transition: none; }
   body[data-view="case"] .case-text { display: flex; }
-  .case-text, .case-foot, .mini-case { display: none; }   /* .case-head и так скрыт вне кейса */
+  .case-text { display: none; min-height: 0; }
 
   /* текст кейса: блоки через 20px, внутри блока 4px, всё 20px */
   .case-text { flex-direction: column; gap: 1.25rem; width: 27.5rem; font-size: 1.25rem; line-height: 1.19;
                overflow-y: auto; scrollbar-width: thin; }
-  .case-text section { display: flex; flex-direction: column; gap: .25rem; }
-  .case-text h2 { margin: 0; font-size: inherit; font-weight: inherit; color: var(--dim); }
-  .case-text p { margin: 0; }
+  .screen-notes { display: none; }
+  :is(.case-text, .screen-notes) section { display: flex; flex-direction: column; gap: .25rem; }
+  .case-text h2, .screen-notes h4 { margin: 0; font-size: inherit; font-weight: inherit; color: var(--dim); }
+  :is(.case-text, .screen-notes) p { margin: 0; }
 
-  /* Макбук. В макете (1440×1024) он шириной 1280, стоит на 480 и обрезается правым краем.
-     На широком окне он не может расти: иначе не влезает по высоте и обрежется сам экран.
-     Поэтому размер держим по высоте, а сам макбук ставим по центру свободного места
-     справа от карточки, но не левее, чем в макете.
-     Нижний край держим на одной линии с подписью кейса внизу карточки — 48px от низа. */
-  .no-screen .case-laptop { display: none; }
-  .case-laptop {
-    --lw: min(88.9vw, 125vh);
-    position: absolute; bottom: 3rem; width: var(--lw); aspect-ratio: 1280 / 776;
-    left: max(30rem, calc((100vw + 32.5rem - var(--lw)) / 2));
-    overflow: hidden;
-  }
-  /* при сворачивании панели ноутбук остаётся на месте: уезжает только панель */
-  /* в макете картинка макбука сдвинута на -25px при ширине 1280 — это -1.953% */
-  /* Телефон для мобильных кейсов: высота 82% экрана, низ на одной линии с подписью,
-     по центру свободного места справа от карточки — как и ноутбук */
-  .case-phone {
-    --pw: min(39.94vh, 28vw);
-    position: absolute; bottom: 3rem; width: var(--pw); aspect-ratio: 431.33 / 885.33;
-    left: max(30rem, calc((100vw + 32.5rem - var(--pw)) / 2));
-  }
-  .ph-body { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-  .case-phone .mb-screen { inset: 1.88% 4.48%; left: 4.4%; right: 4.48%; top: 1.88%; bottom: 1.88%;
-    width: auto; height: auto; border-radius: 7%; }
-  body:not(.phone-case) .case-phone, body.phone-case .case-laptop { display: none; }
-  .no-screen .case-phone { display: none; }
-
-  .mb-body { position: absolute; left: -1.953%; top: 0; width: 99.967%; height: 100%; object-fit: cover; }
-  .mb-screen { position: absolute; left: 8.2%; top: 3.35%; width: 79.8%; height: 85.56%; overflow: hidden; background: #0d0d0f; }
-  .mb-screen > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .mb-empty { display: grid; place-items: center; padding: 2rem; text-align: center; color: rgba(255,255,255,.5); font-size: 1.25rem; }
-  .mb-screen.has-video video, .mb-screen.has-shot .mb-shot { display: block; }
-  .mb-screen video, .mb-shot { display: none; }
-  .mb-screen.has-video .mb-empty, .mb-screen.has-shot .mb-empty { display: none; }
-
-  /* файлы на «рабочем столе» кейса */
-  .case-file {
-    position: absolute; width: 7rem; display: flex; flex-direction: column; align-items: center; gap: .5rem;
-    font-size: 1.25rem; color: #000; text-align: center;
-    transition: transform .2s var(--ease);
-  }
-  .case-file:hover { transform: translateY(-.25rem); }
-  /* Safari иначе перехватывает жест и тащит копию картинки вместо иконки */
-  .case-file, .desk-item { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
-  .case-file img, .desk-item img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
-  .case-file.dragging, .desk-item.dragging { cursor: grabbing; transition: none; }
-  .case-file img { width: 5rem; }
+  .desk-item { cursor: grab; user-select: none; -webkit-user-select: none; }
+  .desk-item img { -webkit-user-drag: none; pointer-events: none; }
+  .desk-item.dragging { cursor: grabbing; transition: none; transform: none; }
 
   .home-btn { flex: 0 0 auto; margin-left: -.5rem; }   /* шеврон слева от названия кейса */
   .back-fix { display: none; }                         /* на компьютере хватает шеврона у названия */
   body[data-view="case"] #collapse { display: none; }   /* шеврон внизу панели не нужен */
 
-  /* ── Окна с текстом (фрейм 42:20994): 520×496, стекло, шапка 60 светлее,
-     заголовок чёрный слева на 40/18, крестик 16 справа на 40/22, текст белый 20 ── */
-  .docs { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
-  .doc-window {
-    position: absolute; pointer-events: auto;
-    width: min(92vw, 32.5rem); height: min(80vh, 31rem);
-    display: flex; flex-direction: column;
-    background: rgba(255,255,255,.2); border-radius: .85rem; overflow: hidden;
-    -webkit-backdrop-filter: blur(26px) saturate(1.7); backdrop-filter: blur(26px) saturate(1.7);
-  }
-  .doc-bar {
-    position: relative; flex: none; height: 3.75rem; background: rgba(255,255,255,.4);
-    cursor: grab; user-select: none; touch-action: none;
-  }
-  .doc-bar:active { cursor: grabbing; }
-  .doc-title {
-    position: absolute; left: 2.5rem; top: 1.125rem; width: 27.5rem;
-    font-size: 1.25rem; line-height: 1.19; color: #000;
-  }
-  .doc-close {
-    position: absolute; right: 1.75rem; top: .625rem; width: 2.5rem; height: 2.5rem;
-    display: grid; place-items: center; transition: opacity .2s;
-  }
-  .doc-close:hover { opacity: .6; }
-  .doc-close img { width: 1rem; }   /* иконка 16px как в макете, кликабельная зона 40 */
-  .doc-body {
-    overflow: auto; padding: 2.5rem; font-size: 1.25rem; line-height: 1.19; color: #fff;
-    scrollbar-width: thin;
-  }
-  /* на светлом экране кейса белый текст на стекле не читается — там он чёрный */
-  body[data-view="case"] .doc-body { color: #000; }
-  .doc-body h3 { margin: 1.25rem 0 .25rem; font-size: inherit; font-weight: inherit; }
-  .doc-body h3:first-child { margin-top: 0; }
-  .doc-body p { margin: 0 0 1.25rem; white-space: pre-line; }
-  .doc-body p:last-child { margin-bottom: 0; }
-  .doc-body a { text-decoration: underline; }
-
   a:focus-visible, button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: .5rem; }
 
   /* ── Телефоны и узкие окна ── */
   @media (max-width: 760px), (max-aspect-ratio: 4/5) {
-    :root { --button-font-size: 1rem; --note-width: min(85vw, 19rem); }
+    :root { --button-font-size: 1rem; }
     html { font-size: 16px; }
     .stage { height: 78svh; min-height: 30rem; }
     .bg { object-position: 68% 25%; }
@@ -547,7 +393,7 @@
     .folders { left: 1rem; right: 1rem; bottom: 2.5rem; gap: .75rem; justify-content: space-between; }
     .folder { flex: 1; width: auto; min-width: 0; }
     .f-link { font-size: 1rem; white-space: normal; text-align: center; line-height: 1.2; }
-    .f-link > span { position: static; left: auto; right: auto; }   /* на телефоне подпись в потоке */
+    .folder-label { position: static; left: auto; right: auto; }   /* на телефоне подпись в потоке */
     .folder-date-break { display: inline; }
     .bio-break { display: none; }
     .f-body { width: 80%; }
@@ -557,10 +403,6 @@
                 display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .fan-name { font-size: 1rem; }
 
-    /* Кейс на узком экране: ноутбук сверху, под ним текст, ниже файлы */
-    body[data-view="case"] .case { position: static; display: flex; flex-direction: column; padding: 4.5rem 1rem 0; }
-    .case-laptop { position: relative; inset: auto; width: 100%; aspect-ratio: 1280 / 776; margin: 0 0 1.5rem; }
-    .case-phone { position: relative; inset: auto; width: min(60vw, 15rem); margin: 0 auto 1.5rem; }
     .case-text { width: auto; font-size: 1.125rem; }
     /* на телефоне заголовок остаётся в чёрном блоке, как сейчас */
     .case-title { font-size: 1.5rem; }
@@ -574,34 +416,25 @@
     body[data-view="case"] .top { position: fixed; top: 1rem; bottom: auto; left: auto; right: 1rem; }
     /* на телефоне порядок такой: видео, описание проекта, потом экраны с выносками */
     body[data-view="case"] { background: #fff; }
-    body[data-view="case"] .case, body.has-feed .case-feed { display: contents; }
+    body[data-view="case"] .case, .case-feed { display: contents; }
     .case-screen { height: auto; margin-bottom: 40px; padding: 0 1rem; order: 0;
                    container-type: inline-size; }
     .scr-title { display: block; margin: 0 1.25rem 1.25rem; font-size: 1.5rem; line-height: 1.19;
                  font-weight: 600; color: #1b1b1d; }
     .case-screen:first-child { order: -2; padding-top: 4.5rem; margin-bottom: 40px; }
-    /* пустой экран под будущий ролик на телефоне не показываем */
-    .case-screen.is-hold { display: none; }
-    /* кейс начинается с пустого экрана — значит первой на телефоне идёт чёрная карточка */
-    body:has(.case-screen.is-hold) .card { margin-top: 0; padding-top: 5.25rem; }
     body[data-view="case"] .card { order: -1; }
-    .case-laptop, .case-phone { order: -2; }
-    .case-desk { order: 1; }
-    .page-foot { order: 2; }
+    .page-foot { order: 1; }
     /* телефон целиком влезает в экран по высоте */
     .scr-row, .scr-pair { position: static; display: block; height: auto; }
-    .scr-item, .scr-video { position: relative; height: auto; max-height: none; margin: 0 auto 40px; }
+    .scr-item, .scr-video { position: relative; height: auto; max-height: none; margin: 0 auto; }
     .scr-item { width: min(100%, (100svh - 5rem) / 2.0525); }
+    .scr-item + .scr-item { margin-top: 2.5rem; }
     .scr-video { width: min(100%, (100svh - 5rem) / 2.0637); }
-    .scr-video.wide { width: 100%; border-radius: 1rem; }
     .scr-cover { width: 100%; height: auto; margin: 0 auto; }
     .scr-cover.mac-cover { width: 100%; max-width: 100%; }
-    .scr-row:has(.mac-cover) > .win-stage { margin-top: 1.25rem; }
     .scr-item > img { height: auto; }
     .scr-item.bleed > img { position: static; width: 100%; }   /* на телефоне запас вокруг корпуса не нужен */
-    .scr-item:last-child, .scr-video { margin-bottom: 0; }
-    .scr-wide, .wide-stage { position: static; display: block; height: auto; width: auto; max-width: none; }
-    /* окна на телефоне идут столбиком во всю ширину, выноски — рядом «жми» под ними */
+    /* Окна на телефоне идут столбиком во всю ширину. */
     .scr-win { position: static; display: block; height: auto; }
     .win-stage { position: static; width: auto; height: auto; max-width: none;
                  display: flex; flex-direction: column; gap: 1.25rem; }
@@ -611,56 +444,20 @@
            width: auto !important; height: auto !important; }
     .win-img { border-radius: 1rem; }
     .win-stage:has(.win-img + .win-img) .win-shot { clip-path: inset(1px round 1rem); }
-    .browser-tabs { --u: .7px; flex-basis: 2rem; }
     .win-shot { height: auto; object-fit: contain; }
-    /* карточка-перевёртыш на телефоне: во всю ширину, кнопка по центру, выноски — после тапа */
+    /* Глобус с графом на телефоне занимает всю ширину. */
     .flip-card { position: relative; border-radius: 1rem; aspect-ratio: 711 / 790;
                  left: auto !important; top: auto !important;
                  width: auto !important; height: auto !important; }
-    .flip-stage:not(.on) .note-bar { display: none; }
-    /* на телефоне после тапа плашки идут столбиком, все раскрытые */
-    .flip-stage .note-bar { flex-direction: column; align-items: stretch; }
-    .flip-stage .note-bar .note { width: 100%; height: auto; }
-    .flip-stage .note-bar .note .note-body {
-      position: static; transform: none; width: min(100%, var(--note-width));
-      max-width: none; margin-inline: auto;
+    .stage-arrow, .note { display: none; }
+    .screen-notes {
+      display: flex; flex-direction: column; gap: 1.25rem;
+      margin-bottom: 1.25rem; padding: 1.5rem 1.25rem;
+      border-radius: 1.5rem; background: #1b1b1d; color: #fff;
+      font-size: 1.125rem; line-height: 1.25; overflow-wrap: break-word;
     }
-    .stage-arrow { display: none; }                  /* стрелка между окнами тут не нужна */
-    /* на телефоне выноски к окнам собраны в ряд кнопок под кадром,
-       раскрытая занимает всю строку и раздвигает соседей вниз */
-    .note-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
-    .note-bar .note { position: relative; transform: none;
-                      left: auto; right: auto; top: auto; bottom: auto;
-                      width: 48px; height: 48px; flex: 0 0 auto; }
-    .note-bar .note.open { width: 100%; height: auto; }
-    /* на телефоне и такая выноска сворачивается в кнопку, как все остальные */
-    .note.always .note-tap { display: grid; }
-    .note.always:not(.open) .note-body { display: none; }
-    .note-bar .note.open .note-body {
-      position: static; transform: none; width: min(100%, var(--note-width));
-      max-width: none; margin: .75rem auto 0;
-    }
-    .wide-shots { margin: 0; height: auto; gap: 1rem; }
-    .wide-shots img { max-height: none; width: 100%; }
-    .scr-wide .note { position: static; transform: none; width: auto; margin-top: 1rem; }
-    /* выноска свёрнута в «жми» и раскрывается по тапу — обе по центру телефона */
-    .note {
-      top: var(--py); bottom: auto; left: 50%; right: auto; transform: translateX(-50%);
-      width: 48px; height: 48px; cursor: pointer;
-    }
-    .note-tap img { width: 22px; height: 22px; }
-    /* плашка по центру экрана, шип у неё сверху — ровно там, где была кнопка */
-    .note-body, .note.anch-r .note-body {
-      left: 50%; right: auto; transform: translateX(-50%);
-      width: var(--note-width); max-width: calc(100vw - 2rem);
-      padding: 16px; border-radius: 20px;
-    }
-    .note-text { max-height: none; overflow: visible; }
+    .screen-notes h4 { font-size: 1rem; }
     .case-bar { display: none !important; }
-    .case-desk { order: 3; position: static; display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1.5rem 1rem 2rem; background: #fff; }
-    .case-desk:empty { display: none; }               /* пустой стол больше не тянет белую полосу под футер */
-    .case-file { position: static !important; flex: 0 0 auto; width: 7.5rem; font-size: 1rem; }
-    .case-file img { width: 3.5rem; }
     body[data-view="case"] .card { background: #1b1b1d; }
     .card, .collapsed .card {
       position: relative; width: auto; min-height: 0;
@@ -694,6 +491,22 @@
     .cat { width: 7rem; }
   }
 
+  @media (max-width: 360px) {
+    body[data-view="case"] .top { right: .75rem; gap: .25rem; }
+    body[data-view="case"] .top :is(.cv, [data-link="contact"]), body[data-view="case"] .back-fix { padding-inline: .625rem; }
+    body[data-view="case"] .back-fix { left: .75rem; }
+  }
+  @media (max-width: 308px) {
+    body[data-view="case"] .top { right: .5rem; gap: .1875rem; }
+    body[data-view="case"] .top :is(.cv, [data-link="contact"]) { padding-inline: .5rem; }
+    body[data-view="case"] .back-fix { left: .5rem; width: 2.25rem; padding: 0; justify-content: center; font-size: 0; }
+    .back-fix::after {
+      content: ""; width: 1.5rem; height: 1.5rem;
+      background: url("assets/ic-arrow.svg") center / contain no-repeat;
+      transform: scaleX(-1);
+    }
+  }
+
   @media (width > 760px) and (aspect-ratio > 4/5) {
     .diagram-row {
       --u: min(1.15px, (100cqw - 32.5rem - 3rem) / 1220, 100cqh / 1000);
@@ -710,16 +523,12 @@
       padding: 5.5rem 3.5rem 2rem 1.5rem;
       align-items: center;
     }
-    .has-desktop-notes > :is(.scr-row, .scr-win, .scr-wide) {
+    .has-desktop-notes > .scr-row {
       position: relative; inset: auto; grid-area: media; align-self: stretch;
       min-width: 0; min-height: 0; container-type: size;
       --u: min(1px, 100cqw / var(--frame-width, 1400), 100cqh / 1080);
       --n: var(--u);
     }
-    .web-frame .win-stage {
-      transform: translate(calc(var(--center-x, 0) * var(--u)), calc(var(--center-y, 0) * var(--u)));
-    }
-    .has-desktop-notes .note { display: none; }
     .desktop-notes { display: grid; grid-area: notes; gap: .75rem; min-width: 0; }
     .desktop-note-group { display: grid; gap: .75rem; min-width: 0; }
     .desktop-note {
@@ -729,43 +538,76 @@
       background: #666; color: #fff;
       font-size: var(--button-font-size); line-height: 1.2;
     }
+    .case-feed.go-feed {
+      container: go-feed / size;
+      --go-pair-ratio: calc((2 * 431.333 + 40) / 885.333);
+      --go-phone-height: min((100cqw - 3rem) / var(--go-pair-ratio), clamp(15rem, 52svh, 34rem));
+    }
+    .case-screen.go-pair {
+      --go-side-padding: 1.5rem;
+      grid-template: "media" var(--go-phone-height) "notes" auto / minmax(0, 1fr);
+      padding-inline: var(--go-side-padding);
+      align-content: center;
+    }
+    .go-pair > .scr-row {
+      container-type: normal;
+      --u: calc(var(--go-phone-height) / 885.333);
+    }
+    .go-feed .scr-video { height: var(--go-phone-height); }
+    .go-pair .desktop-notes { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--note-width)), 1fr)); }
+    .go-pair .desktop-note-group { display: contents; }
   }
   @media (min-width: 1280px) and (aspect-ratio > 4/5) {
-    .case-screen.has-two-note-groups:not(.go-pair, .web-frame) {
+    .case-screen.has-two-note-groups:not(.go-pair) {
       grid-template: "left media right" minmax(0, 1fr) / 14.5rem minmax(0, 1fr) 14.5rem;
       column-gap: .75rem;
     }
-    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-notes { display: contents; }
-    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group { width: var(--note-width); z-index: 1; }
-    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group:first-child { grid-area: left; justify-self: start; }
-    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group:last-child { grid-area: right; justify-self: end; }
-    .has-two-note-groups:not(.go-pair, .web-frame) .desktop-note-group:has(.desktop-note:only-child) {
+    .has-two-note-groups:not(.go-pair) .desktop-notes { display: contents; }
+    .has-two-note-groups:not(.go-pair) .desktop-note-group { width: var(--note-width); z-index: 1; }
+    .has-two-note-groups:not(.go-pair) .desktop-note-group:first-child { grid-area: left; justify-self: start; }
+    .has-two-note-groups:not(.go-pair) .desktop-note-group:last-child { grid-area: right; justify-self: end; }
+    .has-two-note-groups:not(.go-pair) .desktop-note-group:has(.desktop-note:only-child) {
       transform: translateY(clamp(-4rem, calc((var(--note-y, .5) - .5) * 48svh), 7rem));
     }
   }
-  @media (min-width: 1100px) and (aspect-ratio > 4/5) {
-    .case-screen:is(.go-pair, .web-frame) {
-      grid-template: "left media right" minmax(0, 1fr) / 14.5rem minmax(0, 1fr) 14.5rem;
-      column-gap: .75rem;
-      padding: 5rem 2.5rem;
+  @container go-feed (min-width: 68rem) {
+    .go-feed > .case-screen {
+      --go-phone-height: min((100cqw - 33rem) / var(--go-pair-ratio), 100cqh - 10.5rem);
     }
-    :is(.go-pair, .web-frame) .desktop-notes { display: contents; }
-    :is(.go-pair, .web-frame) .desktop-note-group:empty { display: none; }
-    :is(.go-pair, .web-frame) .desktop-note-group { width: var(--note-width); z-index: 1; }
-    :is(.go-pair, .web-frame) .desktop-note-group:first-child { grid-area: left; justify-self: start; }
-    :is(.go-pair, .web-frame) .desktop-note-group:last-child { grid-area: right; justify-self: end; }
-    :is(.go-pair, .web-frame) .desktop-note-group:has(.desktop-note:only-child) {
-      transform: translateY(clamp(-4rem, calc((var(--note-y, .5) - .5) * 48svh), 7rem));
+    .case-screen.go-pair {
+      --go-pair-width: calc(var(--go-phone-height) * var(--go-pair-ratio));
+      /* Выноски немного заходят на корпус, оставляя место у индикатора прокрутки. */
+      --go-note-overlap: max(1rem, calc(var(--note-width) + var(--go-side-padding) - (100cqw - var(--go-pair-width)) / 2));
+      grid-template: "left media right" var(--go-phone-height) / minmax(0, 1fr) var(--go-pair-width) minmax(0, 1fr);
+      gap: 0;
+      padding: 0 var(--go-side-padding);
+    }
+    .go-pair .desktop-notes { display: contents; }
+    .go-pair .desktop-note-group:empty { display: none; }
+    .go-pair .desktop-note-group {
+      --group-position: clamp(0%, calc(var(--note-y, .5) * 100%), 100%);
+      display: grid;
+      position: relative;
+      align-self: start;
+      top: var(--group-position);
+      width: var(--note-width);
+      z-index: 1;
+      transform: translateY(calc(-1 * var(--group-position)));
+    }
+    .go-pair .desktop-note-group:first-child {
+      grid-area: left; justify-self: end; margin-inline-end: calc(-1 * var(--go-note-overlap));
+    }
+    .go-pair .desktop-note-group:last-child {
+      grid-area: right; justify-self: start; margin-inline-start: calc(-1 * var(--go-note-overlap));
     }
   }
   @media (760px < width < 1100px) and (aspect-ratio > 4/5) {
-    .case-screen.has-desktop-notes {
+    .case-screen.has-desktop-notes:not(.go-pair) {
       grid-template: "media" clamp(15rem, 52svh, 34rem) "notes" auto / minmax(0, 1fr);
       padding-inline: 1.5rem 3rem;
     }
     .desktop-notes { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--note-width)), 1fr)); }
     .desktop-note-group { display: contents; }
-    .case-screen:is(.go-pair, .web-frame) { padding-inline: 1.5rem; }
   }
 
   @media (width > 760px) and (aspect-ratio > 4/5) {
@@ -775,7 +617,6 @@
       position: absolute; inset: 0; container-type: normal;
       --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080);
     }
-    .mac-screen .win-stage { display: none; }
     .mac-screen .desktop-notes {
       position: absolute; right: 2.5rem; bottom: 1.25rem;
       max-width: calc(100% - 4rem);
@@ -815,59 +656,59 @@
 <body>
 
 <main class="stage" id="stage">
-  <img class="bg" src="assets/photo.jpg" alt="" data-i18n-alt="photoAlt">
+  <img class="bg" src="assets/photo.jpg" width="1440" height="960" fetchpriority="high" alt="" data-i18n-alt="photoAlt">
 
-  <nav class="folders">
-    <div class="folder"><a class="f-link" data-link="folder1">
-      <div class="f-body red">
+  <nav class="folders" data-i18n-label="projects">
+    <div class="folder" data-folder="folder1"><button class="f-link" type="button" aria-expanded="false">
+      <span class="f-body red">
         <img class="f-front" src="assets/folder-red-front.svg" alt="">
-        <div class="f-icons">
+        <span class="f-icons">
           <img class="ya" src="assets/yandex-bank.svg" alt="">
-          <div class="box">
-            <div class="box-layer box-out">
-              <div class="icon-box">
-                <div class="s1"><img src="assets/box-red.png" alt=""></div>
-                <div class="s2"><img src="assets/box-red.png" alt=""></div>
-              </div>
-            </div>
-            <div class="box-layer box-in">
-              <div class="icon-box">
-                <div class="s1"><img src="assets/box-red.png" alt=""></div>
-                <div class="s2"><img src="assets/box-red.png" alt=""></div>
+          <span class="box">
+            <span class="box-layer box-out">
+              <span class="icon-box">
+                <span class="s1"><img src="assets/box-red.png" alt=""></span>
+                <span class="s2"><img src="assets/box-red.png" alt=""></span>
+              </span>
+            </span>
+            <span class="box-layer box-in">
+              <span class="icon-box">
+                <span class="s1"><img src="assets/box-red.png" alt=""></span>
+                <span class="s2"><img src="assets/box-red.png" alt=""></span>
                 <img class="u" src="assets/union.svg" alt="">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <span data-i18n="f1"></span>
-      </a>
+              </span>
+            </span>
+          </span>
+        </span>
+      </span>
+      <span class="folder-label" data-i18n="f1"></span>
+      </button>
     </div>
-    <div class="folder"><a class="f-link" data-link="folder2">
-      <div class="f-body green">
+    <div class="folder" data-folder="folder2"><button class="f-link" type="button" aria-expanded="false">
+      <span class="f-body green">
         <img class="f-front" src="assets/folder-green-front.svg" alt="">
-        <div class="f-icons">
+        <span class="f-icons">
           <img class="otp" src="assets/otp-logo.svg" alt="">
           <img class="frog" src="assets/frog.svg" alt="">
-        </div>
-      </div>
-      <span data-i18n="f2"></span>
-      </a>
+        </span>
+      </span>
+      <span class="folder-label" data-i18n="f2"></span>
+      </button>
     </div>
-    <div class="folder"><a class="f-link" data-link="folder3">
-      <div class="f-body">
+    <div class="folder" data-folder="folder3"><button class="f-link" type="button" aria-expanded="false">
+      <span class="f-body">
         <img class="cu" src="assets/folder-cu.svg" alt="">
-      </div>
-      <span data-i18n="f3"></span>
-      </a>
+      </span>
+      <span class="folder-label" data-i18n="f3"></span>
+      </button>
     </div>
   </nav>
 
 </main>
 
-  <button class="pill back-fix" id="back-fix" type="button" data-i18n="home"></button>
+  <button class="pill back-fix" id="back-fix" type="button" data-i18n="home" data-i18n-label="back"></button>
   <div class="top">
-    <button class="pill cv" type="button" data-doc="resume" data-i18n="cv"></button>
+    <a class="pill cv" href="assets/resume-ru.pdf" data-resume target="_blank" rel="noopener" data-i18n="cv"></a>
     <a class="pill" data-link="contact"><span data-i18n="contact"></span></a>
     <button class="pill snd" id="snd" type="button" data-i18n-label="sound" aria-pressed="true">
       <svg class="snd-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z" fill="#fff"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
@@ -878,23 +719,7 @@
 
 <main class="case" id="case">
   <div class="case-feed" id="case-feed"></div>
-  <div class="case-bar" id="case-bar"></div>
-  <div class="case-desk" id="case-desk"></div>
-  <div class="case-phone">
-    <img class="ph-body" src="assets/iphone.png" alt="">
-    <div class="mb-screen" id="ph-screen">
-      <img class="mb-shot" id="case-shot-ph" src="" alt="">
-      <video id="case-video-ph" playsinline muted loop autoplay controls preload="metadata"></video>
-    </div>
-  </div>
-  <div class="case-laptop">
-    <img class="mb-body" src="assets/macbook.png" alt="">
-    <div class="mb-screen" id="mb-screen">
-      <img class="mb-shot" id="case-shot" src="" alt="">
-      <video id="case-video" playsinline muted loop autoplay controls preload="metadata"></video>
-      <div class="mb-empty" data-i18n="videoSoon"></div>
-    </div>
-  </div>
+  <div class="case-bar" id="case-bar" aria-hidden="true"></div>
 </main>
 
 <aside class="card" id="card">
@@ -904,20 +729,18 @@
       <button class="toggle back home-btn" id="home-btn" type="button" data-i18n-label="back">
         <img src="assets/ic-arrow.svg" alt="">
       </button>
-      <h2 class="case-title" id="case-title"></h2>
+      <h2 class="case-title" id="case-title" tabindex="-1"></h2>
     </div>
     <div class="case-text" id="case-text"></div>
     <div class="card-foot">
       <span id="foot" data-i18n="foot"></span>
-      <span id="case-foot" class="case-foot"></span>
       <button class="toggle back" id="collapse" type="button" data-i18n-label="collapse">
         <img src="assets/ic-arrow.svg" alt="">
       </button>
     </div>
   </div>
-  <div class="card-mini">
+  <div class="card-mini" inert>
     <div class="mini-name" data-i18n="name"></div>
-    <div class="mini-name mini-case" id="mini-case"></div>
     <button class="toggle" id="expand" type="button" data-i18n-label="expand">
       <img src="assets/ic-arrow.svg" alt="">
     </button>
@@ -925,10 +748,10 @@
 </aside>
 
 <div class="desk">
-  <button class="desk-item resume" type="button" data-doc="resume">
+  <a class="desk-item resume" href="assets/resume-ru.pdf" data-resume target="_blank" rel="noopener" draggable="false">
     <img src="assets/resume-icon.svg" alt="" draggable="false">
     <span data-i18n="resume"></span>
-  </button>
+  </a>
   <button class="desk-item cat" type="button" id="cat">
     <span class="cat-pic">
       <img class="cat-away" src="assets/cat.png" alt="" draggable="false">
@@ -940,96 +763,49 @@
 
 <div class="page-foot" id="page-foot"></div>
 
-<div class="docs" id="docs"></div>
-
 <script>
   // ▼ Сюда вставь свои ссылки
   const LINKS = {
     contact:  'https://t.me/nizephyris',  // личный телеграм — кнопка «связь»
     telegram: 'https://t.me/mir_bez_zephyr', // телеграм-канал
-    resume:   '#',                        // резюме (PDF или ссылка)
-    folder1:  '#',                        // Яндекс Доставка, 02.2026 → сейчас
-    folder2:  '#',                        // 08.2024 → 02.2026
-    folder3:  '#',                        // учёба в ЦУ
   };
 
-  // ▼ Проекты, которые выезжают веером при наведении на папку.
-  // Замени названия и ссылки на свои; можно добавлять и убирать строки.
-  // ▼ Кейсы. Внутри каждого — видео с полным сценарием (mp4/webm) и блоки текста.
-  // Чтобы проект открывал кейс, укажи у него в PROJECTS не url, а case: 'otp'.
-  // ▼ Кейсы. Тексты взяты с abalashova.ru/admin_panel
-  // ────────── Формат кейса ──────────
-  // Образец — «роботы в го» (ключ go). Новый кейс добавляется сюда по этой же схеме,
-  // раскладку, масштаб, стекло, скролл с магнитом и мобильный вид считает сам код.
-  //
-  //   ключ: {
-  //     device: 'phone',                       // 'phone' | 'laptop' — только для кейсов без screens
-  //     plain: true,                           // карточка слева не сворачивается, шеврон — на главную
-  //     files: [],                             // документы на столе: [{ doc: 'ключ из DOCS', x, y }]
-  //     screens: [
-  //       { video: 'assets/....mp4' },         // первый экран — ролик, без телефона-рамки
-  //       { hold: true },                      // ...или пустой экран, пока ролика нет
-  //       {                                    // окна браузера с кадрами интерфейса
-  //         title: { ru: '…', en: '…' },
-  //         frames: [{ src: 'assets/….webp', x: 81, y: 148, w: 1239, h: 785 }],  // снизу вверх
-  //         arrow: { src: 'assets/….svg', x, y, w, h },   // необязательная стрелка поверх окон
-  //         notes: [{ x: 40, y: 764, ru: '…', en: '…' }], // выноски 380 шириной, x/y из макета
-  //                                                 // вместо x можно r — отступ правого края от края кадра
-  //       },
-  //       {
-  //         title: { ru: '…', en: '…' },       // заголовок пары, виден только на телефоне
-  //         shots: ['assets/…a.webp', 'assets/…b.webp'],   // два рендера телефона 431,33×885,33, 2×
-  //         notes: [                           // выноски; координаты прямо из макета 1400×1080
-  //           { at: 'l' | 'c' | 'r',           // к какому телефону привязана: l/c — к левому, r — к правому
-  //             tail: 'tl' | 'tr' | 'bl' | 'br',           // угол, из которого растёт уголок
-  //             x: 40, y: 410, h: 117,         // x/y — левый верх плашки в макете, h — её высота
-  //             ru: '…', en: '…' },
-  //         ],
-  //       },
-  //     ],
-  //     ru: { title: '…', blocks: [['контекст', '…'], ['проблема', '…'], ['аудитория', '…'],
-  //                                ['моя роль', '…'], ['статус', '…'], ['что меряем', '…']] },
-  //     en: { … то же самое },
-  //   }
-  //
-  // Что считается само: телефоны 431,33×885,33 с зазором 40, кадр 1400×1080 по центру белой
-  // области, выноски 380 шириной с заходом на телефон ровно 40, вертикальный магнит по экранам,
-  // индикатор под кнопкой языка. На телефоне: экран по высоте окна, выноски сворачиваются
-  // в «жми» по центру и разводятся так, чтобы раскрытые не перекрывались.
   const CASES = {
     otp: {
-      video: '',                          // напр. 'assets/otp.mp4' — видео с полным сценарием
-      shot: 'assets/case-otp-screen.jpg', // статичный экран, пока видео нет
-      // Экраны собраны по макету: Фигма, Section 3 (Desktop 31…35)
       screens: [
         { hold: true, cover: 'assets/otp-cover-mac.png', coverWidth: 6612, coverInset: 199 },
         { title: { ru: 'создание продукта', en: 'creating a product' }, noteOverlay: 'alternate',
           cover: 'assets/otp-create-mac.png', coverWidth: 6612, coverInset: 199,
           notes: [
-            { always: true, b: [18.06, 48.15], x: 0, y: 775, ru: 'Сгруппировала связанные параметры, чтобы сотрудник мог заполнять и проверять их по частям',
+            { b: [18.06, 48.15], x: 0, y: 775, heading: { ru: 'параметры по разделам', en: 'section by section' },
+              ru: 'Сгруппировала связанные параметры, чтобы сотрудник мог заполнять и проверять их по частям',
               en: 'I grouped related fields so staff could fill in and check one section at a time' },
-            { b: [81.94, 37.34], r: 'snd', y: 258, ru: 'Настройки можно загрузить из файла, чтобы не заполнять похожую карточку с нуля',
+            { b: [81.94, 37.34], r: 'snd', y: 258, heading: { ru: 'импорт настроек', en: 'importing settings' },
+              ru: 'Настройки можно загрузить из файла, чтобы не заполнять похожую карточку с нуля',
               en: 'Staff can import settings from a file to avoid filling out a similar product form from scratch' },
-            { b: [81.94, 58.79], r: 'snd', y: 775, ru: 'Проверяем данные по разделам, чтобы найти ошибки до отправки в банковские системы',
+            { b: [81.94, 58.79], r: 'snd', y: 775, heading: { ru: 'ранняя проверка', en: 'early validation' },
+              ru: 'Проверяем данные по разделам, чтобы найти ошибки до отправки в банковские системы',
               en: 'We validate each section to catch errors before the data reaches the bank’s systems' },
           ] },
         // Desktop-34 — два окна внахлёст и стрелка между ними
-        { title: { ru: 'добавление параметров', en: 'adding parameters' }, diagram: true,
+        { title: { ru: 'добавление параметров', en: 'adding parameters' },
           frames: [
-            { src: 'assets/otp-s4a.webp', x: 60,  y: 137, w: 800, h: 397 },
-            { src: 'assets/otp-s4b.webp', x: 480, y: 432, w: 800, h: 537 },
+            { src: 'assets/otp-s4a.webp', size: [1920, 810], x: 60,  y: 137, w: 800, h: 397 },
+            { src: 'assets/otp-s4b.webp', size: [1920, 1146], x: 480, y: 432, w: 800, h: 537 },
           ],
           arrow: { src: 'assets/otp-arrow.svg', x: 883, y: 265.529, w: 264.375, h: 121.335 },
           notes: [
             // 137+397 = 534 — низ верхнего окна, 480 — левый край правого: по 40 от обоих
-            { always: true, x: 60, y: 574, ru: 'Если партнёра нет в списке, его можно добавить прямо в форме и продолжить настройку',
+            { x: 60, y: 574, heading: { ru: 'добавление партнёра', en: 'adding a partner' },
+              ru: 'Если партнёра нет в списке, его можно добавить прямо в форме и продолжить настройку',
               en: 'If a partner is missing from the list, staff can add them in the form and carry on' },
           ] },
         // Desktop-35 — карточка готового продукта с меню операций
         { title: { ru: 'дублирование продукта', en: 'duplicating a product' }, noteOverlay: true,
           cover: 'assets/otp-duplicate-mac.png', coverWidth: 6612, coverInset: 199,
           notes: [
-            { always: true, x: 837, y: 591, ru: 'Похожий продукт можно взять за основу. Сотрудник меняет нужные поля в копии',
+            { x: 837, y: 591, heading: { ru: 'готовые настройки', en: 'starting from a copy' },
+              ru: 'Похожий продукт можно взять за основу. Сотрудник меняет нужные поля в копии',
               en: 'Staff can duplicate a similar product and edit only the fields that need to change' },
           ] },
       ],
@@ -1054,43 +830,53 @@
     },
 
     go: {
-      device: 'phone',
-      video: 'assets/go-rovers.mp4', shot: '',
-      // plain: страница без файлов — карточка слева не сворачивается,
-      // кнопки «на главную» нет, шеврон в карточке возвращает на главную
-      plain: true,
-      files: [],
-      // Лента экранов по макету 85:22033. Координаты выносок — из макета 1400×1080:
-      // at — к какому краю прижата (l/c/r), tail — куда смотрит хвостик, y — верх выноски
       screens: [
-        { video: 'assets/go-rovers-phone.mp4' },
+        { video: 'assets/go-rovers-phone.mp4', poster: 'assets/go-rovers-phone-poster.webp' },
         // Фигма, Desktop-50 (124:13513): телефоны стоят на 249 и 720,33 — как и везде
         { title: { ru: 'что рассматривали', en: 'what we weighed up' },
           shots: ['assets/go-1a.webp', 'assets/go-1b.webp'], notes: [
-          { always: true, b: [0.8, 42.0], at: 'l', tail: 'tr', x: 81, y: 436, h: 146,
+          { at: 'l', y: 436, h: 146, heading: { ru: 'сравнение тарифов', en: 'comparing rates' },
             ru: 'Добавили робота в «Экспресс», чтобы сравнить цены с курьером на одном экране',
             en: 'We added the rover to Express so customers could compare prices on one screen' },
         ] },
         { title: { ru: 'форма экспресса и роботы', en: 'express form and robots' },
           shots: ['assets/go-2a.webp', 'assets/go-2b.webp'], notes: [
-          { b: [0.8, 37.8], at: 'l', tail: 'tr', x: 40, y: 410, h: 117, ru: 'Сохранили привычную форму заказа. Робота предлагаем для доставки с одной остановкой', en: 'We kept the familiar order form and limited the rover option to single-stop deliveries' },
-          { always: true, b: [113.4, 49.2], at: 'c', tail: 'tr', x: 557, y: 611, h: 66, ru: 'До оплаты предупреждаем, что к роботу нужно выйти. Так у отправителя есть время выбрать курьера', en: 'We flag before payment that the sender needs to meet the rover, while there’s still time to choose a courier' },
-          { b: [99.4, 23.2], at: 'r', tail: 'tl', x: 1100, y: 301, h: 100, ru: 'Робот доступен при оплате с корпоративного счёта, если оба адреса в зоне рободоставки', en: 'The rover is available for corporate payments when both addresses are in its delivery area' },
+          { at: 'l', y: 410, h: 117, heading: { ru: 'знакомая форма заказа', en: 'familiar order form' },
+            ru: 'Сохранили привычную форму заказа. Робота предлагаем для доставки с одной остановкой',
+            en: 'We kept the familiar order form and limited the rover option to single-stop deliveries' },
+          { at: 'c', y: 611, h: 66, heading: { ru: 'предупреждение до оплаты', en: 'notice before checkout' },
+            ru: 'До оплаты предупреждаем, что к роботу нужно выйти. Так у отправителя есть время выбрать курьера',
+            en: 'We flag before payment that the sender needs to meet the rover, while there’s still time to choose a courier' },
+          { at: 'r', y: 301, h: 100, heading: { ru: 'доступность ровера', en: 'rover availability' },
+            ru: 'Робот доступен при оплате с корпоративного счёта, если оба адреса в зоне рободоставки',
+            en: 'The rover is available for corporate payments when both addresses are in its delivery area' },
         ] },
         { title: { ru: 'завершение заказа', en: 'finishing the order' },
           shots: ['assets/go-3a.webp', 'assets/go-3b.webp'], notes: [
-          { b: [1.5, 53.6], at: 'l', tail: 'tr', x: 40, y: 792, h: 117, ru: 'Заранее предупреждаем об ограничениях. Например, робот не может проверить возраст получателя', en: 'We flag delivery restrictions up front. For example, the rover can’t verify the recipient’s age' },
-          { always: true, b: [99.4, 39.6], at: 'r', tail: 'tl', x: 1100, y: 421, h: 117, ru: 'Показываем цены до подъезда и до двери. Вариант доставки человек выбирает сам', en: 'We show both prices and let customers choose delivery to the building entrance or to the door' },
+          { at: 'l', y: 792, h: 117, heading: { ru: 'что нельзя отправить', en: 'delivery restrictions' },
+            ru: 'Заранее предупреждаем об ограничениях. Например, робот не может проверить возраст получателя',
+            en: 'We flag delivery restrictions up front. For example, the rover can’t verify the recipient’s age' },
+          { at: 'r', y: 421, h: 117, heading: { ru: 'подъезд или дверь', en: 'entrance or doorstep' },
+            ru: 'Показываем цены до подъезда и до двери. Вариант доставки человек выбирает сам',
+            en: 'We show both prices and let customers choose delivery to the building entrance or to the door' },
         ] },
         { title: { ru: 'общение с роботом', en: 'talking to the robot' },
           shots: ['assets/go-4a.webp', 'assets/go-4b.webp'], notes: [
-          { b: [1.5, 82.3], at: 'l', tail: 'tr', x: 40, y: 755, h: 117, ru: 'Отправитель встречает робота всегда, получатель — при доставке до подъезда', en: 'The sender always meets the rover. The recipient meets it outside for delivery to the building entrance' },
-          { b: [99.4, 65.5], at: 'r', tail: 'bl', x: 1100, y: 607, h: 100, ru: 'Схема помогает найти кнопку на крышке, когда робот уже подъехал', en: 'The diagram points out the button on the lid so it’s easier to find when the rover arrives' },
-          { always: true, b: [79.9, 98.9], at: 'r', tail: 'tl', x: 1100, y: 940, h: 83, ru: 'На загрузку есть минута. Просим подтвердить открытие, когда отправитель уже рядом', en: 'The sender has one minute to load the parcel. We ask them to confirm they’re ready before opening the lid' },
+          { at: 'l', y: 755, h: 117, heading: { ru: 'кто встречает робота', en: 'who meets the rover' },
+            ru: 'Отправитель встречает робота всегда, получатель — при доставке до подъезда',
+            en: 'The sender always meets the rover. The recipient meets it outside for delivery to the building entrance' },
+          { at: 'r', y: 607, h: 100, heading: { ru: 'кнопка на крышке', en: 'the lid button' },
+            ru: 'Схема помогает найти кнопку на крышке, когда робот уже подъехал',
+            en: 'The diagram points out the button on the lid so it’s easier to find when the rover arrives' },
+          { at: 'r', y: 940, h: 83, heading: { ru: 'минута на загрузку', en: 'one minute to load' },
+            ru: 'На загрузку есть минута. Просим подтвердить открытие, когда отправитель уже рядом',
+            en: 'The sender has one minute to load the parcel. We ask them to confirm they’re ready before opening the lid' },
         ] },
         { title: { ru: 'доставка до двери', en: 'delivery to the door' },
           shots: ['assets/go-5a.webp', 'assets/go-5b.webp'], notes: [
-          { always: true, b: [98.8, 72.1], at: 'r', tail: 'tl', x: 1100, y: 708, h: 83, ru: 'Когда курьер забирает посылку у робота, в трекинге появляется кнопка звонка', en: 'Once the courier collects the parcel from the rover, the tracking screen shows a button to call them' },
+          { at: 'r', y: 708, h: 83, heading: { ru: 'звонок курьеру', en: 'calling the courier' },
+            ru: 'Когда курьер забирает посылку у робота, в трекинге появляется кнопка звонка',
+            en: 'Once the courier collects the parcel from the rover, the tracking screen shows a button to call them' },
         ] },
       ],
       ru: {
@@ -1114,51 +900,49 @@
     },
 
     expedition: {
-      plain: true,
-      video: '', shot: '',
       // Экраны собраны по макету: Фигма, Section 146:18467 (пять десктопов)
       screens: [
         { hold: true, cover: 'assets/expedition-cover-mac.png', coverWidth: 6472, coverInset: 59 },
         { title: { ru: 'личный кабинет', en: 'the client account' }, noteOverlay: 'alternate',
           cover: 'assets/expedition-home-mac.png', coverWidth: 6472, coverInset: 59,
           notes: [
-            { always: true, b: [4.71, 34.07], anchor: 'l',
+            { b: [4.71, 34.07], anchor: 'l', heading: { ru: 'баннер о договоре', en: 'contract banner' },
               ru: 'Баннер предупреждает об ограничении ещё на главной и сразу ведёт к договору',
               en: 'The dashboard banner flags the restriction early and gives customers a direct route to the contract' },
-            { b: [61.64, 80.19], anchor: 'l',
+            { b: [61.64, 80.19], anchor: 'l', heading: { ru: 'справка об экспедиции', en: 'freight forwarding guides' },
               ru: 'Справки на главной объясняют, что такое экспедиция и какие условия меняются',
               en: 'The dashboard guides explain what freight forwarding means and which terms are changing' },
           ] },
         { title: { ru: 'новый заказ', en: 'a new order' }, noteOverlay: true,
           cover: 'assets/expedition-order-mac.png', coverWidth: 6472, coverInset: 59,
           notes: [
-            { always: true, b: [67.14, 51.30], anchor: 'l',
+            { b: [67.14, 51.30], anchor: 'l', heading: { ru: 'договор из формы заказа', en: 'signing from the order form' },
               ru: 'Клиенты замечали ограничение при заказе. Добавили переход к договору прямо в форму',
               en: 'Clients noticed the restriction at checkout, so we linked to signing from the form' },
           ] },
-        { title: { ru: 'подписание договора', en: 'signing the contract' }, diagram: true,
+        { title: { ru: 'подписание договора', en: 'signing the contract' },
           frames: [
-            { src: 'assets/exp-sign-b.webp', x: 631, y: 212, w: 637, h: 766 },
-            { src: 'assets/exp-sign-a.webp', x: 131, y: 106, w: 637, h: 766 },
+            { src: 'assets/exp-sign-b.webp', size: [1274, 1414], x: 631, y: 212, w: 637, h: 766 },
+            { src: 'assets/exp-sign-a.webp', size: [1300, 1440], x: 131, y: 106, w: 637, h: 766 },
           ],
           arrow: { src: 'assets/exp-arrow-1.svg', x: 336, y: 894, w: 262, h: 89 },
           notes: [
-            { always: true, b: [95.29, 65.37], anchor: 'r',
+            { b: [95.29, 65.37], anchor: 'r', heading: { ru: 'подтверждение ИНН', en: 'tax ID verification' },
               ru: 'Данные уже в договоре. Клиенту остаётся подтвердить ИНН',
               en: 'We prefill the contract details. At this step, the customer verifies their tax ID' },
           ] },
-        { title: { ru: 'два баланса', en: 'two balances' }, diagram: true,
+        { title: { ru: 'два баланса', en: 'two balances' },
           frames: [
-            { src: 'assets/exp-fin-a.webp', x: 148, y: 228, w: 386, h: 425 },
-            { src: 'assets/exp-fin-b.webp', x: 850, y: 316, w: 402, h: 250 },
-            { src: 'assets/exp-fin-c.webp', x: 650, y: 604, w: 402, h: 250 },
+            { src: 'assets/exp-fin-a.webp', size: [772, 730], x: 148, y: 228, w: 386, h: 425 },
+            { src: 'assets/exp-fin-b.webp', size: [804, 380], x: 850, y: 316, w: 402, h: 250 },
+            { src: 'assets/exp-fin-c.webp', size: [804, 380], x: 650, y: 604, w: 402, h: 250 },
           ],
           arrows: [
             { src: 'assets/exp-arrow-2.svg', x: 562, y: 394, w: 262, h: 90 },
             { src: 'assets/exp-arrow-3.svg', x: 366, y: 667, w: 264, h: 126 },
           ],
           notes: [
-            { always: true, b: [4, 72], anchor: 'l',
+            { b: [4, 72], anchor: 'l', heading: { ru: 'баланс и оплата актов', en: 'balance and payment status' },
               ru: 'Для доставки показываем баланс и лимит, для экспедиции — оплату актов',
               en: 'The delivery card puts the balance and credit limit up front. The freight forwarding card highlights payment status' },
           ] },
@@ -1184,25 +968,25 @@
     },
 
     telegraph: {
-      plain: true,
-      video: '', shot: '',
       // Экраны собраны по макету: Фигма, Section 117:12274 (четыре десктопа)
       screens: [
-        { video: 'assets/tg-intro-screen.mp4', cover: 'assets/telegraph-cover-mac.png', coverWidth: 6560, coverInset: 147 },
+        { video: 'assets/tg-intro-screen.mp4', poster: 'assets/tg-intro-screen-poster.webp', cover: 'assets/telegraph-cover-mac.png', coverWidth: 6560, coverInset: 147 },
         // карточка 711×790 в центре кадра: глобус с фасада переворачивается в граф
-        { title: { ru: 'метафора связи', en: 'the metaphor of connection' }, diagram: true,
+        { title: { ru: 'метафора связи', en: 'the metaphor of connection' },
           flip: { x: 365, y: 145, w: 711, h: 790,
                   front: 'assets/tg-globe-clean.png', back: 'assets/tg-graph.webp' },
           notes: [
             { hint: true, x: 75, y: 735, ru: 'Наведи на глобус, чтобы увидеть, как он превращается в граф',
               en: 'Hover over the globe to see it turn into a graph' },
-            { r: 154, y: 777, ru: 'Взяла глобус с фасада и превратила его в граф. Идею связи продолжили через истории студентов',
+            { r: 154, y: 777, heading: { ru: 'от глобуса к графу', en: 'from globe to graph' },
+              ru: 'Взяла глобус с фасада и превратила его в граф. Идею связи продолжили через истории студентов',
               en: 'The facade’s globe becomes a graph linking the stories of students on the new campus' },
           ] },
         { title: { ru: 'главный экран', en: 'the home screen' }, noteOverlay: true,
           cover: 'assets/telegraph-final-mac.png', coverWidth: 6560, coverInset: 147,
           notes: [
-            { always: true, b: [5.61, 71.69], x: 40, y: 749, ru: 'По точкам графа можно читать ответы студентов об образовании, опыте и общении',
+            { b: [5.61, 71.69], x: 40, y: 749, heading: { ru: 'ответы студентов', en: 'student responses' },
+              ru: 'По точкам графа можно читать ответы студентов об образовании, опыте и общении',
               en: 'Explore the graph to read students’ answers about education, experience and communication' },
           ] },
       ],
@@ -1227,8 +1011,6 @@
     },
 
     aviasales: {
-      plain: true,
-      video: '', shot: '',
       // Экраны собраны по макету: Фигма, Section 4 (пять десктопов)
       screens: [
         { hold: true },                     // первый экран пустой — сюда встанет ролик
@@ -1237,13 +1019,13 @@
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-1.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-2.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-3.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { always: true, b: [-0.3, 84.5], at: 0, side: 'l', over: 179, y: 612,
+            { at: 0, side: 'l', y: 612, heading: { ru: 'баннер на главной', en: 'home screen banner' },
               ru: 'Баннер на главной знакомит с групповыми поездками ещё до поиска билетов',
               en: 'The home screen banner introduces group trips before travellers start searching for tickets' },
-            { b: [47.7, 50.7], at: 1, side: 'l', over: 232, y: 356,
+            { at: 1, side: 'l', y: 356, heading: { ru: 'переход из поиска', en: 'from search to planning' },
               ru: 'Из поискового запроса можно сразу перейти к планированию поездки с друзьями',
               en: 'Travellers can start planning a trip with friends directly from their search' },
-            { b: [99.0, 16.9], at: 2, side: 'r', over: 179, y: 318,
+            { at: 2, side: 'r', y: 318, heading: { ru: 'билеты на двоих и больше', en: 'flights for two or more' },
               ru: 'Предлагаем создать поездку, когда человек уже ищет билеты на двоих или больше',
               en: 'We suggest starting a group trip when someone searches for tickets for two or more people' },
           ] },
@@ -1252,10 +1034,10 @@
           phone: { w: 426.4, h: 885.333, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-4.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-5.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { b: [0.0, 77.3], at: 0, side: 'l', over: 54, y: 711,
+            { at: 0, side: 'l', y: 711, heading: { ru: 'подбор вариантов', en: 'trip suggestions' },
               ru: 'ИИ подбирает варианты поездки и помогает разделить оплату',
               en: 'The AI suggests trip options and helps split the payment' },
-            { always: true, b: [97.1, 47.7], at: 1, side: 'r', over: 73, y: 390,
+            { at: 1, side: 'r', y: 390, heading: { ru: 'одна ссылка для друзей', en: 'one link to share' },
               ru: 'Организатор заполняет короткую форму и отправляет друзьям одну ссылку',
               en: 'The organiser fills in a short form and shares one link with friends' },
           ] },
@@ -1263,13 +1045,13 @@
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-6.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-7.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-8.webp', w: 101.246, x: -0.519 }],
           notes: [
-            { b: [0.0, 50.9], at: 0, side: 'l', over: 179, y: 642,
+            { at: 0, side: 'l', y: 642, heading: { ru: 'обсуждение вариантов', en: 'discussing options' },
               ru: 'Собрали направления, билеты и жильё в комнате поездки, чтобы обсуждать варианты всей группой',
               en: 'We put destinations, flights and stays in the trip room so the whole group can discuss the options' },
-            { always: true, b: [96.1, 65.5], at: 1, side: 'l', over: 230, y: 471,
+            { at: 1, side: 'l', y: 471, heading: { ru: 'подтверждение и оплата', en: 'confirmation and payment' },
               ru: 'Покупка проходит после выбора и оплаты всеми. Остальным напоминаем',
               en: 'Everyone confirms and pays before booking. Pending members get a reminder' },
-            { b: [99.5, 50.9], at: 2, side: 'r', over: 179, y: 681,
+            { at: 2, side: 'r', y: 681, heading: { ru: 'билеты без интернета', en: 'offline access' },
               ru: 'Даты, брони и билеты доступны без интернета, чтобы их можно было открыть и в дороге',
               en: 'Dates, bookings and tickets are available offline so travellers can open them on the go' },
           ] },
@@ -1300,10 +1082,6 @@
   };
 
   const PROJECTS = {
-    // cover — «обложка»: путь к картинке ('assets/rover.png'), эмодзи или пара букв.
-    // Проект с case: '…' открывает экран кейса, с url: '…' — внешнюю ссылку.
-    // Пока один проект — остальные добавляются сюда по образцу: подпись на двух языках,
-    // case — id кейса в CASES, cover — картинка обложки 204×140.
     folder1: [
       { ru: 'роботы в го', en: 'robots in go', case: 'go', cover: 'assets/cover-go.webp' },
       { ru: 'экспедиция в лк', en: 'freight forwarding', case: 'expedition', cover: 'assets/cover-expedition.webp' },
@@ -1316,12 +1094,6 @@
       { ru: 'телеграф', en: 'telegraph', case: 'telegraph', cover: 'assets/cover-telegraph.webp' },
     ],
   };
-
-  // ▼ Тексты файлов. Взяты с abalashova.ru/admin_panel.
-  // Пустая строка разделяет абзацы, строка вида '## Заголовок' — подзаголовок.
-  // Документы на столе кейса: { ключ: { ru: { title, body }, en: {…} } }.
-  // Сейчас ни один кейс их не раскладывает — механизм оставлен на будущее.
-  const DOCS = {};
 
   const heart = '<img class="emo" src="assets/emoji-heart.png" alt="❤️">';
   const truck = '<img class="emo big" src="assets/emoji-delivery.png" alt="📦">';
@@ -1336,8 +1108,8 @@
       foot: '2026, всё своими лапками 🦦',
       f1: '02.2026 → <br class="folder-date-break">сейчас', f2: '08.2024 → <br class="folder-date-break">02.2026', f3: 'творческие проекты',
       resume: 'резюме.мяу', cat: 'мой.кот', cv: 'резюме',
-      collapse: 'Свернуть', expand: 'Развернуть', tap: 'жми', photoAlt: 'Настя Балашова', sound: 'Звук', back: 'Назад', close: 'Закрыть', home: 'назад',
-      videoSoon: 'Здесь будет видео с полным сценарием',
+      collapse: 'Свернуть', expand: 'Развернуть', photoAlt: 'Настя Балашова', sound: 'Звук', back: 'Назад', home: 'назад',
+      projects: 'Кейсы', graph: 'Показать граф',
     },
     en: {
       lang: 'en', name: 'Nastya Balashova', contact: 'contact me',
@@ -1347,8 +1119,8 @@
       foot: '2026, all made with my own paws 🦦',
       f1: '02.2026 → <br class="folder-date-break">now', f2: '08.2024 → <br class="folder-date-break">02.2026', f3: 'creative projects',
       resume: 'cv.meow', cat: 'my.cat', cv: 'CV',
-      collapse: 'Collapse', expand: 'Expand', tap: 'tap', photoAlt: 'Nastya Balashova', sound: 'Sound', back: 'Back', close: 'Close', home: 'back',
-      videoSoon: 'A video with the full scenario goes here',
+      collapse: 'Collapse', expand: 'Expand', photoAlt: 'Nastya Balashova', sound: 'Sound', back: 'Back', home: 'back',
+      projects: 'Projects', graph: 'Show graph',
     },
   };
 
@@ -1378,28 +1150,37 @@
     }
   }
 
-  function setLang(lang) {
+  const RESUME = { ru: 'assets/resume-ru.pdf', en: 'assets/resume-en.pdf' };
+
+  function translatePage() {
     const t = T[lang];
     document.documentElement.lang = lang;
-    document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t[el.dataset.i18n]; typograph(el); });
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.innerHTML = t[el.dataset.i18n];
+      typograph(el);
+    });
     document.querySelectorAll('[data-i18n-label]').forEach(el => el.setAttribute('aria-label', t[el.dataset.i18nLabel]));
     document.querySelectorAll('[data-i18n-alt]').forEach(el => { el.alt = t[el.dataset.i18nAlt]; });
+    document.querySelectorAll('[data-resume]').forEach(el => { el.href = RESUME[lang]; });
     document.getElementById('lang').textContent = t.lang;
-    document.title = lang === 'ru' ? 'Настя Балашова — продуктовый дизайнер' : 'Nastya Balashova — product designer';
+    for (const [label, project] of projectLabels) {
+      label.textContent = project[lang];
+      typograph(label);
+    }
     applyLinks();
-    if (window.buildFansReady) buildFans();
-    typograph(document.body);   // ни один предлог не должен висеть в конце строки
-    if (window.caseReady && currentCase) renderCase(currentCase);
-    if (window.docReady) openDocs.forEach((win, id) => fillDoc(win, id));
+    if (currentCase) translateCase();
+    else document.title = t.name + (lang === 'ru' ? ' — продуктовый дизайнер' : ' — product designer');
     store.set('lang', lang);
+    requestLayout();
   }
 
   // ── Саунд-дизайн: все звуки синтезируются Web Audio, без файлов ──
   const Sound = (() => {
-    let ctx, out, heard = false, on = store.get('sound') !== 'off';
+    let ctx, out, on = store.get('sound') !== 'off';
     const last = {};
 
     function unlock() {
+      if (!on) return;
       if (!ctx) {
         const AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
@@ -1408,14 +1189,12 @@
         out = ctx.createGain(); out.gain.value = .6;
         out.connect(comp).connect(ctx.destination);
       }
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state !== 'running') ctx.resume().catch(() => {});
     }
     // браузеры включают звук только после первого действия пользователя
-    ['pointerdown', 'pointerup', 'click', 'keydown', 'touchstart']
+    ['pointerdown', 'click', 'keydown']
       .forEach(e => addEventListener(e, unlock, { passive: true, capture: true }));
-    addEventListener('visibilitychange', () => { if (!document.hidden && ctx) ctx.resume().catch(() => {}); });
-
-    const ready = () => on && ctx && ctx.state === 'running';
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && on && ctx) unlock(); });
     // не даём одному звуку трещать, если курсор дёргается
     const throttle = (key, ms) => { const t = performance.now(); if (t - (last[key] || 0) < ms) return false; last[key] = t; return true; };
 
@@ -1501,143 +1280,168 @@
 
     return {
       play(name, arg, gap = 60) {
-        if (!on || !ctx || !sfx[name]) return;
+        if (!on || !ctx || document.hidden || !sfx[name]) return;
         const key = name + (arg ?? '');
         // контекст засыпает, когда вкладка уходит в фон или страница живёт во фрейме:
         // будим его и доигрываем звук, а не молчим
         if (ctx.state !== 'running') {
-          ctx.resume().then(() => { if (on && ctx.state === 'running' && throttle(key, gap)) { heard = true; sfx[name](arg); } }, () => {});
+          ctx.resume().then(() => { if (on && !document.hidden && ctx.state === 'running' && throttle(key, gap)) sfx[name](arg); }, () => {});
           return;
         }
-        if (throttle(key, gap)) { heard = true; sfx[name](arg); }
+        if (throttle(key, gap)) sfx[name](arg);
       },
       get on() { return on; },
-      set on(v) { on = v; store.set('sound', v ? 'on' : 'off'); },
-      // был ли хоть один реально сыгранный звук
-      get heard() { return heard; },
+      set on(value) {
+        on = value;
+        if (out) out.gain.setValueAtTime(on ? .6 : 0, ctx.currentTime);
+        store.set('sound', on ? 'on' : 'off');
+      },
       unlock,
     };
   })();
 
-  // Язык берётся из адреса (?lang=en), иначе из памяти, иначе из языка браузера.
-  // Адрес нужен, чтобы можно было дать ссылку сразу на английскую версию.
   const askedLang = new URLSearchParams(location.search).get('lang');
-  let lang = (askedLang === 'ru' || askedLang === 'en') ? askedLang
-           : store.get('lang') || (navigator.language.startsWith('ru') ? 'ru' : 'en');
-  // в адресе язык держим, только если он не родной для браузера — иначе не мусорим
+  const rememberedLang = store.get('lang');
+  let lang = Object.hasOwn(T, askedLang) ? askedLang
+           : Object.hasOwn(T, rememberedLang) ? rememberedLang
+           : navigator.language.startsWith('ru') ? 'ru' : 'en';
+  let languageInUrl = Boolean(askedLang) || lang === 'en';
+
   function syncLangUrl() {
-    const url = new URL(location);
-    if (lang === 'en') url.searchParams.set('lang', 'en'); else url.searchParams.delete('lang');
-    history.replaceState(null, '', url);
+    if (!languageInUrl) return;
+    const url = new URL(location.href);
+    if (url.searchParams.get('lang') === lang) return;
+    url.searchParams.set('lang', lang);
+    try { history.replaceState(history.state, '', url); } catch {}
   }
-  setLang(lang); syncLangUrl();
+
   document.getElementById('lang').onclick = () => {
     lang = lang === 'ru' ? 'en' : 'ru';
-    setLang(lang); syncLangUrl();
+    languageInUrl = true;
+    translatePage();
+    syncLangUrl();
     Sound.play('lang', lang === 'en');
   };
 
-  const setCollapsed = on => {
-    document.body.classList.toggle('collapsed', on);
-    Sound.play(on ? 'collapse' : 'expand');
-  };
-  document.getElementById('collapse').onclick = () => {
-    // в кейсе без файлов сворачивать карточку нечего — шеврон ведёт на главную
-    if (document.body.dataset.view === 'case') closeCase();   // в кейсе шеврон — это «назад»
-    else setCollapsed(true);
-  };
-  document.getElementById('expand').onclick = () => setCollapsed(false);
+  const cardFull = document.querySelector('.card-full');
+  const cardMini = document.querySelector('.card-mini');
+  const collapse = document.getElementById('collapse');
+  const expand = document.getElementById('expand');
 
-  // на телефонах наведения нет — кот оборачивается по тапу
+  function setCollapsed(on) {
+    document.body.classList.toggle('collapsed', on);
+    cardFull.inert = on;
+    cardMini.inert = !on;
+  }
+
+  collapse.onclick = e => {
+    setCollapsed(true);
+    Sound.play('collapse');
+    if (!e.detail) expand.focus();
+  };
+  expand.onclick = e => {
+    setCollapsed(false);
+    Sound.play('expand');
+    if (!e.detail) collapse.focus();
+  };
+
   const cat = document.getElementById('cat');
   let catNap;
-  // клик и тап: кот поднимает голову, мяукает и сам снова засыпает
   cat.onclick = () => {
-    Sound.unlock();
     cat.classList.add('look');
     Sound.play('meow', null, 0);
     clearTimeout(catNap);
     catNap = setTimeout(() => cat.classList.remove('look'), 1400);
   };
-  cat.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') Sound.play('meow', null, 1200); });
-
-  // папки
-  document.querySelectorAll('.folder').forEach((f, i) => {
-    f.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') Sound.play('folderHover', i, 120); });
-    f.addEventListener('click', () => Sound.play('folderOpen', i));
+  cat.addEventListener('pointerenter', e => {
+    if (e.pointerType === 'mouse') Sound.play('meow', null, 1200);
   });
 
-  // ── Веер проектов: раскладываем карточки по дуге над папкой ──
-  function buildFans() {
-    document.querySelectorAll('.folder').forEach(folder => {
-      const key = folder.querySelector('[data-link]').dataset.link, items = (PROJECTS[key] || []).filter(it => !it.hidden);
-      folder.querySelector('.fan')?.remove();
-      if (!items.length) return;
+  const projectLabels = new Map();
+  let openFolder = null;
 
+  function setFolder(folder) {
+    if (openFolder === folder) return;
+    if (openFolder) {
+      openFolder.classList.remove('open');
+      openFolder.querySelector('.f-link').setAttribute('aria-expanded', 'false');
+      openFolder.querySelector('.fan').inert = true;
+    }
+    openFolder = folder;
+    if (folder) {
+      const fan = folder.querySelector('.fan');
+      layoutFan(fan);
+      folder.classList.add('open');
+      folder.querySelector('.f-link').setAttribute('aria-expanded', 'true');
+      fan.inert = false;
+    }
+  }
+
+  function buildFans() {
+    document.querySelectorAll('.folder').forEach((folder, index) => {
+      const trigger = folder.querySelector('.f-link');
+      const key = folder.dataset.folder;
       const fan = document.createElement('div');
       fan.className = 'fan';
-      // в первой папке обложки вылетают вправо, в остальных — влево
+      fan.id = key + '-projects';
+      fan.inert = true;
+      trigger.setAttribute('aria-controls', fan.id);
       if (key === 'folder1') fan.dataset.dir = 'right';
-      items.forEach((it, i) => {
-        const a = document.createElement(it.case ? 'button' : 'a');
-        if (it.case) { a.type = 'button'; a.dataset.case = it.case; }
-        a.className = 'fan-item';
-        const name = it[lang] || it.ru || it.en || '';
+
+      PROJECTS[key].filter(project => !project.hidden).forEach((project, i) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'fan-item';
+        card.dataset.case = project.case;
+        card.dataset.seed = project.case;
+        card.style.setProperty('--i', i);
+
         const cover = document.createElement('span');
         cover.className = 'fan-cover';
-        const art = it.cover || name.slice(0, 1).toUpperCase();
-        if (/[\/.](png|jpe?g|svg|webp|gif)$|^https?:|^assets\//i.test(art)) {
-          const img = document.createElement('img'); img.src = art; img.alt = ''; cover.appendChild(img);
-        } else {
-          const glyph = document.createElement('span');
-          glyph.className = 'fan-emoji'; glyph.textContent = art; cover.appendChild(glyph);
-        }
+        const img = document.createElement('img');
+        img.alt = '';
+        img.decoding = 'async';
+        img.src = project.cover;
+        cover.appendChild(img);
         const label = document.createElement('span');
-        label.className = 'fan-name'; label.textContent = name;
-        a.append(cover, label);
-        if (!it.case) {
-          a.href = it.url || '#';
-          if (/^https?:/.test(a.href)) { a.target = '_blank'; a.rel = 'noopener'; }
-        }
-        a.style.setProperty('--i', i);
-        a.dataset.seed = (it.case || it.url || '') + i;
-        a.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') Sound.play('tick', 'fan' + i, 60); });
-        fan.appendChild(a);
+        label.className = 'fan-name';
+        projectLabels.set(label, project);
+        card.append(cover, label);
+        card.addEventListener('pointerenter', e => {
+          if (e.pointerType === 'mouse') Sound.play('tick', 'fan' + i, 60);
+        });
+        fan.appendChild(card);
       });
-      // слушатели вешаем один раз: buildFans вызывается ещё и при смене языка
-      if (!folder.dataset.bound) {
-        folder.dataset.bound = '1';
-        // каждый раз карточки вылетают чуть вразнобой: задержка и скорость свои
-        folder.addEventListener('pointerenter', () => {
-          folder.querySelectorAll('.fan-item').forEach((a, i) => {
-            a.style.transitionDelay = Math.round(i * 36 + Math.random() * 90) + 'ms';
-            a.style.transitionDuration = (.42 + Math.random() * .16).toFixed(2) + 's, .22s';
-          });
-        });
-        folder.addEventListener('pointerleave', () => {
-          folder.querySelectorAll('.fan-item').forEach(a => { a.style.transitionDelay = '0ms'; });
-        });
-        // там, где нет курсора, пучок открывается по тапу по папке
-        folder.addEventListener('click', e => {
-          if (matchMedia('(hover: hover)').matches || e.target.closest('.fan-item')) return;
-          e.preventDefault();
-          const open = folder.classList.contains('open');
-          closeFans();
-          const current = folder.querySelector('.fan');
-          if (!open && current) { layoutFan(current); folder.classList.add('open'); }
-        });
-      }
       folder.appendChild(fan);
-      typograph(fan);
-      layoutFan(fan);
+
+      folder.addEventListener('pointerenter', e => {
+        if (e.pointerType !== 'mouse') return;
+        setFolder(folder);
+        Sound.play('folderHover', index, 120);
+      });
+      folder.addEventListener('pointerleave', e => {
+        if (e.pointerType === 'mouse' && openFolder === folder && !folder.contains(document.activeElement)) setFolder(null);
+      });
+      trigger.addEventListener('click', e => {
+        const mouseClick = e.pointerType === 'mouse' && e.detail > 0;
+        if (openFolder === folder && !mouseClick) setFolder(null);
+        else { setFolder(folder); Sound.play('folderOpen', index); }
+      });
+      folder.addEventListener('focusout', e => {
+        if (openFolder === folder && e.relatedTarget && !folder.contains(e.relatedTarget)) setFolder(null);
+      });
     });
   }
 
-  function closeFans() {
-    document.querySelectorAll('.folder.open').forEach(f => f.classList.remove('open'));
-  }
-  // тап мимо папки — пучок закрывается
-  addEventListener('click', e => { if (!e.target.closest('.folder')) closeFans(); });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.folder')) setFolder(null);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || !openFolder) return;
+    const trigger = openFolder.querySelector('.f-link');
+    setFolder(null);
+    trigger.focus();
+  });
 
   // обложки встают над папкой шахматкой: по две в ряд, ряды поднимаются вверх
   // и слегка уходят вправо. Если стопка не помещается, она уменьшается и сдвигается целиком.
@@ -1682,7 +1486,7 @@
       right = Math.max(right, p.x + w / 2);
     });
 
-    const available = folder.getBoundingClientRect().top - pad;
+    const available = Math.max(0, folder.getBoundingClientRect().top - pad);
     const k = Math.min(1, available / top, (innerWidth - 2 * pad) / (right - left));
     fan.style.setProperty('--k', k.toFixed(3));
 
@@ -1701,10 +1505,6 @@
     fan.style.setProperty('--bl', (k * left + shift - rem).toFixed(1) + 'px');
     fan.style.setProperty('--bw', (k * (right - left) + 2 * rem).toFixed(1) + 'px');
   }
-
-  window.buildFansReady = true;
-  buildFans();
-  addEventListener('resize', () => document.querySelectorAll('.fan').forEach(layoutFan));
 
   // резюме шуршит бумагой
   const resume = document.querySelector('.resume');
@@ -1726,730 +1526,542 @@
   placeFoot();
   mobile.addEventListener('change', placeFoot);
 
-  // ── Экран кейса ──
   let currentCase = null;
+  const caseTitle = document.getElementById('case-title');
   const caseText = document.getElementById('case-text');
-  const caseVideo = document.getElementById('case-video');
+  const feed = document.getElementById('case-feed');
+  const caseBar = document.getElementById('case-bar');
+  const caseCopy = new Map();
+  const videos = new Map();
+  const PHONE = { w: 431.333, h: 885.333, y: 97 };
+  const percent = (value, base) => (value * 100 / base).toFixed(3) + '%';
 
-  // ── Лента экранов кейса (макет 85:19987 и дальше) ──
-  // Экран 1 — устройство с видео, дальше — пары экранов с выносками.
-  // Координаты выносок пересчитываются из макета 1400×1080 в проценты.
-  const feed = document.getElementById('case-feed'), caseBar = document.getElementById('case-bar');
-  const PH = { x: 249, x2: 720.333, y: 97, w: 431.333, h: 885.333 };   // телефон в макете 1400×1080
+  function createImage(src, className, first = false) {
+    const img = document.createElement('img');
+    img.className = className;
+    img.alt = '';
+    img.decoding = 'async';
+    img.loading = first ? 'eager' : 'lazy';
+    if (first) img.fetchPriority = 'high';
 
-  // обложка кейса — та же картинка, что лежит в папке на главной
-  function coverOf(id) {
-    for (const list of Object.values(PROJECTS))
-      for (const it of list) if (it.case === id && it.cover) return it.cover;
-    return '';
+    const laptop = src.endsWith('-mac.png');
+    if (!laptop && src !== 'assets/tg-globe-clean.png') {
+      img.src = src;
+      return img;
+    }
+
+    const picture = document.createElement('picture');
+    const source = document.createElement('source');
+    const stem = src.slice(0, -4);
+    source.type = 'image/webp';
+    if (laptop) {
+      source.srcset = stem + '-1600.webp 1600w, ' + stem + '-3200.webp 3200w';
+      source.sizes = '(max-width: 760px) 100vw, (max-aspect-ratio: 4/5) 100vw, (max-width: 2050px) 72vw, 1488px';
+    } else source.srcset = stem + '.webp';
+    img.addEventListener('error', () => source.remove(), { once: true });
+    picture.append(source, img);
+    img.src = src;
+    return picture;
   }
 
-  function buildFeed(c, t, id) {
-    feed.querySelectorAll('video').forEach(v => { v.pause(); v.removeAttribute('src'); v.load(); });
-    noteRO.disconnect();
-    feed.innerHTML = '';
-    const screens = (t.screens || c.screens || []);
-    document.body.classList.toggle('has-feed', screens.length > 0);
-    if (!screens.length) return;
-
-    screens.forEach(sc => {
-      const sec = document.createElement('section');
-      sec.className = 'case-screen';
-      if (sc.noteOverlay) sec.classList.add(sc.noteOverlay === 'alternate' ? 'mac-note-alternate' : 'mac-note-overlay');
-      if (sc.title) {                                // заголовок пары — только на телефоне
-        const h = document.createElement('h3');
-        h.className = 'scr-title';
-        h.textContent = sc.title[lang] || sc.title.ru;
-        sec.appendChild(h);
+  function syncVideo(video, state) {
+    if (!state.visible || document.hidden) {
+      if (!video.paused) {
+        state.resume = true;
+        video.pause();
       }
-      const cover = sc.cover || (sc.hold ? coverOf(id) : '');
-      if (sc.hold && !cover) sec.classList.add('is-hold');
+    } else if (state.resume) {
+      state.resume = false;
+      video.play().catch(() => {});
+    }
+  }
+
+  const videoObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      const state = videos.get(entry.target);
+      if (!state) continue;
+      state.visible = entry.isIntersecting && entry.intersectionRatio >= .15;
+      syncVideo(entry.target, state);
+    }
+  }, { threshold: .15 });
+
+  document.addEventListener('visibilitychange', () => {
+    videos.forEach((state, video) => syncVideo(video, state));
+  });
+
+  // Готовим соседние экраны заранее, в том числе при прокрутке внутри ленты.
+  const slideObserver = new IntersectionObserver(entries => {
+    for (const { target, isIntersecting } of entries) {
+      if (!isIntersecting || !target.isConnected) continue;
+      for (const slide of [target.previousElementSibling, target, target.nextElementSibling]) {
+        slide?.querySelectorAll('img[loading="lazy"]').forEach(img => { img.loading = 'eager'; });
+      }
+    }
+  });
+
+  function clearFeed() {
+    slideObserver.disconnect();
+    videoObserver.disconnect();
+    videos.forEach((state, video) => {
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+    });
+    videos.clear();
+    caseCopy.clear();
+    feed.replaceChildren();
+  }
+
+  function createVideo(screen) {
+    const video = document.createElement('video');
+    video.playsInline = video.defaultMuted = video.muted = video.loop = video.controls = true;
+    video.preload = 'metadata';
+    video.poster = screen.poster;
+    video.src = screen.video;
+    videos.set(video, { visible: false, resume: true });
+    return video;
+  }
+
+  function createNote(copy) {
+    const note = document.createElement('div');
+    note.className = 'note';
+    const body = document.createElement('span');
+    body.className = 'note-body';
+    const text = document.createElement('span');
+    text.className = 'note-text';
+    body.appendChild(text);
+    caseCopy.set(text, copy);
+    note.appendChild(body);
+    return note;
+  }
+
+  function createScreenNotes(notes) {
+    const block = document.createElement('div');
+    block.className = 'screen-notes';
+    for (const copy of notes) {
+      const section = document.createElement('section');
+      const heading = document.createElement('h4');
+      const text = document.createElement('p');
+      caseCopy.set(heading, copy.heading);
+      caseCopy.set(text, copy);
+      section.append(heading, text);
+      block.appendChild(section);
+    }
+    return block;
+  }
+
+  function positionWindow(el, frame) {
+    el.style.left = percent(frame.x, 1400);
+    el.style.top = percent(frame.y, 1080);
+    el.style.width = percent(frame.w, 1400);
+    el.style.height = percent(frame.h, 1080);
+  }
+
+  function createFlip(screen) {
+    const stage = document.createElement('div');
+    stage.className = 'win-stage flip-stage';
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'flip-card';
+    card.dataset.i18nLabel = 'graph';
+    card.setAttribute('aria-label', T[lang].graph);
+    card.setAttribute('aria-pressed', 'false');
+    positionWindow(card, screen.flip);
+    const back = createImage(screen.flip.back, 'flip-back');
+    card.append(createImage(screen.flip.front, 'flip-front'), back);
+    stage.appendChild(card);
+
+    for (const copy of screen.notes) {
+      const note = createNote(copy);
+      if (copy.hint) note.classList.add('flip-hint');
+      if (copy.r != null) {
+        note.style.setProperty('--nr', percent(copy.r, 1400));
+        note.classList.add('anch-r');
+      } else note.style.setProperty('--nx', percent(copy.x, 1400));
+      note.style.setProperty('--ny', percent(copy.y, 1080));
+      stage.appendChild(note);
+    }
+
+    let wantsGraph = false;
+    function showGraph(show) {
+      wantsGraph = show;
+      if (!show) {
+        stage.classList.remove('on');
+        card.setAttribute('aria-pressed', 'false');
+        return;
+      }
+      back.loading = 'eager';
+      back.decode().then(() => {
+        if (!wantsGraph || !stage.isConnected) return;
+        stage.classList.add('on');
+        card.setAttribute('aria-pressed', 'true');
+      }).catch(() => {});
+    }
+    card.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showGraph(true); });
+    stage.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') showGraph(false); });
+    card.addEventListener('click', e => {
+      showGraph(e.pointerType === 'mouse' && e.detail ? true : !wantsGraph);
+    });
+    card.addEventListener('keydown', e => { if (e.key === 'Escape') showGraph(false); });
+    return stage;
+  }
+
+  function createWindows(screen, first) {
+    const stage = document.createElement('div');
+    stage.className = 'win-stage';
+    const frames = screen.frames;
+    const left = Math.min(...frames.map(frame => frame.x));
+    const right = Math.max(...frames.map(frame => frame.x + frame.w));
+    stage.style.setProperty('--center-x', 700 - (left + right) / 2);
+    frames.forEach((frame, i) => {
+      const box = document.createElement('div');
+      box.className = 'win win-img';
+      box.style.zIndex = frames.length - i;
+      // В координатах макета у окна была шапка высотой 60.
+      positionWindow(box, { ...frame, y: frame.y + 60, h: frame.h - 60 });
+      const shot = createImage(frame.src, 'win-shot', first);
+      [shot.width, shot.height] = frame.size;
+      box.appendChild(shot);
+      stage.appendChild(box);
+    });
+    for (const arrow of screen.arrows || (screen.arrow ? [screen.arrow] : [])) {
+      const image = createImage(arrow.src, 'stage-arrow', first);
+      image.style.zIndex = frames.length + 1;
+      positionWindow(image, arrow);
+      stage.appendChild(image);
+    }
+    for (const copy of screen.notes || []) {
+      const note = createNote(copy);
+      if (copy.b) {
+        const [x, y] = copy.b;
+        const right = copy.anchor ? copy.anchor === 'r' : x >= 50;
+        note.classList.toggle('anch-r', right);
+        note.style.setProperty(right ? '--nr' : '--nx', 'calc(' + (right ? 100 - x : x) + '% - var(--note-anchor) / 2)');
+        note.style.setProperty('--ny', 'calc(' + y + '% - var(--note-anchor) / 2)');
+      } else {
+        note.style.setProperty('--nx', percent(copy.x, 1400));
+        note.style.setProperty('--ny', percent(copy.y, 1080));
+      }
+      stage.appendChild(note);
+    }
+    return stage;
+  }
+
+  function createPhones(screen, first) {
+    const pair = document.createElement('div');
+    pair.className = 'scr-pair';
+    if (screen.phone) {
+      pair.style.setProperty('--ph-h', screen.phone.h);
+      pair.style.setProperty('--ph-ar', screen.phone.ar);
+    }
+    for (const shot of screen.shots) {
+      const item = document.createElement('div');
+      item.className = 'scr-item';
+      if (typeof shot === 'object') {
+        item.classList.add('bleed');
+        item.style.setProperty('--sw', shot.w + '%');
+        item.style.setProperty('--sx', shot.x + '%');
+      }
+      item.appendChild(createImage(shot.src || shot, '', first));
+      pair.appendChild(item);
+    }
+    return pair;
+  }
+
+  function addDesktopNotes(section, row, screen, goPair) {
+    section.classList.add('has-desktop-notes');
+    const notes = document.createElement('div');
+    notes.className = 'desktop-notes';
+    const left = document.createElement('div');
+    const right = document.createElement('div');
+    left.className = right.className = 'desktop-note-group';
+    const goNoteY = [0, 0];
+
+    for (const copy of screen.notes) {
+      const card = document.createElement('div');
+      card.className = 'desktop-note';
+      const text = document.createElement('span');
+      text.className = 'note-text';
+      caseCopy.set(text, copy);
+      card.appendChild(text);
+      const onLeft = screen.shots && (copy.side || copy.at) === 'l';
+      const group = onLeft ? left : right;
+      group.appendChild(card);
+      if (goPair) goNoteY[onLeft ? 0 : 1] += (copy.y + copy.h / 2 - PHONE.y) / PHONE.h;
+      else if (copy.y != null) group.style.setProperty('--note-y', copy.y / 1080);
+    }
+    if (goPair) [left, right].forEach((group, i) => {
+      if (group.childElementCount) group.style.setProperty('--note-y', goNoteY[i] / group.childElementCount);
+    });
+    if (goPair || left.childElementCount) notes.appendChild(left);
+    if (goPair || right.childElementCount) notes.appendChild(right);
+    if (left.childElementCount && right.childElementCount) section.classList.add('has-two-note-groups');
+    if (screen.shots) {
+      const count = screen.shots.length;
+      row.style.setProperty('--frame-width', count * (screen.phone?.w || PHONE.w) + (count - 1) * 40 + 12);
+    }
+    section.appendChild(notes);
+  }
+
+  function buildFeed(id) {
+    feed.classList.toggle('go-feed', id === 'go');
+    CASES[id].screens.forEach((screen, index) => {
+      const first = index === 0;
+      const section = document.createElement('section');
+      section.className = 'case-screen';
+      const goPair = id === 'go' && Boolean(screen.shots);
+      section.classList.toggle('go-pair', goPair);
+      if (screen.noteOverlay) section.classList.add(screen.noteOverlay === 'alternate' ? 'mac-note-alternate' : 'mac-note-overlay');
+      if (screen.title) {
+        const title = document.createElement('h3');
+        title.className = 'scr-title';
+        caseCopy.set(title, screen.title);
+        section.appendChild(title);
+      }
+      const notes = screen.notes?.filter(copy => !copy.hint);
+      if (notes?.length) section.appendChild(createScreenNotes(notes));
+
       const row = document.createElement('div');
       row.className = 'scr-row';
-
-      let coverBox;
+      const cover = screen.cover || (screen.hold && Object.values(PROJECTS).flat().find(project => project.case === id)?.cover);
       if (cover) {
-        row.classList.add('fit');                    // масштаб как у экранов с кадрами
+        row.classList.add('fit');
         const box = document.createElement('div');
         box.className = 'scr-cover';
-        coverBox = box;
-        if (sc.coverWidth) {
-          sec.classList.add('mac-screen');
+        let art = box;
+        if (screen.coverWidth) {
+          section.classList.add('mac-screen');
           box.classList.add('mac-cover');
-          box.style.setProperty('--cover-width', sc.coverWidth);
-          box.style.setProperty('--cover-inset', sc.coverInset);
-          coverBox = document.createElement('div');
-          coverBox.className = 'mac-cover-art';
-          box.appendChild(coverBox);
+          box.style.setProperty('--cover-width', screen.coverWidth);
+          box.style.setProperty('--cover-inset', screen.coverInset);
+          art = document.createElement('div');
+          art.className = 'mac-cover-art';
+          box.appendChild(art);
         }
-        const img = document.createElement('img');
-        img.src = cover; img.alt = '';
-        coverBox.appendChild(img);
+        art.appendChild(createImage(cover, '', first));
+        if (screen.video) art.appendChild(createVideo(screen));
         row.appendChild(box);
-      }
-      if (sc.video) {
-        const box = coverBox || document.createElement('div');
-        if (!coverBox) {
-          box.className = 'scr-video';
-          if (sc.ar) {
-            row.classList.add('vid'); box.classList.add('wide');
-            box.style.setProperty('--ar', sc.ar);
-          }
-          row.appendChild(box);
-        }
-        const v = document.createElement('video');
-        v.playsInline = v.muted = v.loop = v.autoplay = v.controls = true;
-        v.preload = 'metadata';
-        box.appendChild(v);
-        v.src = sc.video;
-        v.addEventListener('loadeddata', () => v.play().catch(() => {}), { once: true });
-      }
-      if (sc.flip) {                                 // карточка-перевёртыш: глобус сменяется графом
-        row.className = 'scr-win';
-        const st = document.createElement('div'); st.className = 'win-stage flip-stage';
-        const pc = (v, base) => (v / base * 100).toFixed(3) + '%';
-        const card = document.createElement('div');
-        card.className = 'flip-card';
-        card.style.left = pc(sc.flip.x, 1400); card.style.top = pc(sc.flip.y, 1080);
-        card.style.width = pc(sc.flip.w, 1400); card.style.height = pc(sc.flip.h, 1080);
-        card.innerHTML = '<img class="flip-front" alt="" loading="lazy">'
-                       + '<img class="flip-back" alt="" loading="lazy">';
-        card.querySelector('.flip-front').src = sc.flip.front;
-        card.querySelector('.flip-back').src = sc.flip.back;
-        st.appendChild(card);
-        const bar = document.createElement('div'); bar.className = 'note-bar';
-        (sc.notes || []).forEach(n => {
-          const el = document.createElement('div');
-          el.className = 'note';
-          if (n.hint) el.classList.add('flip-hint');
-          if (n.r != null) { el.style.setProperty('--nr', pc(n.r, 1400)); el.classList.add('anch-r'); }
-          else { el.style.setProperty('--nx', pc(n.x, 1400)); }
-          el.style.setProperty('--ny', pc(n.y, 1080));
-          el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
-                       + '<span class="note-body"><span class="note-text"></span></span>';
-          el.querySelector('.note-text').textContent = n[lang] || n.ru;
-          bar.appendChild(el);
-        });
-        if (bar.children.length) st.appendChild(bar);
-        // на компьютере карточка переворачивается по наведению и держится, пока курсор на кадре,
-        // чтобы можно было дотянуться до выносок; на телефоне — по тапу
-        const hoverable = () => matchMedia('(hover: hover)').matches;
-        card.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') st.classList.add('on'); });
-        st.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') st.classList.remove('on'); });
-        card.addEventListener('click', () => { if (!hoverable()) st.classList.toggle('on'); });
-        row.appendChild(st);
-      }
-      const frames = sc.frames || [];
-      if (frames.length || (sc.cover && sc.notes?.length)) {
-        if (frames.length) row.className = sc.diagram ? 'scr-win diagram-row' : 'scr-win';
-        const st = document.createElement('div'); st.className = 'win-stage';
-        if (sc.diagram) {
-          const left = Math.min(...frames.map(frame => frame.x));
-          const right = Math.max(...frames.map(frame => frame.x + frame.w));
-          st.style.setProperty('--center-x', 700 - (left + right) / 2);
-        }
-        const px = (v, base) => (v / base * 100).toFixed(3) + '%';
-        const place = (el, o) => {                   // координаты прямо из макета 1400×1080
-          el.style.left = px(o.x, 1400); el.style.top = px(o.y, 1080);
-          el.style.width = px(o.w, 1400); el.style.height = px(o.h, 1080);
-        };
-        frames.forEach((f, i) => {                // порядок в массиве — порядок чтения, первое окно сверху
-          const el = document.createElement('div');
-          el.className = 'win win-img';
-          el.style.zIndex = frames.length - i;
-          // Координаты в макете включали шапку высотой 60.
-          const inset = sc.diagram ? 60 : 12;
-          place(el, { ...f, y: f.y + inset, h: f.h - inset });
-          if (!sc.diagram) {
-            el.innerHTML = '<div class="browser-tabs" aria-hidden="true">'
-                       + '<span class="browser-controls"><i></i><i></i><i></i></span>'
-                       + '<span class="browser-tab"></span></div>';
-            el.querySelector('.browser-tab').textContent = sc.title?.[lang] || t.title;
-          }
-          const shot = document.createElement('img');
-          shot.className = 'win-shot';
-          shot.alt = '';
-          shot.loading = 'lazy';
-          shot.src = f.src;
-          el.appendChild(shot);
-          st.appendChild(el);
-        });
-        (sc.arrows || (sc.arrow ? [sc.arrow] : [])).forEach(ar => {   // стрелки между окнами
-          const a = document.createElement('img');
-          a.className = 'stage-arrow'; a.src = ar.src; a.alt = ''; a.loading = 'lazy';
-          a.style.zIndex = frames.length + 1;
-          place(a, ar);
-          st.appendChild(a);
-        });
-        // на компьютере выноски стоят по координатам, на телефоне собираются в ряд «жми»
-        const bar = document.createElement('div'); bar.className = 'note-bar';
-        (sc.notes || []).forEach(n => {
-          const el = document.createElement('div');
-          el.className = 'note';
-          if (n.b) {                                           // b — центр кнопки в процентах от кадра
-            const half = v => 'calc(' + v.toFixed(3) + '% - var(--tap) / 2)';
-            const toLeft = n.anchor ? n.anchor === 'r' : n.b[0] >= 50;   // влево растёт плашка или вправо
-            if (toLeft) { el.style.setProperty('--nr', half(100 - n.b[0])); el.classList.add('anch-r'); }
-            else el.style.setProperty('--nx', half(n.b[0]));
-            el.style.setProperty('--ny', half(n.b[1]));
-          } else if (n.r === 'snd') {                          // правым краем ровно под кнопкой звука
-            el.classList.add('at-snd', 'anch-r');
-          } else if (n.r != null) {                            // r — отступ правого края от края кадра
-            el.style.setProperty('--nr', px(n.r, 1400)); el.classList.add('anch-r');
-          } else {                                             // x — левый край плашки в макете
-            el.style.setProperty('--nx', px(n.x, 1400));
-          }
-          if (n.always) el.classList.add('always');
-          if (!n.b) el.style.setProperty('--ny', px(n.y, 1080));
-          el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
-                       + '<span class="note-body"><span class="note-text"></span></span>';
-          el.querySelector('.note-text').textContent = n[lang] || n.ru;
-          bar.appendChild(el);
-        });
-        if (bar.children.length) st.appendChild(bar);
-        row.appendChild(st);
-      }
-      if (sc.laptop) {                               // ноутбук с кадром интерфейса
+      } else if (screen.video) {
         const box = document.createElement('div');
-        box.className = 'scr-laptop';
-        box.innerHTML = '<img class="mb-body" src="assets/macbook.png" alt="">'
-                      + '<div class="mb-screen has-shot"><img class="mb-shot" alt=""></div>';
-        box.querySelector('.mb-shot').src = sc.laptop;
+        box.className = 'scr-video';
+        box.appendChild(createVideo(screen));
         row.appendChild(box);
       }
-      if ((sc.wide || []).length) {                  // широкий экран: кадры интерфейса + выноска
-        row.className = 'scr-wide';
-        const stage = document.createElement('div'); stage.className = 'wide-stage';
-        const shots = document.createElement('div'); shots.className = 'wide-shots';
-        shots.style.setProperty('--shots', sc.wide.length);
-        sc.wide.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src; img.alt = ''; img.loading = 'lazy';
-          shots.appendChild(img);
-        });
-        stage.appendChild(shots);
-        if (sc.note) {
-          const el = document.createElement('div');
-          el.className = 'note';
-          el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
-                       + '<span class="note-body"><span class="note-text"></span></span>';
-          el.querySelector('.note-text').textContent = sc.note[lang] || sc.note.ru;
-          stage.appendChild(el);
-        }
-        row.appendChild(stage);
-      }
-      const items = [];
-      if ((sc.shots || []).length) {
-        const pair = document.createElement('div');
-        pair.className = 'scr-pair';
-        if (sc.phone) {                              // телефон своего размера — иначе 431,33×885,33
-          if (sc.phone.h) pair.style.setProperty('--ph-h', sc.phone.h);
-          if (sc.phone.ar) pair.style.setProperty('--ph-ar', sc.phone.ar);
-          row.classList.add('fit');                  // масштаб считается от ширины всей композиции
-          if (sc.span) row.style.setProperty('--span', sc.span);
-        }
-        sc.shots.forEach(src => {
-          const item = document.createElement('div');
-          item.className = 'scr-item';
-          const img = document.createElement('img');
-          if (typeof src === 'object') {              // снимок с запасом вокруг корпуса
-            item.classList.add('bleed');
-            img.src = src.src;
-            item.style.setProperty('--sw', src.w + '%');
-            item.style.setProperty('--sx', src.x + '%');
-            if (src.y != null) item.style.setProperty('--sy', src.y + '%');
-          } else img.src = src;
-          img.alt = ''; img.loading = 'lazy';
-          item.appendChild(img);
-          pair.appendChild(item); items.push(item);
-        });
-        row.appendChild(pair);
-      }
-      sec.appendChild(row);
 
-      // выноски у телефонов; у кадров интерфейса они ставятся выше, по координатам макета
-      (items.length ? (sc.notes || []) : []).forEach(n => {
-        const el = document.createElement('div');
-        const tail = n.tail || 'tr';
-        el.className = 'note ' + (n.side ? 'p' + (n.at || 0) : (n.at || 'l')) + ' ' + tail;
-        if (n.always) el.classList.add('always');
-        // В макете телефон стоит на (249 или 720,333; 97) и занимает 431,333×885,333.
-        // Выноску цепляем тем углом, где хвостик, — долей от своего телефона.
-        const pc = v => v.toFixed(3) + '%';
-        // b — центр кнопки в процентах от коробки телефона; выноска растёт в ту же
-        // сторону, что и раньше, просто кнопка стоит там, где она отмечена в макете
-        const half = v => 'calc(' + v.toFixed(3) + '% - var(--tap) / 2)';
-        if (n.b) {
-          const toLeft = n.side ? n.side === 'l' : (n.at !== 'r');
-          if (toLeft) { el.style.setProperty('--nr', half(100 - n.b[0])); el.classList.add('anch-r'); }
-          else el.style.setProperty('--nx', half(n.b[0]));
-          el.style.setProperty('--ny', half(n.b[1]));
-          el.dataset.py = Math.min(Math.max(n.b[1] / 100, .02), .84);
-        } else if (n.side) {
-          // side — с какой стороны телефона висит выноска, over — на сколько пикселей
-          // макета она заходит на экран, y — её верх, считая от верха телефона
-          const pw = (sc.phone && sc.phone.w) || PH.w, ph = (sc.phone && sc.phone.h) || PH.h;
-          if (n.side === 'r') el.style.setProperty('--nx', pc((pw - n.over) / pw * 100));
-          else { el.style.setProperty('--nr', pc((pw - n.over) / pw * 100)); el.classList.add('anch-r'); }
-          el.style.setProperty('--ny', pc(n.y / ph * 100));
-          el.dataset.py = Math.min(Math.max(n.y / ph, .02), .84);
-        } else {
-        // выноска заходит на телефон ровно на 40px и дальше растёт наружу;
-        // средние цепляются хвостиком за то же место, что и в макете
-        if (n.at === 'r') el.style.setProperty('--nx', 'calc(100% - 40px)');
-        else if (n.at === 'c') { el.style.setProperty('--nr', pc((PH.w - (817 - PH.x)) / PH.w * 100)); el.classList.add('anch-r'); }
-        else { el.style.setProperty('--nr', 'calc(100% - 40px)'); el.classList.add('anch-r'); }
-        if (tail.startsWith('b')) el.style.setProperty('--nb', pc((PH.y + PH.h - (n.y + n.h)) / PH.h * 100));
-        else                      el.style.setProperty('--ny', pc((n.y - PH.y) / PH.h * 100));
-        // на телефоне выноска всегда по центру, сверху вниз — только доля высоты
-        el.dataset.py = Math.min(Math.max((n.y - PH.y) / PH.h, .02), .84);
-        }
-        el.style.setProperty('--py', (el.dataset.py * 100).toFixed(2) + '%');
-        el.innerHTML = '<span class="note-tap"><img src="assets/ic-tap.svg" alt=""></span>'
-                       + '<span class="note-body"><span class="note-text"></span></span>';
-        el.querySelector('.note-text').textContent = n[lang] || n.ru || n.en || '';
-        // на телефоне выноска живёт внутри своего экрана, на компьютере — поверх всего кадра
-        const host = items.length
-          ? (n.side ? (items[n.at || 0] || items[0]) : (n.at === 'r' && items[1] ? items[1] : items[0]))
-          : sec;
-        host.appendChild(el);
-        noteRO.observe(el);
-      });
-      const notes = sc.notes || (sc.note ? [sc.note] : []);
-      if (notes.length && !sc.diagram) {
-        sec.classList.add('has-desktop-notes');
-        const goPair = id === 'go' && items.length > 0;
-        const webFrame = Boolean(sc.frames?.length || sc.flip);
-        sec.classList.toggle('go-pair', goPair);
-        sec.classList.toggle('web-frame', webFrame);
-        if (webFrame) {
-          const frames = sc.frames || [sc.flip];
-          const stage = row.querySelector('.win-stage');
-          const leftEdge = Math.min(...frames.map(frame => frame.x));
-          const rightEdge = Math.max(...frames.map(frame => frame.x + frame.w));
-          const topEdge = Math.min(...frames.map(frame => frame.y + (sc.flip ? 0 : 12)));
-          const bottomEdge = Math.max(...frames.map(frame => frame.y + frame.h));
-          stage.style.setProperty('--center-x', 700 - (leftEdge + rightEdge) / 2);
-          stage.style.setProperty('--center-y', 540 - (topEdge + bottomEdge) / 2);
-        }
-        const desktopNotes = document.createElement('div');
-        desktopNotes.className = 'desktop-notes';
-        const left = document.createElement('div');
-        const right = document.createElement('div');
-        left.className = right.className = 'desktop-note-group';
-        notes.forEach(n => {
-          const card = document.createElement('div');
-          card.className = 'desktop-note';
-          const copy = document.createElement('span');
-          copy.className = 'note-text';
-          copy.textContent = n[lang] || n.ru || n.en || '';
-          card.appendChild(copy);
-          const onLeft = webFrame
-            ? (n.b?.[0] ?? ((n.x ?? 1400) / 14)) < 50
-            : items.length && (n.side || n.at) === 'l';
-          const group = onLeft ? left : right;
-          group.appendChild(card);
-          if (n.y != null) group.style.setProperty('--note-y', n.y / 1080);
-        });
-        if (goPair || webFrame || left.childElementCount) desktopNotes.appendChild(left);
-        if (goPair || webFrame || right.childElementCount) desktopNotes.appendChild(right);
-        if (left.childElementCount && right.childElementCount) sec.classList.add('has-two-note-groups');
-        if (items.length) {
-          const frameWidth = items.length * (sc.phone?.w || PH.w) + (items.length - 1) * 40 + 12;
-          row.style.setProperty('--frame-width', frameWidth);
-        }
-        sec.appendChild(desktopNotes);
+      if (screen.flip) {
+        row.className = 'scr-win';
+        row.appendChild(createFlip(screen));
       }
-      feed.appendChild(sec);
+      if (screen.frames?.length) {
+        row.className = 'scr-win diagram-row';
+        row.appendChild(createWindows(screen, first));
+      }
+      if (screen.shots) {
+        if (screen.phone) {
+          row.classList.add('fit');
+          row.style.setProperty('--span', screen.span);
+        }
+        row.appendChild(createPhones(screen, first));
+      }
+
+      section.appendChild(row);
+      if (screen.notes?.length && !screen.frames && !screen.flip) addDesktopNotes(section, row, screen, goPair);
+      feed.appendChild(section);
+      slideObserver.observe(section);
     });
-    typograph(feed);
-    feed.scrollTop = 0;
-    setBar();
+    videos.forEach((state, video) => videoObserver.observe(video));
   }
 
-  // Контур выноски — вектор из макета, пересчитанный под размер блока.
-  // На компьютере хвостик острым крючком в углу: тело поджимается, остриё выходит на 5,107px.
-  // На телефоне — шип по центру верхней грани, 7px глубиной (у «жми» он уже).
-  const K = .4477;                                   // плечо скругления
-  function shapeNote(note) {
-    const el = note.querySelector('.note-body');
-    // дробные размеры: offsetWidth округляет, и остриё, стоящее ровно в углу, срезается
-    const box = el.getBoundingClientRect(), w = box.width, h = box.height;
-    if (!w || !h) { el.style.clipPath = ''; return; }
-    const n2 = v => (Math.round(v * 1000) / 1000);
-    if (mobile.matches && note.classList.contains('open')) {   // шип только у раскрытой плашки
-      const d = 7, B = h - d, r = 20,
-            c = w / 2, hb = 6.624,
-            x = v => n2(v), y = v => n2(h - v);      // шип переезжает наверх
-      el.style.clipPath = 'path("' +
-        `M ${x(r)} ${y(0)} L ${x(w - r)} ${y(0)} ` +
-        `C ${x(w - r * K)} ${y(0)}, ${x(w)} ${y(r * K)}, ${x(w)} ${y(r)} ` +
-        `L ${x(w)} ${y(B - r)} ` +
-        `C ${x(w)} ${y(B - r * K)}, ${x(w - r * K)} ${y(B)}, ${x(w - r)} ${y(B)} ` +
-        `L ${x(c + hb)} ${y(B)} ` +
-        `C ${x(c + hb * .641)} ${y(B + d * .148)}, ${x(c + hb * .336)} ${y(B + d * .405)}, ${x(c + hb * .140)} ${y(B + d * .739)} ` +
-        `C ${x(c + hb * .121)} ${y(B + d * .771)}, ${x(c + hb * .102)} ${y(B + d * .807)}, ${x(c + hb * .064)} ${y(B + d * .879)} ` +
-        `L ${x(c)} ${y(B + d)} L ${x(c - hb * .064)} ${y(B + d * .879)} ` +
-        `C ${x(c - hb * .102)} ${y(B + d * .807)}, ${x(c - hb * .121)} ${y(B + d * .771)}, ${x(c - hb * .140)} ${y(B + d * .739)} ` +
-        `C ${x(c - hb * .336)} ${y(B + d * .405)}, ${x(c - hb * .641)} ${y(B + d * .148)}, ${x(c - hb)} ${y(B)} ` +
-        `L ${x(r)} ${y(B)} ` +
-        `C ${x(r * K)} ${y(B)}, ${x(0)} ${y(B - r * K)}, ${x(0)} ${y(B - r)} ` +
-        `L ${x(0)} ${y(r)} ` +
-        `C ${x(0)} ${y(r * K)}, ${x(r * K)} ${y(0)}, ${x(r)} ${y(0)} Z")`;
-      return;
-    }
-    el.style.clipPath = '';          // на компьютере выноска — просто плашка, без уголка
-  }
-  function shapeNotes() { feed.querySelectorAll('.note').forEach(shapeNote); }
-
-  // Раскрытая плашка не должна уезжать за край ленты: если не влезает,
-  // сдвигаем её внутрь — тогда она заходит на телефон, но её видно целиком.
   function clampNotes() {
-    if (mobile.matches) { feed.querySelectorAll('.note').forEach(el => el.style.removeProperty('--bshift')); return; }
-    feed.querySelectorAll('.case-screen').forEach(sec => {
-      const box = sec.getBoundingClientRect();
-      if (!box.width) return;
-      // слева от панели всегда не меньше 40px, справа — ровно под кнопкой языка
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const padL = Math.max(40, 2.5 * rem), padR = 2.5 * rem;
-      sec.querySelectorAll('.note').forEach(el => {
-        el.style.setProperty('--bshift', '0px');
-        const body = el.querySelector('.note-body');
-        if (!body) return;
-        const open = el.classList.contains('always');
-        if (!open) el.classList.add('measure');
-        const b = body.getBoundingClientRect();
-        if (!open) el.classList.remove('measure');
-        let d = 0;
-        if (b.left < box.left + padL) d = box.left + padL - b.left;
-        else if (b.right > box.right - padR) d = box.right - padR - b.right;
-        if (d) el.style.setProperty('--bshift', Math.round(d) + 'px');
-      });
-    });
-  }
-  addEventListener('resize', clampNotes);
-
-  // На телефоне выноски раскрываются по тапу и могут налезть друг на друга.
-  // Разводим их по высоте телефона так, чтобы хватило места всем раскрытым сразу.
-  function layoutNotes() {
-    if (!mobile.matches) return;
-    feed.querySelectorAll('.scr-item').forEach(item => {
-      const ns = [...item.querySelectorAll('.note')], H = item.clientHeight;
-      if (!H) return;
-      const open = ns.map(n => {                       // высота плашки в раскрытом виде
-        const was = n.classList.contains('open');
-        n.classList.add('open');
-        const hh = (n.querySelector('.note-body') || n).offsetHeight;
-        if (!was) n.classList.remove('open');
-        return hh;
-      });
-      const gap = 12, pad = 8, last = ns.length - 1;
-      const top = ns.map(n => +n.dataset.py * H);
-      top[0] = Math.max(pad, top[0]);
-      for (let i = 1; i <= last; i++) top[i] = Math.max(top[i], top[i - 1] + open[i - 1] + gap);
-      const over = top[last] + open[last] - (H - pad);
-      if (over > 0) {                                  // не влезли снизу — поджимаем вверх
-        top[last] -= over;
-        for (let i = last - 1; i >= 0; i--) top[i] = Math.min(top[i], top[i + 1] - open[i] - gap);
+    if (mobile.matches) return;
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    for (const section of feed.children) {
+      const box = section.getBoundingClientRect();
+      for (const note of section.querySelectorAll('.note')) {
+        if (!note.getClientRects().length) continue;
+        note.style.removeProperty('--bshift');
+        const body = note.querySelector('.note-body').getBoundingClientRect();
+        const left = box.left + Math.max(40, 2.5 * rem);
+        const right = box.right - 2.5 * rem;
+        const shift = body.left < left ? left - body.left : Math.min(0, right - body.right);
+        if (shift) note.style.setProperty('--bshift', Math.round(shift) + 'px');
       }
-      ns.forEach((n, i) => n.style.setProperty('--py', Math.round(Math.max(pad, top[i])) + 'px'));
-      ns.forEach(shapeNote);
-    });
+    }
   }
-  addEventListener('resize', layoutNotes);
-  // контур пересчитывается, как только выноска меняет размер: при смене окна,
-  // раскрытии по тапу, подгрузке шрифта
-  const noteRO = new ResizeObserver(es => es.forEach(e => shapeNote(e.target)));
-  addEventListener('resize', shapeNotes);
-  if (document.fonts) document.fonts.ready.then(shapeNotes);
 
   function setBar() {
+    if (!currentCase || mobile.matches) return;
     const max = feed.scrollHeight - feed.clientHeight;
-    caseBar.style.setProperty('--p', max > 0 ? (feed.scrollTop / max).toFixed(3) : 0);
+    const progress = max > 0 ? Math.max(0, Math.min(1, feed.scrollTop / max)) : 0;
+    caseBar.style.setProperty('--p', progress.toFixed(4));
   }
-  feed.addEventListener('click', e => {
-    const n = e.target.closest('.note');
-    if (n) { n.classList.toggle('open'); shapeNote(n); }
-  });
-  feed.addEventListener('scroll', setBar, { passive: true });
-  addEventListener('resize', setBar);
+
+  let scrollFrame = 0;
+  feed.addEventListener('scroll', () => {
+    if (scrollFrame) return;
+    scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; setBar(); });
+  }, { passive: true });
+
+  function refreshLayout() {
+    if (currentCase) {
+      clampNotes();
+      setBar();
+    } else document.querySelectorAll('.fan').forEach(layoutFan);
+  }
+
+  let layoutFrame = 0;
+  function requestLayout() {
+    if (layoutFrame) return;
+    layoutFrame = requestAnimationFrame(() => {
+      layoutFrame = 0;
+      refreshLayout();
+    });
+  }
+  addEventListener('resize', requestLayout);
+  document.fonts?.ready.then(requestLayout);
+  document.fonts?.addEventListener('loadingdone', requestLayout);
+
+  function translateCase() {
+    const copy = CASES[currentCase][lang];
+    const blocks = copy.blocks.map(([label, body]) => {
+      const section = document.createElement('section');
+      const title = document.createElement('h2');
+      const paragraph = document.createElement('p');
+      title.textContent = label;
+      paragraph.textContent = body;
+      section.append(title, paragraph);
+      return section;
+    });
+    caseText.replaceChildren(...blocks);
+    caseTitle.textContent = copy.title;
+    for (const [element, strings] of caseCopy) element.textContent = strings[lang] || strings.ru;
+    typograph(caseTitle);
+    typograph(caseText);
+    typograph(feed);
+    document.title = copy.title + ' — ' + T[lang].name;
+  }
 
   function renderCase(id) {
-    const c = CASES[id], t = c && (c[lang] || c.ru || c.en);
-    if (!t) return showHome();
-
-    caseText.innerHTML = '';
-    t.blocks.forEach(([label, body]) => {
-      const sec = document.createElement('section');
-      const h = document.createElement('h2'); h.textContent = label;
-      const p = document.createElement('p'); p.textContent = body;
-      sec.append(h, p); caseText.appendChild(sec);
-    });
-    typograph(caseText);
-
-    document.getElementById('case-title').textContent = t.title;
-    document.getElementById('case-foot').textContent = t.title;
-    document.getElementById('mini-case').textContent = t.title;
-    document.title = t.title + ' — ' + (lang === 'ru' ? 'Настя Балашова' : 'Nastya Balashova');
-
-    // файлы на столе
-    const desk = document.getElementById('case-desk');
-    desk.innerHTML = '';
-    (c.files || []).forEach(f => {
-      const d = DOCS[f.doc], dt = d && (d[lang] || d.ru || d.en);
-      const el = document.createElement('button');
-      el.type = 'button'; el.className = 'case-file'; el.dataset.doc = f.doc;
-      el.style.left = f.x / 16 + 'rem'; el.style.top = f.y / 16 + 'rem';
-      el.innerHTML = '<img src="assets/file-green.svg" alt="" draggable="false">';
-      const name = document.createElement('span');
-      name.textContent = dt ? dt.title : f.doc;
-      el.appendChild(name);
-      makeDraggable(el);
-      desk.appendChild(el);
-    });
-
-    // экран макбука: видео, если есть, иначе статичный скрин
-    const phone = c.device === 'phone';
-    document.body.classList.toggle('phone-case', phone);
-    const screen = document.getElementById(phone ? 'ph-screen' : 'mb-screen');
-    const video = document.getElementById(phone ? 'case-video-ph' : 'case-video');
-    const shot = document.getElementById(phone ? 'case-shot-ph' : 'case-shot');
-    screen.classList.toggle('has-video', !!c.video);
-    screen.classList.toggle('has-shot', !c.video && !!c.shot);
-    document.body.classList.toggle('no-screen', !c.video && !c.shot);  // пустое устройство не показываем
-    const other = document.getElementById(phone ? 'case-video' : 'case-video-ph');
-    other.pause(); other.removeAttribute('src'); other.load();
-    if (c.screens) {                       // видео живёт в ленте — старое устройство глушим
-      video.pause(); video.removeAttribute('src'); video.load();
-    } else if (c.video) {
-      video.src = c.video;
-      if (c.poster) video.poster = c.poster;
-      video.load();
-      // запускаем, когда появились первые кадры: play() сразу после load() браузер отменяет
-      video.addEventListener('loadeddata', () => video.play().catch(() => {}), { once: true });
-    } else { video.pause(); video.removeAttribute('src'); video.load(); }
-    shot.src = !c.video && c.shot ? c.shot : '';
-
-    buildFeed(c, t, id);
-
-    const plain = !!c.plain;
-    document.body.classList.toggle('case-plain', plain);
-    document.body.classList.remove('collapsed');
-    document.getElementById('collapse').setAttribute('aria-label', T[lang].back);
-
-    document.body.dataset.view = 'case';
-    feed.scrollTop = 0;                  // кейс всегда открывается с первого экрана
-    scrollTo(0, 0);
-    layoutNotes();                       // сперва разводим выноски, потом режем контур
-    shapeNotes();                        // контур считаем, когда экран уже показан и выноски измерены
-    clampNotes();                        // и подвигаем те плашки, что не влезают в ленту
+    if (id === currentCase || !Object.hasOwn(CASES, id)) return;
+    setFolder(null);
+    clearTimeout(catNap);
+    cat.classList.remove('look');
+    clearFeed();
     currentCase = id;
-    typograph(document.body);
+    document.body.dataset.view = 'case';
+    setCollapsed(false);
+    buildFeed(id);
+    translateCase();
+    feed.scrollTop = 0;
+    scrollTo(0, 0);
+    refreshLayout();
   }
 
   function showHome() {
+    if (document.body.dataset.view === 'home') return;
+    clearFeed();
     currentCase = null;
-    document.body.classList.remove('case-plain');
-    document.body.classList.remove('no-screen');
     document.body.dataset.view = 'home';
-    document.querySelectorAll('video').forEach(v => v.pause());
-    setLang(lang);
-    document.querySelectorAll('.fan').forEach(layoutFan);
+    document.title = T[lang].name + (lang === 'ru' ? ' — продуктовый дизайнер' : ' — product designer');
+    scrollTo(0, 0);
+    requestLayout();
   }
 
-  // Адрес меняем осторожно: внутри iframe на claude.ai это может быть запрещено,
-  // поэтому переходы делаем прямо на странице, а адрес обновляем «если получится».
-  function setHash(value) {
-    try { history.pushState({ case: value || null }, '', value ? '#case/' + value : location.pathname + location.search); }
-    catch { /* песочница не разрешает менять адрес — не страшно */ }
+  function setHash(id) {
+    const url = new URL(location.href);
+    url.hash = id ? 'case/' + id : '';
+    if (url.href === location.href) return;
+    try { history.pushState(null, '', url); } catch {}
   }
 
-  function openCase(id) {
-    if (!CASES[id]) return;
-    closeFans();             // открытый по тапу пучок не должен ждать возвращения
-    closeAllDocs();          // файлы принадлежат экрану, с которого их открыли
+  function openCase(id, keyboard = false) {
+    if (id === currentCase || !Object.hasOwn(CASES, id)) return;
     renderCase(id);
     setHash(id);
+    if (keyboard) caseTitle.focus({ preventScroll: true });
     Sound.play('expand');
   }
 
-  function closeCase() {
-    closeAllDocs();
+  function closeCase(e) {
+    if (!currentCase) return;
+    const folder = document.querySelector('[data-case="' + currentCase + '"]')?.closest('.folder');
     showHome();
     setHash(null);
+    if (e?.detail === 0) (folder?.querySelector('.f-link') || document.querySelector('.f-link')).focus({ preventScroll: true });
     Sound.play('collapse');
   }
 
   function route() {
-    const m = location.hash.match(/^#case\/(\w+)$/);
-    if (m && CASES[m[1]]) renderCase(m[1]); else showHome();
+    const match = location.hash.match(/^#case\/(\w+)$/);
+    if (match && Object.hasOwn(CASES, match[1])) renderCase(match[1]);
+    else showHome();
+    syncLangUrl();
   }
 
-  window.caseReady = true;
   addEventListener('popstate', route);
   addEventListener('hashchange', route);
   document.addEventListener('click', e => {
     const opener = e.target.closest('[data-case]');
-    if (opener) { e.preventDefault(); openCase(opener.dataset.case); }
+    if (opener) openCase(opener.dataset.case, e.detail === 0);
   });
   document.getElementById('home-btn').onclick = closeCase;
   document.getElementById('back-fix').onclick = closeCase;
-  route();
 
-  // ── Файлы на «рабочем столе» можно двигать мышкой; короткий клик открывает окно ──
   function makeDraggable(el) {
+    let suppressClick = false;
+    el.addEventListener('click', e => {
+      if (suppressClick && e.detail) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+      suppressClick = false;
+    }, true);
     el.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch' || e.button !== 0) return;  // на телефоне не мешаем прокрутке
-      const box = el.offsetParent || document.body;
-      const bRect = box.getBoundingClientRect(), r = el.getBoundingClientRect();
-      const dx = e.clientX - r.left, dy = e.clientY - r.top;
+      suppressClick = false;
+      if (mobile.matches || e.pointerType === 'touch' || e.button !== 0) return;
+      const bounds = (el.offsetParent || document.body).getBoundingClientRect();
+      const box = el.getBoundingClientRect();
+      const dx = e.clientX - box.left, dy = e.clientY - box.top;
       let moved = false;
       el.setPointerCapture(e.pointerId);
 
-      const move = ev => {
-        if (!moved && Math.hypot(ev.clientX - e.clientX, ev.clientY - e.clientY) < 4) return;
+      const move = event => {
+        if (!moved && Math.hypot(event.clientX - e.clientX, event.clientY - e.clientY) < 4) return;
         moved = true;
         el.classList.add('dragging');
-        const pad = 8;
-        const x = Math.max(pad, Math.min(innerWidth - r.width - pad, ev.clientX - dx)) - bRect.left;
-        const y = Math.max(pad, Math.min(innerHeight - r.height - pad, ev.clientY - dy)) - bRect.top;
+        const x = Math.max(8, Math.min(innerWidth - box.width - 8, event.clientX - dx)) - bounds.left;
+        const y = Math.max(8, Math.min(innerHeight - box.height - 8, event.clientY - dy)) - bounds.top;
         el.style.left = Math.round(x) + 'px';
         el.style.top = Math.round(y) + 'px';
       };
-      const up = () => {
+      const finish = () => {
         el.removeEventListener('pointermove', move);
-        el.removeEventListener('pointerup', up);
+        for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) el.removeEventListener(event, finish);
         el.classList.remove('dragging');
-        // после перетаскивания не открываем окно
-        if (moved) el.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); }, { capture: true, once: true });
+        suppressClick = moved;
       };
       el.addEventListener('pointermove', move);
-      el.addEventListener('pointerup', up);
-    });
-  }
-
-  // ── Окна с текстом: открываются поверх страницы, их можно открыть несколько,
-  //    двигать мышкой за шапку и закрывать крестиком ──
-  const docsLayer = document.getElementById('docs');
-  const openDocs = new Map();   // id документа → окно
-  let docZ = 1, docCascade = 0;
-
-  function fillDoc(win, id) {
-    const d = DOCS[id], t = d && (d[lang] || d.ru || d.en);
-    if (!t) return;
-    win.querySelector('.doc-title').textContent = t.title;
-    const body = win.querySelector('.doc-body');
-    body.innerHTML = '';
-    t.body.split(/\n\s*\n/).forEach(chunk => {
-      const head = chunk.match(/^##\s+(.*)$/s);
-      const el = document.createElement(head ? 'h3' : 'p');
-      el.textContent = head ? head[1] : chunk;
-      body.appendChild(el);
-    });
-    typograph(win);   // заодно и заголовок окна
-  }
-
-  function placeDoc(win) {
-    const w = win.offsetWidth, h = win.offsetHeight;
-    const step = 28 * (docCascade % 6);
-    let x = (innerWidth - w) / 2 + step - 70;
-    let y = (innerHeight - h) / 2 + step - 70;
-    docCascade++;
-    moveDoc(win, x, y);
-  }
-
-  function moveDoc(win, x, y) {
-    const pad = 8;
-    x = Math.max(pad, Math.min(innerWidth - win.offsetWidth - pad, x));
-    y = Math.max(pad, Math.min(innerHeight - win.offsetHeight - pad, y));
-    win.style.left = Math.round(x) + 'px';
-    win.style.top = Math.round(y) + 'px';
-  }
-
-  function openDoc(id) {
-    if (!DOCS[id]) return;
-    const exists = openDocs.get(id);
-    if (exists) { exists.style.zIndex = ++docZ; return; }   // уже открыт — просто наверх
-
-    const win = document.createElement('div');
-    win.className = 'doc-window';
-    win.setAttribute('role', 'dialog');
-    win.innerHTML = `<div class="doc-bar">
-        <span class="doc-title"></span>
-        <button class="doc-close" type="button" aria-label="${T[lang].close}"><img src="assets/ic-cross.svg" alt=""></button>
-      </div>
-      <div class="doc-body"></div>`;
-    win.style.zIndex = ++docZ;
-    docsLayer.appendChild(win);
-    fillDoc(win, id);
-    placeDoc(win);
-    openDocs.set(id, win);
-
-    win.addEventListener('pointerdown', () => { win.style.zIndex = ++docZ; });
-    win.querySelector('.doc-close').onclick = () => closeDoc(id);
-    dragDoc(win);
-    Sound.play('paper');
-  }
-
-  function closeAllDocs() {
-    if (window.docReady) [...openDocs.keys()].forEach(id => { openDocs.get(id).remove(); openDocs.delete(id); });
-  }
-
-  function closeDoc(id) {
-    const win = openDocs.get(id);
-    if (!win) return;
-    win.remove();
-    openDocs.delete(id);
-    Sound.play('tick');
-  }
-
-  function dragDoc(win) {
-    const bar = win.querySelector('.doc-bar');
-    bar.addEventListener('pointerdown', e => {
-      if (e.target.closest('button')) return;
-      const r = win.getBoundingClientRect();
-      const dx = e.clientX - r.left, dy = e.clientY - r.top;
-      bar.setPointerCapture(e.pointerId);
-      const move = ev => moveDoc(win, ev.clientX - dx, ev.clientY - dy);
-      const up = () => { bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); };
-      bar.addEventListener('pointermove', move);
-      bar.addEventListener('pointerup', up);
+      for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) el.addEventListener(event, finish);
     });
   }
 
   document.querySelectorAll('.desk-item').forEach(makeDraggable);
 
-  window.docReady = true;
-  // На столе лежит настоящее резюме: открывается PDF на языке сайта
-  const RESUME = { ru: 'assets/resume-ru.pdf', en: 'assets/resume-en.pdf' };
-  document.addEventListener('click', e => {
-    const opener = e.target.closest('[data-doc]');
-    if (!opener) return;
-    e.preventDefault();
-    if (opener.dataset.doc === 'resume') window.open(RESUME[lang] || RESUME.ru, '_blank', 'noopener');
-    else openDoc(opener.dataset.doc);
-  });
-  // Esc закрывает верхнее окно
-  addEventListener('keydown', e => {
-    if (e.key !== 'Escape' || !openDocs.size) return;
-    const top = [...openDocs.entries()].sort((a, b) => a[1].style.zIndex - b[1].style.zIndex).pop();
-    closeDoc(top[0]);
-  });
-  addEventListener('resize', () => openDocs.forEach(w => moveDoc(w, w.offsetLeft, w.offsetTop)));
-
-  // кнопка звука
   const snd = document.getElementById('snd');
   const syncSnd = () => snd.setAttribute('aria-pressed', String(Sound.on));
   syncSnd();
-  // кнопка выключает звук, только если он сейчас слышен. Пока браузер не отдал звук,
-  // любое нажатие его включает — иначе первое нажатие выключало то, чего и так не было
   snd.onclick = () => {
-    const heard = Sound.heard;
-    Sound.unlock();
-    Sound.on = heard ? !Sound.on : true;   // пока ничего не звучало, кнопка только включает
+    Sound.on = !Sound.on;
     syncSnd();
-    setTimeout(() => Sound.play('tick'), 80);
+    if (Sound.on) {
+      Sound.unlock();
+      Sound.play('tick');
+    }
   };
+
+  buildFans();
+  translatePage();
+  route();
 </script>
 </body>
 </html>
