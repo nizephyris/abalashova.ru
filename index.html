@@ -187,9 +187,6 @@
     transition: transform .25s var(--ease);
   }
   .fan-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .fan-item[data-case="art"] .fan-cover img {
-    object-position: center 22%; transform: scale(1.2); transform-origin: 85% center;
-  }
   .fan-emoji { font-size: 4em; line-height: 1; filter: drop-shadow(0 .1em .2em rgba(0,0,0,.45)); }
   .fan-name {
     margin-top: .5rem; /* 8px до подписи */ font-size: 1.25rem; text-align: center;
@@ -1260,13 +1257,13 @@
       ru: {
         title: 'Арт и плакаты',
         blocks: [
-          ['', 'Здесь собрала всякое, что делаю в свободное время для души. По любимым песням собираю коллажи, по стихам делаю плакаты. А ещё тут есть журнальные развороты и проекты из сферы графического дизайна'],
+          ['', 'Здесь собрала всякое, что делаю в свободное время для души. По любимым песням собираю коллажи, по стихам делаю плакаты. А ещё тут есть журнальные развороты, айдентика и шоты интерфейсов'],
         ],
       },
       en: {
         title: 'Art and posters',
         blocks: [
-          ['', 'A few things I make in my spare time, just because I enjoy it. I turn favourite songs into collages and poems into posters. There are magazine spreads and graphic design projects here too'],
+          ['', 'A few things I make in my spare time, just because I enjoy it. I turn favourite songs into collages and poems into posters. There are also magazine spreads, visual identities and UI shots'],
         ],
       },
     },
@@ -1373,7 +1370,7 @@
     folder3: [
       { ru: 'группы в aviasales', en: 'groups in aviasales', case: 'aviasales', cover: 'assets/cover-aviasales.webp', hidden: true },
       { ru: 'телеграф', en: 'telegraph', case: 'telegraph', cover: 'assets/cover-telegraph.webp' },
-      { ru: 'арт и плакаты', en: 'art and posters', case: 'art', cover: 'assets/art/breakfast.webp' },
+      { ru: 'арт и плакаты', en: 'art and posters', case: 'art', cover: 'assets/cover-art.webp' },
     ],
   };
 
