@@ -304,7 +304,6 @@
     background: var(--glass);
     -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
     color: #fff;
-    font-size: var(--button-font-size); line-height: 1.2;
   }
   .note-text { display: block; max-height: 4lh; overflow: auto; overflow-wrap: break-word; }
   .note.anch-r .note-body { left: auto; right: 0; }  /* выноска прижата правым краем */
@@ -361,8 +360,8 @@
   body[data-view="case"] .case-text { display: flex; }
   .case-text { display: none; min-height: 0; }
 
-  /* текст кейса: блоки через 20px, внутри блока 4px, всё 20px */
-  .case-text { flex-direction: column; gap: 1.25rem; width: 27.5rem; font-size: 1.25rem; line-height: 1.19;
+  .case-text, .note-body, .desktop-note { font-size: var(--button-font-size); line-height: 1.2; }
+  .case-text { flex-direction: column; gap: 1.25rem; width: 27.5rem;
                overflow-y: auto; scrollbar-width: thin; }
   .screen-notes { display: none; }
   .case-text section { display: flex; flex-direction: column; gap: .25rem; }
@@ -404,7 +403,8 @@
                 display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .fan-name { font-size: 1rem; }
 
-    .case-text { width: auto; font-size: 1.125rem; }
+    .case-text, .screen-notes { font-size: 1.125rem; line-height: 1.25; }
+    .case-text { width: auto; }
     /* на телефоне заголовок остаётся в чёрном блоке, как сейчас */
     .case-title { font-size: 1.5rem; }
     body[data-view="case"] .case-head { margin-bottom: 1.5rem; }
@@ -458,7 +458,7 @@
     .stage-arrow, .note { display: none; }
     .screen-notes {
       display: block; margin: 0 0 1.5rem; color: #1b1b1d;
-      font-size: 1.125rem; line-height: 1.25; overflow-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .has-mobile-demo > .win-stage { display: none; }
@@ -591,7 +591,6 @@
       justify-self: center;
       padding: .75rem .85rem; border-radius: .75rem;
       background: #666; color: #fff;
-      font-size: var(--button-font-size); line-height: 1.2;
     }
     .case-feed.go-feed {
       container: go-feed / size;
@@ -908,19 +907,19 @@
       ru: {
         title: 'Создание продуктов в админке ОТП Банка',
         blocks: [
-          ['задача', 'Сотрудники банка создавали продукты через несколько разрозненных разделов. Параметры приходилось заводить заранее, а ошибки обнаруживались при передаче данных в банковские системы. Нужно было сократить время настройки и помочь сотрудникам проверять данные раньше'],
-          ['моя работа', 'Провела исследование и спроектировала новый сценарий добавления продукта. Прорабатывала решение вместе с командой разработки'],
-          ['ключевое решение', 'Сгруппировала параметры в разделы с проверкой данных. Добавила создание параметров внутри формы, дублирование готового продукта и импорт настроек, чтобы ускорить работу с похожими продуктами'],
-          ['результат', 'Среднее время создания продукта сократилось с 30 до 20 минут. Количество ошибок при заполнении снизилось вдвое'],
+          ['задача', 'Сотрудники заводили параметры продукта заранее в других разделах. Ошибки замечали уже при передаче данных в банковские системы'],
+          ['моя работа', 'Изучила работу сотрудников и спроектировала новый сценарий вместе с разработчиками'],
+          ['ключевое решение', 'Разбила форму на разделы с проверкой данных и добавила создание параметров прямо в форме. Похожие продукты можно дублировать или импортировать их настройки'],
+          ['результат', 'Среднее время создания продукта сократилось с 30 до 20 минут. Ошибок при заполнении стало вдвое меньше'],
         ],
       },
       en: {
         title: 'Creating products in OTP Bank’s admin panel',
         blocks: [
-          ['the challenge', 'Bank employees created products across several disconnected sections. Parameters had to be added in advance, and errors only surfaced when data was sent to the bank’s systems. The goal was to reduce setup time and help employees validate data earlier'],
-          ['my work', 'I conducted research and designed a new product creation flow, working with the development team'],
-          ['the key decision', 'I grouped parameters into sections with data validation. I added in-form parameter creation, product duplication and settings import to speed up work on similar products'],
-          ['the outcome', 'Average product creation time dropped from 30 to 20 minutes. Form errors fell by half'],
+          ['the challenge', 'Staff set up product parameters in separate sections before starting the form. Errors surfaced when data reached the bank’s systems'],
+          ['my work', 'I studied how staff worked and designed a new flow with the development team'],
+          ['the key decision', 'I split the form into sections with validation and let staff add parameters in place. They can duplicate similar products or import their settings'],
+          ['the outcome', 'Average product creation time fell from 30 to 20 minutes. Form errors fell by half'],
         ],
       },
     },
@@ -990,19 +989,19 @@
       ru: {
         title: 'Доставка роботами для бизнеса в Яндекс Go',
         blocks: [
-          ['задача', 'Яндекс Доставка готовила запуск роверов для корпоративных клиентов в Go. Нужно было встроить новый вариант доставки в привычный сценарий заказа и объяснить отправителям и получателям, как взаимодействовать с роботом'],
-          ['моя работа', 'Веду проект как дизайнер вместе с продактом и командой разработки. Спроектировала форму заказа и трекинг для отправителя и получателя'],
-          ['ключевое решение', 'Встроила робота в «Экспресс», чтобы его стоимость и условия можно было сравнить с курьером. До оформления объясняем необходимость выйти к роверу. При доставке до двери последний участок выполняет курьер'],
-          ['статус', 'В августе 2026 года запустили рободоставку в крупных районах Москвы. Отслеживаем выбор робота среди доступных вариантов, конверсию в заказ и обращения в поддержку при передаче и получении посылки'],
+          ['задача', 'Встроить рободоставку в привычный заказ для бизнеса в Go и объяснить, как встретить робота'],
+          ['моя работа', 'Веду дизайн проекта вместе с продактом и разработчиками. Спроектировала форму заказа и трекинг для отправителя и получателя'],
+          ['ключевое решение', 'В «Экспрессе» клиент сравнивает цену и условия доставки роботом и курьером. До оплаты объясняем, кому нужно встретить робота. Доставку до двери завершает курьер'],
+          ['статус', 'Запустили в крупных районах Москвы в августе 2026 года. Отслеживаем выбор робота среди доступных вариантов, конверсию в заказ и обращения в поддержку при передаче и получении посылки'],
         ],
       },
       en: {
         title: 'Robot delivery for businesses in Yandex Go',
         blocks: [
-          ['the challenge', 'Yandex Delivery was preparing to launch rover deliveries for business clients in Go. The new option had to fit the existing order flow and explain how senders and recipients would interact with the robot'],
-          ['my work', 'I lead the design with the product manager and developers. I designed the order form and tracking for both senders and recipients'],
-          ['the key decision', 'I placed the rover alongside couriers in Express to make prices and conditions easy to compare. Before checkout, we explain who needs to meet the rover. For doorstep deliveries, a courier handles the final stretch'],
-          ['status', 'Launched in major Moscow districts in August 2026. We track rover selection among eligible orders, order conversion and support requests during handover and collection'],
+          ['the challenge', 'Fit rover delivery into the familiar Go order flow for businesses and explain how to meet the rover'],
+          ['my work', 'I lead the design with the product manager and developers. I designed the order form and tracking for senders and recipients'],
+          ['the key decision', 'In Express, customers can compare rover and courier deliveries on price and terms. We explain who meets the rover before payment. A courier completes doorstep deliveries'],
+          ['status', 'Launched in major Moscow districts in August 2026. We track rover selection when available, order conversion and support requests during handover and collection'],
         ],
       },
     },
@@ -1062,19 +1061,19 @@
       ru: {
         title: 'Переход на транспортную экспедицию в Яндекс Доставке',
         blocks: [
-          ['задача', 'При переходе на электронные перевозочные документы B2B-клиентам потребовалось подписать договор транспортной экспедиции. Нужно было провести их через изменения и сохранить возможность оформлять доставки в привычном личном кабинете'],
-          ['моя работа', 'Переработала сценарии регистрации и подписания договора, форму создания заказа, трекинг и раздел финансов'],
-          ['ключевое решение', 'Встроила подписание договора в личный кабинет с автоматической подстановкой данных. Разделила балансы доставки и транспортной экспедиции, чтобы клиент понимал, какие услуги он оплачивает и сколько средств доступно'],
-          ['результат', 'За первый месяц на новый договор перешли 300 крупных клиентов. При переходе сохранили объём доставок через личный кабинет'],
+          ['задача', 'При переходе на электронные перевозочные документы бизнесу понадобился новый договор. Нужно было сохранить оформление доставок в привычном кабинете'],
+          ['моя работа', 'Переработала регистрацию, подписание договора, форму заказа, трекинг и финансы'],
+          ['ключевое решение', 'Встроила подписание договора в кабинет с автоподстановкой данных. Разделила балансы доставки и экспедиции, чтобы было понятно, за что клиент платит и сколько средств доступно'],
+          ['результат', 'За первый месяц на новый договор перешли 300 крупных клиентов. Объём доставок через личный кабинет сохранился'],
         ],
       },
       en: {
         title: 'Moving Yandex Delivery clients to freight forwarding',
         blocks: [
-          ['the challenge', 'Moving to electronic transport documents meant B2B clients needed to sign a freight forwarding contract. We needed to guide them through the change while keeping delivery ordering available in the existing client dashboard'],
-          ['my work', 'I redesigned registration and contract signing, the order form, tracking and the finance section'],
-          ['the key decision', 'I integrated contract signing into the dashboard with client details filled in automatically. I separated the delivery and freight forwarding balances so clients could see which services they were paying for and how much money was available'],
-          ['the outcome', 'In the first month, 300 large business clients moved to the new contract. We maintained delivery volumes through the client dashboard during the transition'],
+          ['the challenge', 'The switch to electronic transport documents required a new contract. Businesses needed to keep placing delivery orders in the same dashboard'],
+          ['my work', 'I redesigned registration, contract signing, ordering, tracking and finance'],
+          ['the key decision', 'I added contract signing with prefilled details to the dashboard and separated the two balances so clients could see what they were paying for and how much was available'],
+          ['the outcome', 'In the first month, 300 large clients moved to the new contract. Delivery volumes through the dashboard held steady'],
         ],
       },
     },
@@ -1105,19 +1104,19 @@
       ru: {
         title: 'Арт-проект к открытию кампуса в Центральном телеграфе',
         blocks: [
-          ['задача', 'К открытию кампуса Центрального университета нужно было показать связь между историей Телеграфа и его новой ролью. Сайт адресован студентам и людям, которым важна судьба здания'],
-          ['моя работа', 'Провела исследование, сформулировала принципы проекта, придумала визуальную метафору и разработала дизайн сайта. Работала над проектом самостоятельно'],
-          ['ключевое решение', 'Взяла за основу идею связи между людьми. Глобус с фасада Телеграфа превращается в граф — образ связей между студентами, преподавателями и поколениями. На сайте эту идею продолжают ответы студентов об образовании, опыте и общении'],
-          ['статус', 'Подготовлены концепция и дизайн сайта. Планируемый запуск — сентябрь 2027 года'],
+          ['задача', 'Показать, как история Телеграфа связана с новым кампусом Центрального университета. Сайт адресован студентам и тем, кому важно здание'],
+          ['моя работа', 'Самостоятельно провела исследование, придумала визуальную концепцию и спроектировала сайт'],
+          ['ключевое решение', 'Глобус с фасада превращается в граф связей между студентами, преподавателями и поколениями. По его точкам можно читать ответы студентов об образовании, опыте и общении'],
+          ['статус', 'Концепция и дизайн готовы. Запуск запланирован на сентябрь 2027 года'],
         ],
       },
       en: {
         title: 'An art project for the Central Telegraph campus opening',
         blocks: [
-          ['the challenge', 'For the opening of Central University’s campus, we needed to show how the Telegraph’s history connects with its new role. The site is for students and people who care about the building’s future'],
-          ['my work', 'I conducted the research, defined the project principles, developed the visual metaphor and designed the site. I worked on the project independently'],
-          ['the key decision', 'I built the concept around connections between people. The globe on the Telegraph’s facade transforms into a graph, representing connections between students, teachers and generations. The site extends this idea through students’ responses about education, experience and communication'],
-          ['status', 'The concept and site design are complete. The planned launch is September 2027'],
+          ['the challenge', 'Connect the Telegraph’s history with its new role as Central University’s campus. The site is for students and people who care about the building'],
+          ['my work', 'I worked independently on the research, visual concept and site design'],
+          ['the key decision', 'The globe on the facade becomes a graph of connections between students, teachers and generations. Its nodes open students’ answers about education, experience and communication'],
+          ['status', 'The concept and site design are complete. Launch is planned for September 2027'],
         ],
       },
     },
