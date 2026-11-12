@@ -19,9 +19,7 @@
     --dim: rgba(255, 255, 255, .5);
     --font: "SF Pro Rounded", ui-rounded, "Nunito", system-ui, sans-serif;
     --ease: cubic-bezier(.3, .7, .2, 1);
-    --note-anchor: 3rem;
     --button-font-size: 1.25rem;
-    --note-width: 19rem;
   }
   html { font-size: clamp(11px, min(1.1111vw, 1.5625vh), 20px); }
   * { box-sizing: border-box; }
@@ -130,7 +128,7 @@
   .f-link { position: relative; display: flex; width: 100%; flex-direction: column; align-items: center; gap: .5rem; font-size: 1.25rem; white-space: nowrap; }
   /* подпись висит под папкой и не влияет на высоту ряда: вторая строка не двигает папки */
   .folder-label { position: absolute; top: calc(100% + .5rem); left: -1rem; right: -1rem; text-align: center; }
-  .folder-date-break, .desktop-notes { display: none; }
+  .folder-date-break { display: none; }
   .f-body {
     position: relative; width: 100%; aspect-ratio: 204 / 140; border-radius: 10% / 14.57%;
     container-type: inline-size; --p: calc(100cqw / 204);
@@ -189,6 +187,9 @@
     transition: transform .25s var(--ease);
   }
   .fan-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .fan-item[data-case="art"] .fan-cover img {
+    object-position: center 22%; transform: scale(1.2); transform-origin: 85% center;
+  }
   .fan-emoji { font-size: 4em; line-height: 1; filter: drop-shadow(0 .1em .2em rgba(0,0,0,.45)); }
   .fan-name {
     margin-top: .5rem; /* 8px до подписи */ font-size: 1.25rem; text-align: center;
@@ -231,22 +232,18 @@
   .scr-row { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   /* пара телефонов: 431,33×885,33 каждый, ровно 40px между ними */
   /* если вся композиция помещается в кадр 1400, он и занимает всю белую область */
-  .scr-row.fit { --u: min(1px, (100cqw - 32.5rem) / var(--span, 1400), 100cqh / 1080); --n: var(--u); }
+  .scr-row.fit { --u: min(1px, (100cqw - 32.5rem) / var(--span, 1400), 100cqh / 1080); }
   .scr-pair { position: relative; display: flex; gap: calc(40 * var(--u)); height: calc(var(--ph-h, 885.333) * var(--u)); }
   .scr-item { position: relative; height: 100%; aspect-ratio: var(--ph-ar, 431.333 / 885.333); }
   /* снимок шире самого прибора (тень по бокам) — кладём его с выносом, чтобы корпус встал ровно */
   .scr-item.bleed { overflow: visible; }
   .scr-item.bleed > img { position: absolute; top: var(--sy, 0); left: var(--sx, 0);
                         width: var(--sw, 100%); height: auto; }
-  /* окна с кадрами интерфейса — координаты из макета 1400×1080 */
-  .scr-win { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-             /* здесь кадр 1400 — это и есть белая область, без вылетов выносок за край */
-             --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080); --n: var(--u);
-             /* поле между кадром и правым краем экрана — кадр стоит по центру белой области */
-             --edge: calc((100cqw - 32.5rem - 1400 * var(--u)) / 2); }
-  /* выноска выравнивается правым краем по кнопке звука: 2,5rem до края + 3,75rem «ру» + 1,25rem зазор */
-  .note.at-snd { right: calc(7.5rem - var(--edge)); left: auto; }
-  .win-stage { position: relative; width: calc(1400 * var(--u)); height: calc(1080 * var(--u)); max-width: 100%; }
+  .scr-win { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .win-stage {
+    position: relative; flex: none;
+    width: calc(var(--stage-width) * var(--u)); height: calc(var(--stage-height) * var(--u));
+  }
   .win {
     position: absolute; width: calc(600 * var(--u)); border-radius: calc(16 * var(--u)); overflow: hidden;
     background: #d5d5d5; color: #1d1d1d;
@@ -261,8 +258,6 @@
   .win-shot { flex: 1; min-height: 0; width: 100%; display: block;
               object-fit: cover; object-position: top; }
   .stage-arrow { position: absolute; display: block; }
-  /* выноски к окнам стоят по координатам макета 1400×1080, ширина — как в кейсе роботов */
-  .win-stage .note { position: absolute; transform: none; z-index: 20; }   /* ширину задаёт сама выноска */
   .scr-item > img { width: 100%; height: 100%; display: block; }   /* сам снимок, не иконка выноски */
   /* первый экран: видео стоит само по себе — телефон уже внутри ролика.
      Радиус 120px от ширины 816 и высоты 1684 обрезает чёрные углы кадра */
@@ -278,8 +273,6 @@
   /* У всех PNG корпус 6312×3824, различаются только прозрачные поля. */
   .scr-cover.mac-cover {
     position: relative; aspect-ratio: 6312 / 3824;
-    width: min(calc(1488 * var(--u)), calc(min(69.6cqh, 100cqh - 18rem) * 6312 / 3824));
-    max-width: calc(100% - 2rem);
   }
   .mac-cover-art {
     position: absolute; top: 0; height: 100%;
@@ -291,25 +284,7 @@
     position: absolute; left: 12.0122%; top: 10.8787%;
     width: 76.7683%; height: 78.0858%; display: block; object-fit: fill;
   }
-  /* Десктопные выноски к схемам и графу привязаны к координатам макета. */
-  .note {
-    position: absolute; z-index: 2;
-    width: var(--note-anchor); height: var(--note-anchor);
-    left: var(--nx); right: var(--nr); top: var(--ny);
-  }
-  .note-body {
-    position: absolute; top: 0; left: 0; display: block;
-    width: min(var(--note-width), calc(100cqw - 37.5rem));
-    padding: calc(16 * var(--n)); border-radius: calc(16 * var(--n));
-    background: var(--glass);
-    -webkit-backdrop-filter: blur(18px) saturate(2); backdrop-filter: blur(18px) saturate(2);
-    color: #fff;
-  }
-  .note-text { display: block; max-height: 4lh; overflow: auto; overflow-wrap: break-word; }
-  .note.anch-r .note-body { left: auto; right: 0; }  /* выноска прижата правым краем */
-  /* если плашка не помещается в кадр, её сдвигают внутрь — на кадр она просто заходит */
-  .note-body { transform: translateX(var(--bshift, 0px)); }
-  /* карточка-перевёртыш: по наведению глобус сменяется графом и проявляются выноски */
+  /* Карточка-перевёртыш: по наведению глобус сменяется графом. */
   .flip-card {
     position: absolute; overflow: hidden; cursor: pointer;
     border-radius: calc(45 * var(--u)); background: #efedea;
@@ -317,13 +292,8 @@
   .flip-card img { position: absolute; inset: 0; width: 100%; height: 100%;
                      object-fit: cover; display: block; transition: opacity .35s var(--ease); }
   .flip-card .flip-back { opacity: 0; }
-  /* на этом экране выноски не сворачиваются в кнопку: по наведению на глобус
-     сразу видны все плашки целиком, как в макете */
-  .flip-stage .note { opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
   .flip-stage.on .flip-front { opacity: 0; }
   .flip-stage.on .flip-back { opacity: 1; }
-  .flip-stage.on .note { opacity: 1; pointer-events: auto; }
-  .flip-stage .flip-hint { display: none; }
   .scr-title { display: none; }                     /* пары подписаны только на телефоне */
   .mobile-demo { display: none; }
 
@@ -347,7 +317,6 @@
     /* по ширине кадр считается от композиции: пара 902,67 + два вылета выносок,
        плюс поля, в которых помещается индикатор под кнопкой языка */
     --u: min(1px, (100cqw - 32.5rem - 5rem + 64px) / 1686.67, 100cqh / 1080);
-    --n: var(--u);                                  /* выноски в том же масштабе, что телефоны */
   }
   body[data-view="case"] .case { display: block; animation: screen-in .24s var(--ease) both; }
   /* мягкая смена экранов: только прозрачность и сдвиг — без пересчёта раскладки */
@@ -360,10 +329,10 @@
   body[data-view="case"] .case-text { display: flex; }
   .case-text { display: none; min-height: 0; }
 
-  .case-text, .note-body, .desktop-note { font-size: var(--button-font-size); line-height: 1.2; }
+  .case-text { font-size: var(--button-font-size); line-height: 1.2; }
   .case-text { flex-direction: column; gap: 1.25rem; width: 27.5rem;
                overflow-y: auto; scrollbar-width: thin; }
-  .screen-notes { display: none; }
+  .screen-notes, .screen-note-desktop, .screen-note-hint { display: none; }
   .case-text section { display: flex; flex-direction: column; gap: .25rem; }
   .case-text h2 { margin: 0; font-size: inherit; font-weight: inherit; color: var(--dim); }
   .case-text p { margin: 0; }
@@ -430,6 +399,9 @@
       width: calc(100% - 2rem); max-width: var(--case-max-width, none); margin-inline: auto;
     }
     .case-screen { height: auto; margin-bottom: 40px; container-type: inline-size; }
+    .case-screen.has-caption { display: flex; flex-direction: column; }
+    .has-caption > .scr-title { order: -2; }
+    .has-caption > .screen-notes { order: -1; }
     .scr-title { display: block; margin: 0 0 1.25rem; font-size: 1.5rem; line-height: 1.19;
                  font-weight: 600; color: #1b1b1d; }
     /* Мокапы занимают ту же колонку, что и подписи. */
@@ -455,7 +427,7 @@
     .flip-card { position: relative; border-radius: 1rem; aspect-ratio: 711 / 790;
                  left: auto !important; top: auto !important;
                  width: auto !important; height: auto !important; }
-    .stage-arrow, .note { display: none; }
+    .stage-arrow { display: none; }
     .screen-notes {
       display: block; margin: 0 0 1.5rem; color: #1b1b1d;
       overflow-wrap: break-word;
@@ -563,143 +535,156 @@
   }
 
   @media (width > 760px) and (aspect-ratio > 4/5) {
-    .diagram-row {
-      --u: min(1.15px, (100cqw - 32.5rem - 3rem) / 1220, 100cqh / 1000);
+    .case-feed {
+      --screen-gutter: 1.5rem;
+      --case-media-width: calc(100cqw - 32.5rem - 2 * var(--screen-gutter));
+      --case-media-height: max(10rem, min(73cqh, 100cqh - 14rem));
     }
-    .diagram-row .win-stage {
-      max-width: none; flex: none;
-      transform: translateX(calc(var(--center-x, 0) * var(--u)));
+    .case-screen.has-caption {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 100%; height: auto; gap: clamp(1rem, 3.25cqh, 2.5rem);
+      padding: 5.5rem var(--screen-gutter) 2.75rem;
     }
-    .case-screen.has-desktop-notes {
-      display: grid;
-      grid-template: "media notes" minmax(0, 1fr) / minmax(0, 1fr) var(--note-width);
-      min-height: 100%; height: auto;
-      gap: 1.25rem;
-      padding: 5.5rem 3.5rem 2rem 1.5rem;
-      align-items: center;
+    .has-caption > :is(.scr-row, .scr-win) {
+      position: relative; inset: auto; width: 100%; flex: none;
     }
-    .has-desktop-notes > .scr-row {
-      position: relative; inset: auto; grid-area: media; align-self: stretch;
-      min-width: 0; min-height: 0; container-type: size;
-      --u: min(1px, 100cqw / var(--frame-width, 1400), 100cqh / 1080);
-      --n: var(--u);
+    .has-caption > .scr-row.fit {
+      --u: min(1px, var(--case-media-width) / var(--span, 1400), var(--case-media-height) / 885.333);
     }
-    .desktop-notes { display: grid; grid-area: notes; gap: .75rem; min-width: 0; }
-    .desktop-note-group { display: grid; gap: .75rem; min-width: 0; }
-    .desktop-note {
-      width: min(100%, var(--note-width));
-      justify-self: center;
-      padding: .75rem .85rem; border-radius: .75rem;
-      background: #666; color: #fff;
+    .screen-notes {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+      overflow: hidden; margin: 0; width: min(100%, 47rem);
+      font-size: var(--button-font-size); line-height: 1.35; color: #626267;
+      text-align: center; text-wrap: pretty; overflow-wrap: break-word;
     }
-    .case-feed.go-feed {
-      container: go-feed / size;
-      --go-pair-ratio: calc((2 * 431.333 + 40) / 885.333);
-      --go-phone-height: min((100cqw - 3rem) / var(--go-pair-ratio), clamp(15rem, 52svh, 34rem));
+    .screen-note-mobile { display: none; }
+    .screen-note-desktop, .screen-note-hint { display: inline; }
+    .scr-cover.mac-cover {
+      width: min(1488px, var(--case-media-width), calc(min(69.6cqh, var(--case-media-height)) * 6312 / 3824));
     }
-    .case-screen.go-pair {
-      --go-side-padding: 1.5rem;
-      grid-template: "media" var(--go-phone-height) "notes" auto / minmax(0, 1fr);
-      padding-inline: var(--go-side-padding);
-      align-content: center;
+    .win-stage {
+      --u: min(1.15px, var(--case-media-width) / var(--stage-width), var(--case-media-height) / var(--stage-height));
     }
-    .go-pair > .scr-row {
-      container-type: normal;
-      --u: calc(var(--go-phone-height) / 885.333);
+    .flip-stage {
+      --u: min(1px, var(--case-media-width) / var(--stage-width), var(--case-media-height) / var(--stage-height));
     }
+    .go-feed {
+      --go-phone-height: min(var(--case-media-height), var(--case-media-width) * 885.333 / (2 * 431.333 + 40));
+    }
+    .go-feed .scr-row { --u: calc(var(--go-phone-height) / 885.333); }
     .go-feed .scr-video { height: var(--go-phone-height); }
-    .go-pair .desktop-notes { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--note-width)), 1fr)); }
-    .go-pair .desktop-note-group { display: contents; }
-  }
-  @media (min-width: 1280px) and (aspect-ratio > 4/5) {
-    .case-screen.has-two-note-groups:not(.go-pair) {
-      grid-template: "left media right" minmax(0, 1fr) / 14.5rem minmax(0, 1fr) 14.5rem;
-      column-gap: .75rem;
-    }
-    .has-two-note-groups:not(.go-pair) .desktop-notes { display: contents; }
-    .has-two-note-groups:not(.go-pair) .desktop-note-group { width: var(--note-width); z-index: 1; }
-    .has-two-note-groups:not(.go-pair) .desktop-note-group:first-child { grid-area: left; justify-self: start; }
-    .has-two-note-groups:not(.go-pair) .desktop-note-group:last-child { grid-area: right; justify-self: end; }
-    .has-two-note-groups:not(.go-pair) .desktop-note-group:has(.desktop-note:only-child) {
-      transform: translateY(clamp(-4rem, calc((var(--note-y, .5) - .5) * 48svh), 7rem));
-    }
-  }
-  @container go-feed (min-width: 68rem) {
-    .go-feed > .case-screen {
-      --go-phone-height: min((100cqw - 33rem) / var(--go-pair-ratio), 100cqh - 10.5rem);
-    }
-    .case-screen.go-pair {
-      --go-pair-width: calc(var(--go-phone-height) * var(--go-pair-ratio));
-      /* Выноски немного заходят на корпус, оставляя место у индикатора прокрутки. */
-      --go-note-overlap: max(1rem, calc(var(--note-width) + var(--go-side-padding) - (100cqw - var(--go-pair-width)) / 2));
-      grid-template: "left media right" var(--go-phone-height) / minmax(0, 1fr) var(--go-pair-width) minmax(0, 1fr);
-      gap: 0;
-      padding: 0 var(--go-side-padding);
-    }
-    .go-pair .desktop-notes { display: contents; }
-    .go-pair .desktop-note-group:empty { display: none; }
-    .go-pair .desktop-note-group {
-      --group-position: clamp(0, var(--note-y, .5), 1);
-      display: grid;
-      position: relative;
-      align-self: start;
-      top: calc(var(--go-phone-height) * var(--group-position));
-      width: var(--note-width);
-      z-index: 1;
-      transform: translateY(calc(-100% * var(--group-position)));
-    }
-    .go-pair .desktop-note-group:first-child {
-      grid-area: left; justify-self: end; margin-inline-end: calc(-1 * var(--go-note-overlap));
-    }
-    .go-pair .desktop-note-group:last-child {
-      grid-area: right; justify-self: start; margin-inline-start: calc(-1 * var(--go-note-overlap));
-    }
-  }
-  @media (760px < width < 1100px) and (aspect-ratio > 4/5) {
-    .case-screen.has-desktop-notes:not(.go-pair) {
-      grid-template: "media" clamp(15rem, 52svh, 34rem) "notes" auto / minmax(0, 1fr);
-      padding-inline: 1.5rem 3rem;
-    }
-    .desktop-notes { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--note-width)), 1fr)); }
-    .desktop-note-group { display: contents; }
-  }
-
-  @media (width > 760px) and (aspect-ratio > 4/5) {
-    .flip-stage:not(.on) .flip-hint { display: block; opacity: 1; }
-    .case-screen.mac-screen.has-desktop-notes { display: block; height: 100%; padding: 0; }
-    .mac-screen.has-desktop-notes > .scr-row.fit {
-      position: absolute; inset: 0; container-type: normal;
-      --u: min(1px, (100cqw - 32.5rem) / 1400, 100cqh / 1080);
-    }
-    .mac-screen .desktop-notes {
-      position: absolute; right: 2.5rem; bottom: 1.25rem;
-      max-width: calc(100% - 4rem);
-      grid-auto-flow: column; grid-auto-columns: minmax(0, var(--note-width));
-    }
-    .mac-screen .desktop-note-group { display: contents; }
-  }
-  @media (760px < width < 1100px) and (aspect-ratio > 4/5) {
-    .mac-note-alternate .desktop-notes { right: 1rem; max-width: calc(100% - 2rem); }
-  }
-  @media (min-width: 1100px) and (aspect-ratio > 4/5) {
-    .mac-note-overlay .desktop-notes {
-      top: 50%; right: 1.5rem; bottom: auto; transform: translateY(-50%);
-    }
-    .mac-note-alternate .desktop-notes {
-      display: block; inset: 0; max-width: none; pointer-events: none;
-    }
-    .mac-note-alternate .desktop-note {
-      position: absolute; left: 1.5rem; top: 35%; width: var(--note-width);
-      transform: translateY(-50%); pointer-events: auto;
-    }
-    .mac-note-alternate .desktop-note:nth-child(2) { left: auto; right: 1.5rem; top: 50%; }
-    .mac-note-alternate .desktop-note:nth-child(3) { top: 65%; }
   }
 
   /* низкое окно: шесть блоков кейса должны помещаться без прокрутки */
   @media (min-width: 761px) and (max-height: 760px) {
     .card-full { padding: 1.75rem 2.5rem; }
     .case-text { gap: 1rem; }
+  }
+
+  /* ── Галерея арта ── */
+  body[data-case-id="art"] { --glass: rgba(17, 17, 19, .72); }
+  body[data-case-id="art"] .case { background: #1b1b1d; }
+  body[data-case-id="art"] .case-feed { inset: 0; scroll-snap-type: none; }
+  body[data-case-id="art"] .case-bar { display: none; }
+  body[data-case-id="art"]:has(.art-viewer[open]) { overflow: hidden; }
+  @media (width > 760px) and (aspect-ratio > 4/5) {
+    body[data-case-id="art"] .card {
+      inset: 2.5rem auto auto 2.5rem; width: min(27rem, 40vw);
+      max-height: calc(100vh - 5rem); border-radius: 1.25rem;
+    }
+    body[data-case-id="art"] .card-full {
+      position: relative; width: auto; max-height: inherit; padding: 1.25rem 1.5rem 1.5rem;
+    }
+    body[data-case-id="art"] .case-head { margin-bottom: .8rem; }
+    body[data-case-id="art"] .case-text { width: auto; }
+    body[data-case-id="art"] .card-foot { display: none; }
+  }
+
+  .art-gallery {
+    --art-gap: .25rem;
+    position: relative; isolation: isolate;
+    height: 100vh; height: 100svh;
+  }
+  .art-grid {
+    position: absolute; inset: 0; overflow: hidden; touch-action: pan-y pinch-zoom;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr); gap: var(--art-gap);
+  }
+  .art-column { min-width: 0; overflow: clip; }
+  .art-track { animation: art-cycle var(--art-duration) linear var(--art-delay) infinite; }
+  .art-column:nth-child(even) .art-track { animation-direction: reverse; }
+  /* Два одинаковых отрезка ленты, включая зазор в конце каждого. */
+  @keyframes art-cycle { to { transform: translateY(-50%); } }
+  .art-cycle {
+    display: flex; flex-direction: column; gap: var(--art-gap);
+    padding-bottom: var(--art-gap);
+  }
+  .art-tile {
+    position: relative; overflow: hidden; display: block; flex: none;
+    width: 100%; min-height: 0; aspect-ratio: 7 / 10;
+    background: #2d2b2e; text-align: left; cursor: zoom-in;
+    -webkit-user-select: none; user-select: none;
+  }
+  .art-tile.wide { aspect-ratio: 16 / 9; }
+  .art-gallery.dragging :is(.art-grid, .art-tile) { cursor: grabbing; }
+  .art-tile:focus-visible { outline-offset: -4px; border-radius: 0; z-index: 1; }
+  .art-tile img {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: none;
+    object-fit: cover; pointer-events: none;
+  }
+  .art-tile-title {
+    position: absolute; z-index: 1; bottom: .75rem; left: .75rem; max-width: calc(100% - 1.5rem);
+    padding: .4rem .65rem; border-radius: .45rem; background: var(--glass);
+    color: #fff; font-size: 1rem; line-height: 1.2; opacity: 0; pointer-events: none;
+    transition: opacity .18s ease;
+  }
+  .art-tile:focus-visible .art-tile-title { opacity: 1; }
+  @media (hover: hover) and (pointer: fine) {
+    .art-tile:hover .art-tile-title { opacity: 1; }
+  }
+  .art-gallery:not(.ready) .art-track,
+  .art-gallery:is(.dragging, .offscreen, .background) .art-track,
+  .art-gallery:has(.art-tile:focus-visible, .art-viewer[open]) .art-track { animation-play-state: paused; }
+
+  .art-control { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; color: #fff; }
+
+  .art-viewer {
+    position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none;
+    border: 0; margin: 0; padding: 0; background: #171719; color: #fff;
+    --viewer-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .art-viewer::backdrop { background: #171719; }
+  .art-viewer-work {
+    display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: .75rem;
+    width: 100%; height: 100%; margin: 0;
+    padding: calc(4rem + env(safe-area-inset-top)) 1rem var(--viewer-bottom);
+  }
+  .art-viewer-image { width: 100%; height: 100%; min-height: 0; object-fit: scale-down; }
+  .art-viewer-caption {
+    display: grid; align-content: center; gap: .2rem;
+    min-height: 2.75rem; padding-inline: 3rem; text-align: center;
+  }
+  .art-viewer-caption h3 { margin: 0; font-size: clamp(1rem, 2vw, 1.375rem); font-weight: 600; }
+  .art-viewer-credit { margin: 0; color: #c7c7cc; font-size: .95rem; }
+  .art-viewer .art-control { position: absolute; background: #303034; }
+  .art-viewer .art-control:hover { background: #44444a; }
+  .art-viewer-close { top: calc(1rem + env(safe-area-inset-top)); right: 1rem; }
+  .art-viewer-close img { width: 1rem; filter: invert(1); }
+  .art-viewer-prev { bottom: var(--viewer-bottom); left: 1rem; }
+  .art-viewer-prev img { transform: scaleX(-1); }
+  .art-viewer-next { bottom: var(--viewer-bottom); right: 1rem; }
+
+  .art-gallery.still { height: auto; }
+  .art-gallery.still .art-grid { position: relative; grid-template-rows: auto; touch-action: auto; }
+  .art-gallery.still .art-column { display: flex; }
+  .art-gallery.still .art-track { display: flex; flex-direction: column; width: 100%; animation: none; }
+  .art-gallery.still .art-cycle { flex: 1; }
+
+  @media (max-width: 760px), (max-aspect-ratio: 4/5) {
+    body[data-case-id="art"] .case { padding-top: 0; }
+    body[data-case-id="art"] .page-foot { margin-top: 0; }
+    .art-gallery { --art-gap: 3px; }
+    .art-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -818,6 +803,30 @@
 
 <div class="page-foot" id="page-foot"></div>
 
+<template id="art-gallery-template">
+  <section class="art-gallery" aria-labelledby="case-title">
+    <div class="art-grid"></div>
+    <dialog class="art-viewer" aria-labelledby="art-viewer-title">
+      <figure class="art-viewer-work">
+        <img class="art-viewer-image" alt="" decoding="async">
+        <figcaption class="art-viewer-caption" aria-live="polite">
+          <h3 id="art-viewer-title"></h3>
+          <p class="art-viewer-credit" hidden></p>
+        </figcaption>
+      </figure>
+      <button class="pill art-control art-viewer-close" type="button" data-art-control="close" autofocus>
+        <img src="assets/ic-cross.svg" alt="">
+      </button>
+      <button class="pill art-control art-viewer-prev" type="button" data-art-control="previous">
+        <img src="assets/ic-arrow.svg" alt="">
+      </button>
+      <button class="pill art-control art-viewer-next" type="button" data-art-control="next">
+        <img src="assets/ic-arrow.svg" alt="">
+      </button>
+    </dialog>
+  </section>
+</template>
+
 <template id="partner-demo-template">
   <form class="mobile-demo partner-demo" autocomplete="off">
     <button type="button" class="demo-button demo-fill" data-copy="example"></button>
@@ -870,6 +879,10 @@
           mobileNote: {
             ru: 'Разбила форму на разделы со связанными параметрами. Проверка в каждом разделе помогает заметить ошибки ещё до отправки данных в банковские системы. Для похожих продуктов настройки можно загрузить из файла.',
             en: 'I grouped related fields into sections so staff can catch errors before sending the data to the bank’s systems. When setting up a similar product, they can import settings from a file.',
+          },
+          desktopNote: {
+            ru: 'В форме проверяем данные по разделам до отправки в банковские системы. Настройки похожего продукта можно загрузить из файла',
+            en: 'The form checks each section before sending data to the bank’s systems. Staff can import settings for similar products',
           },
           notes: [
             { b: [18.06, 48.15], x: 0, y: 775,
@@ -939,6 +952,10 @@
             ru: 'В привычной форме «Экспресса» робот доступен для заказа с одной остановкой, если оба адреса в зоне рободоставки и оплата идёт с корпоративного счёта. Заранее объясняем, что робота нужно встретить. Так отправитель ещё до оплаты может выбрать курьера.',
             en: 'The familiar Express form offers a rover for single-stop deliveries when both addresses are in range and the customer pays from a corporate account. We explain that the sender needs to meet the rover while they can still switch to a courier before payment.',
           },
+          desktopNote: {
+            ru: 'Робота можно заказать с одной остановкой, если оба адреса в зоне и счёт корпоративный. До оплаты предупреждаем, что его нужно встретить',
+            en: 'A rover is available for one stop, two addresses in range and corporate payment. We tell senders before payment that they’ll need to meet it',
+          },
           shots: ['assets/go-2a.webp', 'assets/go-2b.webp'], notes: [
           { at: 'l', y: 410, h: 117,
             ru: 'Сохранили привычную форму заказа. Робота предлагаем для доставки с одной остановкой',
@@ -955,6 +972,10 @@
             ru: 'Перед оформлением объясняем, что для товаров 18+ нужен курьер, который сможет проверить возраст получателя. Если робот подходит для заказа, показываем цены до подъезда и до двери, чтобы клиент сам выбрал вариант.',
             en: 'Before checkout, we explain that age-restricted items need a courier who can check the recipient’s age. For rover deliveries, we show prices for the building entrance and the doorstep so customers can choose.',
           },
+          desktopNote: {
+            ru: 'Для товаров 18+ нужен курьер, который проверит возраст. Для робота показываем цены до двери и до подъезда, чтобы клиент выбрал сам',
+            en: 'Age-restricted items need a courier who can verify age. For rovers, we show prices to the building entrance and to the door',
+          },
           shots: ['assets/go-3a.webp', 'assets/go-3b.webp'], notes: [
           { at: 'l', y: 792, h: 117,
             ru: 'Заранее предупреждаем об ограничениях. Например, робот не может проверить возраст получателя',
@@ -967,6 +988,10 @@
           mobileNote: {
             ru: 'Отправитель всегда встречает робота. При доставке до подъезда к нему выходит и получатель. Когда робот приезжает, схема в трекинге показывает, где кнопка на крышке. На загрузку есть минута, поэтому просим подтвердить открытие, когда отправитель уже рядом.',
             en: 'The sender always meets the rover, and the recipient does too for deliveries to the building entrance. On arrival, the tracking screen points out the lid button. There’s one minute to load the parcel, so we ask the sender to confirm they’re ready before opening the lid.',
+          },
+          desktopNote: {
+            ru: 'Схема показывает кнопку на крышке. На загрузку есть минута, поэтому просим подтвердить открытие, когда отправитель рядом',
+            en: 'Tracking points out the lid button. Senders have a minute to load the parcel, so we ask them to confirm they’re ready',
           },
           shots: ['assets/go-4a.webp', 'assets/go-4b.webp'], notes: [
           { at: 'l', y: 755, h: 117,
@@ -1015,6 +1040,10 @@
           mobileNote: {
             ru: 'Баннер на главной заранее предупреждает об ограничениях доставки и ведёт к договору. Там же можно открыть справку об экспедиции и разобраться в новых условиях.',
             en: 'A banner on the dashboard flags the delivery restrictions and takes customers straight to the contract. The same page has guides that explain freight forwarding and what’s changing.',
+          },
+          desktopNote: {
+            ru: 'Баннер на главной предупреждает об ограничениях и ведёт к договору. Справка объясняет, что меняется при переходе на экспедицию',
+            en: 'A dashboard banner flags the restriction and links to the contract. The guides explain what changes with freight forwarding',
           },
           notes: [
             { b: [4.71, 34.07], anchor: 'l',
@@ -1086,9 +1115,13 @@
         { title: { ru: 'метафора связи', en: 'the metaphor of connection' },
           flip: { x: 365, y: 145, w: 711, h: 790,
                   front: 'assets/tg-globe-clean.png', back: 'assets/tg-graph.webp' },
+          desktopNote: {
+            ru: 'Глобус с фасада стал графом, который связывает истории студентов',
+            en: 'The facade’s globe becomes a graph linking student stories',
+          },
           notes: [
-            { hint: true, x: 75, y: 735, ru: 'Наведи на глобус, чтобы увидеть, как он превращается в граф',
-              en: 'Hover over the globe to see it turn into a graph' },
+            { hint: true, ru: 'Наведи на глобус, чтобы увидеть граф',
+              en: 'Hover over the globe to see the graph' },
             { r: 154, y: 777,
               ru: 'Взяла глобус с фасада и превратила его в граф. Идею связи продолжили через истории студентов',
               en: 'The facade’s globe becomes a graph linking the stories of students on the new campus' },
@@ -1121,6 +1154,99 @@
       },
     },
 
+    art: {
+      screens: [
+        { title: { ru: '«Утро» и «Завтрак»', en: 'Morning and Breakfast' },
+          credit: { ru: 'По песням «Дайте танк (!)»', en: 'Inspired by songs by Daite Tank (!)' },
+          artwork: [
+            ['breakfast', 600, 800, { ru: 'Красный рассвет и рукописные строки из песни «Завтрак»', en: 'A red sunrise and handwritten lyrics from Breakfast' }, [92, 40, 508, 720]],
+            ['morning', 600, 800, { ru: 'Рассвет в маленьком окне и рукописные строки из песни «Утро»', en: 'A sunrise in a small window and handwritten lyrics from Morning' }, [0, 40, 508, 720]],
+          ] },
+        { title: { ru: 'Cardio Killer', en: 'Cardio Killer' },
+          credit: { ru: 'Развороты журнала LOCAL', en: 'Spreads for LOCAL magazine' },
+          artwork: [
+            ['cardio-killer', 990, 1400, { ru: 'Первая страница интервью с Cardio Killer с зелёным рукописным заголовком', en: 'The opening page of the Cardio Killer interview with a green handwritten headline' }],
+            ['cardio-killer-print', 600, 800, { ru: 'Печатный разворот с двумя портретами, которые сходятся на сгибе', en: 'A printed spread with two portraits meeting at the fold' }],
+          ] },
+        { title: { ru: 'Fantastic Yarn', en: 'Fantastic Yarn' },
+          artwork: [
+            ['fantastic-yarn', 800, 450, { ru: 'Логотип с овечкой на фоне оранжевой пряжи', en: 'A sheep logo against orange yarn' }],
+            ['fantastic-yarn-tags', 800, 450, { ru: 'Бирки для пряжи с фирменным знаком', en: 'Yarn tags with the sheep logo' }],
+            ['fantastic-yarn-pattern', 800, 450, { ru: 'Овечка повторяется в узоре из вязаных квадратов', en: 'The sheep motif repeats across crocheted squares' }],
+          ] },
+        { title: { ru: '«Кресты и башни»', en: 'Crosses and Towers' },
+          credit: { ru: 'Развороты журнала LOCAL', en: 'Spreads for LOCAL magazine' },
+          artwork: [
+            ['crosses-and-towers', 565, 800, { ru: 'Первая страница с фотографией фасада бывшей телефонной станции', en: 'The opening page with a photo of the former telephone exchange' }],
+            ['crosses-and-towers-interior', 565, 800, { ru: 'Белые блоки текста на фотографиях стен и лестницы станции', en: 'White blocks of text over photos of the exchange’s walls and staircase' }],
+            ['crosses-and-towers-rooftop', 904, 1280, { ru: 'Страница с рисунком арки и фотографией башни на крыше телефонной станции', en: 'A page featuring an arch drawing and a photo of the exchange’s rooftop tower' }],
+          ] },
+        { title: { ru: 'Эльфийский гротеск', en: 'An Elvish sans serif' },
+          artwork: [
+            ['tolkien-ring', 2048, 1152, { ru: 'Золотое кольцо на цепочке с эльфийской надписью изнутри', en: 'A gold ring on a chain with Elvish lettering on the inside' }],
+            ['tolkien-books', 2048, 1152, { ru: 'Три обложки «Властелина колец» с золотыми эльфийскими надписями', en: 'Three Lord of the Rings book covers with gold Elvish lettering' }],
+            ['tolkien-poster', 2048, 1152, { ru: 'Чёрный плакат с золотой надписью, набранной по кругу', en: 'A black poster with gold Elvish lettering arranged in a circle' }],
+            ['tolkien-map', 2048, 1152, { ru: 'Сторона выставочного буклета с картой Средиземья и образцом эльфийского письма', en: 'The exhibition booklet with a map of Middle-earth and an Elvish type sample' }],
+            ['tolkien-alphabet', 2048, 1152, { ru: 'Сторона выставочного буклета со строением букв и таблицей алфавита', en: 'The other side of the booklet, showing letter structure and the alphabet' }],
+          ] },
+        { title: { ru: 'Плакат по Ахматовой', en: 'A poster inspired by Akhmatova' },
+          artwork: [
+            ['akhmatova-poster', 800, 450, { ru: 'Стихотворение Ахматовой и пиксельный одуванчик на плакате', en: 'A poster pairing Akhmatova’s poem with a pixelated dandelion' }],
+          ] },
+        { title: { ru: 'Плакаты по Бродскому', en: 'Posters inspired by Brodsky' },
+          artwork: [
+            ['brodsky-type', 904, 1280, { ru: 'Белые строки на чёрном фоне образуют силуэт и три дуги над ним', en: 'White lettering on black forms a figure with three arcs of text above it' }],
+            ['brodsky-pieta', 904, 1280, { ru: 'Скульптура Марии и силуэт Христа из белых букв', en: 'A sculpture of Mary holding a figure of Christ formed from white type' }],
+          ] },
+        { title: { ru: 'Стикерпак для майнора «UX-дизайн» НИУ ВШЭ', en: 'Sticker pack for the UX Design minor at HSE University' },
+          artwork: [
+            ['hse-ux-stickers', 1920, 1080, { ru: 'Пять стикеров с котёнком Юхом на жёлтом фоне', en: 'Five stickers of the kitten mascot Yukh on a yellow background' }],
+          ] },
+        { title: { ru: 'Влюблённая лягушка', en: 'A Frog in Love' },
+          artwork: [
+            ['frog-in-love', 907, 1280, { ru: 'Скелет лягушки и белое сердце на зелёном фоне', en: 'A frog skeleton with a white heart on a textured green background' }],
+          ] },
+        { title: { ru: 'Триптих по D&D', en: 'D&D poster triptych' },
+          artwork: [
+            ['dnd-paladin', 853, 1280, { ru: 'Силуэт паладинки с белым мечом и узкие строки на бордовом фоне', en: 'A paladin with a white sword and condensed lettering on a burgundy background' }],
+            ['dnd-flowers', 853, 1280, { ru: 'Красные и синие цветы на чёрном фоне', en: 'Red and blue flowers against a near-black background' }],
+            ['dnd-portrait', 853, 1280, { ru: 'Героиня со сложенными ладонями на тёмно-синем фоне', en: 'A character with her palms pressed together on a dark blue background' }],
+          ] },
+        { title: { ru: 'Колода карт в технике коллажа', en: 'Collage playing cards' },
+          artwork: [
+            ['collage-deck', 960, 1280, { ru: 'Карты пиковой масти с коллажами из чёрно-белых вырезок', en: 'Spades playing cards decorated with black-and-white paper collages' }],
+          ] },
+        { title: { ru: '«Шоп-шоп»', en: 'Shop Shop' },
+          credit: { ru: 'Развороты журнала LOCAL. Иллюстрации Даны Шерстневой', en: 'Spreads for LOCAL magazine. Illustrations by Dana Sherstneva' },
+          artwork: [
+            ['shop-shop-striped-look', 896, 1280, { ru: 'Иллюстрированный образ в полосатой рубашке с подписями к одежде и аксессуарам', en: 'An illustrated outfit with a striped shirt and labels for the clothes and accessories' }],
+            ['shop-shop-analog', 896, 1280, { ru: 'Журнал, кассета, пластинки и радиола с подписями на голубом фоне', en: 'A magazine, cassette, records and radiogram with labels on a blue background' }],
+          ] },
+        { title: { ru: 'Rostok', en: 'Rostok' },
+          artwork: [
+            ['rostok-onboarding', 1920, 1080, { ru: 'Экраны знакомства с Rostok и иллюстрации роста цветка', en: 'Rostok onboarding screens with illustrations of a flower growing' }],
+            ['rostok-app', 1920, 1080, { ru: 'Вопрос дня, ответы близких, общий сад и статьи в приложении Rostok', en: 'The daily question, family responses, shared garden and articles in the Rostok app' }],
+            ['rostok-city-posters', 1920, 1080, { ru: 'Три зелёных плаката Rostok с цветами на городских стендах', en: 'Three green Rostok posters with flowers on street displays' }],
+            ['rostok-flower-poster', 2048, 1152, { ru: 'Плакат с экранами приложения среди розовых цветов', en: 'A poster with app screens surrounded by pink flowers' }],
+            ['rostok-garden-posters', 2048, 1152, { ru: 'Три плаката Rostok с ростками и иллюстрациями цветов на фоне сада', en: 'Three Rostok posters with seedlings and floral illustrations in a garden setting' }],
+            ['rostok-pins', 2048, 1152, { ru: 'Три значка в форме цветов на фирменных карточках Rostok', en: 'Three flower-shaped pins on Rostok backing cards' }],
+            ['rostok-stickers', 2048, 1152, { ru: 'Жёлтый цветок, логотип и стикер Rostok на ноутбуке', en: 'A yellow flower, the Rostok logo and a sticker on a laptop' }],
+          ] },
+      ],
+      ru: {
+        title: 'Арт и плакаты',
+        blocks: [
+          ['', 'Здесь собрала всякое, что делаю в свободное время для души. По любимым песням собираю коллажи, по стихам делаю плакаты. А ещё тут есть журнальные развороты и проекты из сферы графического дизайна'],
+        ],
+      },
+      en: {
+        title: 'Art and posters',
+        blocks: [
+          ['', 'A few things I make in my spare time, just because I enjoy it. I turn favourite songs into collages and poems into posters. There are magazine spreads and graphic design projects here too'],
+        ],
+      },
+    },
+
     aviasales: {
       // Экраны собраны по макету: Фигма, Section 4 (пять десктопов)
       screens: [
@@ -1130,6 +1256,10 @@
           mobileNote: {
             ru: 'Баннер на главной знакомит с групповыми поездками ещё до поиска билетов. Начать планирование можно и из поиска. Когда человек ищет билеты на двоих или больше, предлагаем создать поездку с друзьями.',
             en: 'The home screen banner introduces group trips before travellers start looking for tickets. They can also start planning from their search. When they look for tickets for two or more, we suggest creating a trip with friends.',
+          },
+          desktopNote: {
+            ru: 'Баннер знакомит с групповыми поездками. В поиске предлагаем создать поездку, если человек ищет билеты на двоих или больше',
+            en: 'The home banner introduces group trips. In search, we offer to start one when a traveller looks for tickets for two or more',
           },
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-1.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-2.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-3.webp', w: 101.246, x: -0.519 }],
@@ -1164,6 +1294,10 @@
           mobileNote: {
             ru: 'В комнате поездки друзья обсуждают направления, билеты и жильё. Покупка проходит, когда все подтвердят выбор и оплатят свою часть. Если от участника ждём подтверждение или оплату, отправляем напоминание. Даты, брони и билеты можно открыть без интернета.',
             en: 'Friends use the trip room to discuss destinations, tickets and accommodation. Booking goes ahead once everyone confirms and pays their share. We remind anyone whose confirmation or payment is pending. Dates, bookings and tickets are available offline.',
+          },
+          desktopNote: {
+            ru: 'Друзья обсуждают варианты в комнате поездки. Покупка проходит после подтверждения и оплаты всеми. Даты, брони и билеты доступны офлайн',
+            en: 'Friends compare options in the trip room. Booking goes ahead once everyone confirms and pays. Dates, bookings and tickets are available offline',
           },
           phone: { w: 354, h: 735, ar: '963 / 2000' }, span: 1710,
           shots: [{ src: 'assets/av-6.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-7.webp', w: 101.246, x: -0.519 }, { src: 'assets/av-8.webp', w: 101.246, x: -0.519 }],
@@ -1215,6 +1349,7 @@
     folder3: [
       { ru: 'группы в aviasales', en: 'groups in aviasales', case: 'aviasales', cover: 'assets/cover-aviasales.webp', hidden: true },
       { ru: 'телеграф', en: 'telegraph', case: 'telegraph', cover: 'assets/cover-telegraph.webp' },
+      { ru: 'арт и плакаты', en: 'art and posters', case: 'art', cover: 'assets/art/breakfast.webp' },
     ],
   };
 
@@ -1233,6 +1368,10 @@
       resume: 'резюме.мяу', cat: 'мой.кот', cv: 'резюме',
       collapse: 'Свернуть', expand: 'Развернуть', photoAlt: 'Настя Балашова', sound: 'Звук', back: 'Назад', home: 'назад',
       projects: 'Кейсы', graph: 'Показать граф',
+      art: {
+        close: 'Закрыть просмотр',
+        previous: 'Предыдущая работа', next: 'Следующая работа',
+      },
     },
     en: {
       lang: 'en', name: 'Nastya Balashova', contact: 'contact me',
@@ -1244,6 +1383,10 @@
       resume: 'cv.meow', cat: 'my.cat', cv: 'CV',
       collapse: 'Collapse', expand: 'Expand', photoAlt: 'Nastya Balashova', sound: 'Sound', back: 'Back', home: 'back',
       projects: 'Projects', graph: 'Show graph',
+      art: {
+        close: 'Close artwork',
+        previous: 'Previous artwork', next: 'Next artwork',
+      },
     },
   };
 
@@ -1655,8 +1798,8 @@
   const feed = document.getElementById('case-feed');
   const caseBar = document.getElementById('case-bar');
   const caseCopy = new Map();
+  let artGallery = null;
   const videos = new Map();
-  const PHONE = { w: 431.333, h: 885.333, y: 97 };
   const percent = (value, base) => (value * 100 / base).toFixed(3) + '%';
 
   function createImage(src, className, first = false) {
@@ -1723,6 +1866,8 @@
   });
 
   function clearFeed() {
+    artGallery?.dispose();
+    artGallery = null;
     slideObserver.disconnect();
     videoObserver.disconnect();
     videos.forEach((state, video) => {
@@ -1745,61 +1890,54 @@
     return video;
   }
 
-  function createNote(copy) {
-    const note = document.createElement('div');
-    note.className = 'note';
-    const body = document.createElement('span');
-    body.className = 'note-body';
-    const text = document.createElement('span');
-    text.className = 'note-text';
-    body.appendChild(text);
-    caseCopy.set(text, copy);
-    note.appendChild(body);
-    return note;
-  }
-
-  function createScreenNote(notes) {
+  function createScreenNote(notes, desktopNote, hint) {
     const paragraph = document.createElement('p');
     paragraph.className = 'screen-notes';
     const prose = language => notes.map(copy => {
       const text = copy[language] || copy.ru;
       return /[.!?…]$/.test(text) ? text : text + '.';
     }).join(' ').replace(/(?<!\.)\.$/, '');
-    caseCopy.set(paragraph, { ru: prose('ru'), en: prose('en') });
+    const body = document.createElement('span');
+    caseCopy.set(body, { ru: prose('ru'), en: prose('en') });
+    paragraph.appendChild(body);
+    if (desktopNote) {
+      const compact = document.createElement('span');
+      compact.className = 'screen-note-desktop';
+      body.className = 'screen-note-mobile';
+      caseCopy.set(compact, desktopNote);
+      paragraph.appendChild(compact);
+    }
+    if (hint) {
+      const cue = document.createElement('span');
+      cue.className = 'screen-note-hint';
+      caseCopy.set(cue, { ru: '. ' + hint.ru, en: '. ' + hint.en });
+      paragraph.appendChild(cue);
+    }
     return paragraph;
   }
 
-  function positionWindow(el, frame) {
-    el.style.left = percent(frame.x, 1400);
-    el.style.top = percent(frame.y, 1080);
-    el.style.width = percent(frame.w, 1400);
-    el.style.height = percent(frame.h, 1080);
+  function positionWindow(el, frame, bounds) {
+    el.style.left = percent(frame.x - bounds.x, bounds.w);
+    el.style.top = percent(frame.y - bounds.y, bounds.h);
+    el.style.width = percent(frame.w, bounds.w);
+    el.style.height = percent(frame.h, bounds.h);
   }
 
   function createFlip(screen) {
     const stage = document.createElement('div');
     stage.className = 'win-stage flip-stage';
+    stage.style.setProperty('--stage-width', screen.flip.w);
+    stage.style.setProperty('--stage-height', screen.flip.h);
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'flip-card';
     card.dataset.i18nLabel = 'graph';
     card.setAttribute('aria-label', T[lang].graph);
     card.setAttribute('aria-pressed', 'false');
-    positionWindow(card, screen.flip);
+    positionWindow(card, screen.flip, screen.flip);
     const back = createImage(screen.flip.back, 'flip-back');
     card.append(createImage(screen.flip.front, 'flip-front'), back);
     stage.appendChild(card);
-
-    for (const copy of screen.notes) {
-      const note = createNote(copy);
-      if (copy.hint) note.classList.add('flip-hint');
-      if (copy.r != null) {
-        note.style.setProperty('--nr', percent(copy.r, 1400));
-        note.classList.add('anch-r');
-      } else note.style.setProperty('--nx', percent(copy.x, 1400));
-      note.style.setProperty('--ny', percent(copy.y, 1080));
-      stage.appendChild(note);
-    }
 
     let wantsGraph = false;
     function showGraph(show) {
@@ -1828,40 +1966,34 @@
   function createWindows(screen, first) {
     const stage = document.createElement('div');
     stage.className = 'win-stage';
-    const frames = screen.frames;
-    const left = Math.min(...frames.map(frame => frame.x));
-    const right = Math.max(...frames.map(frame => frame.x + frame.w));
-    stage.style.setProperty('--center-x', 700 - (left + right) / 2);
+    // У макетов окон верхние 60 единиц относились к удалённой шапке.
+    const frames = screen.frames.map(frame => ({ ...frame, y: frame.y + 60, h: frame.h - 60 }));
+    const arrows = screen.arrows || (screen.arrow ? [screen.arrow] : []);
+    const parts = [...frames, ...arrows];
+    const left = Math.min(...parts.map(part => part.x));
+    const top = Math.min(...parts.map(part => part.y));
+    const bounds = {
+      x: left, y: top,
+      w: Math.max(...parts.map(part => part.x + part.w)) - left,
+      h: Math.max(...parts.map(part => part.y + part.h)) - top,
+    };
+    stage.style.setProperty('--stage-width', bounds.w);
+    stage.style.setProperty('--stage-height', bounds.h);
     frames.forEach((frame, i) => {
       const box = document.createElement('div');
       box.className = 'win win-img';
       box.style.zIndex = frames.length - i;
-      // В координатах макета у окна была шапка высотой 60.
-      positionWindow(box, { ...frame, y: frame.y + 60, h: frame.h - 60 });
+      positionWindow(box, frame, bounds);
       const shot = createImage(frame.src, 'win-shot', first);
       [shot.width, shot.height] = frame.size;
       box.appendChild(shot);
       stage.appendChild(box);
     });
-    for (const arrow of screen.arrows || (screen.arrow ? [screen.arrow] : [])) {
+    for (const arrow of arrows) {
       const image = createImage(arrow.src, 'stage-arrow', first);
       image.style.zIndex = frames.length + 1;
-      positionWindow(image, arrow);
+      positionWindow(image, arrow, bounds);
       stage.appendChild(image);
-    }
-    for (const copy of screen.notes || []) {
-      const note = createNote(copy);
-      if (copy.b) {
-        const [x, y] = copy.b;
-        const right = copy.anchor ? copy.anchor === 'r' : x >= 50;
-        note.classList.toggle('anch-r', right);
-        note.style.setProperty(right ? '--nr' : '--nx', 'calc(' + (right ? 100 - x : x) + '% - var(--note-anchor) / 2)');
-        note.style.setProperty('--ny', 'calc(' + y + '% - var(--note-anchor) / 2)');
-      } else {
-        note.style.setProperty('--nx', percent(copy.x, 1400));
-        note.style.setProperty('--ny', percent(copy.y, 1080));
-      }
-      stage.appendChild(note);
     }
     return stage;
   }
@@ -2040,59 +2172,291 @@
     return pair;
   }
 
-  function addDesktopNotes(section, row, screen, goPair) {
-    section.classList.add('has-desktop-notes');
-    const notes = document.createElement('div');
-    notes.className = 'desktop-notes';
-    const left = document.createElement('div');
-    const right = document.createElement('div');
-    left.className = right.className = 'desktop-note-group';
-    const goNoteY = [0, 0];
+  function buildArtGallery() {
+    const gallery = document.getElementById('art-gallery-template').content.firstElementChild.cloneNode(true);
+    const grid = gallery.querySelector('.art-grid');
+    const viewer = gallery.querySelector('.art-viewer');
+    const viewerImage = viewer.querySelector('.art-viewer-image');
+    const viewerTitle = viewer.querySelector('h3');
+    const viewerCredit = viewer.querySelector('.art-viewer-credit');
+    const viewerControls = viewer.querySelectorAll('[data-art-control]');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const listeners = new AbortController();
+    const works = CASES.art.screens.flatMap(({ title, credit, artwork }) =>
+      artwork.map(([file, width, height, alt, crop], part) => ({
+        src: 'assets/art/' + file + '.webp', width, height, alt, crop, title, credit, part,
+      })));
+    const gridOrder = works.map((_, index) => index).sort((a, b) => works[a].part - works[b].part);
+    let activeWork = 0;
+    let drag = null;
+    let suppressClick = false;
+    let wheelFrame = 0;
+    let wheelDistance = 0;
 
-    for (const copy of screen.notes) {
-      const card = document.createElement('div');
-      card.className = 'desktop-note';
-      const text = document.createElement('span');
-      text.className = 'note-text';
-      caseCopy.set(text, copy);
-      card.appendChild(text);
-      const onLeft = screen.shots && (copy.side || copy.at) === 'l';
-      const group = onLeft ? left : right;
-      group.appendChild(card);
-      if (goPair) goNoteY[onLeft ? 0 : 1] += (copy.y + copy.h / 2 - PHONE.y) / PHONE.h;
-      else if (copy.y != null) group.style.setProperty('--note-y', copy.y / 1080);
-    }
-    if (goPair) [left, right].forEach((group, i) => {
-      if (group.childElementCount) group.style.setProperty('--note-y', goNoteY[i] / group.childElementCount);
+    const tileVisibility = new IntersectionObserver(entries => {
+      for (const { target, intersectionRatio } of entries) {
+        const visible = intersectionRatio >= .2;
+        target.tabIndex = visible ? 0 : -1;
+        if (visible || target === document.activeElement) target.removeAttribute('aria-hidden');
+        else target.setAttribute('aria-hidden', 'true');
+      }
+    }, { root: grid, threshold: .2 });
+    const galleryVisibility = new IntersectionObserver(([entry]) => {
+      gallery.classList.toggle('offscreen', !entry.isIntersecting);
     });
-    if (goPair || left.childElementCount) notes.appendChild(left);
-    if (goPair || right.childElementCount) notes.appendChild(right);
-    if (left.childElementCount && right.childElementCount) section.classList.add('has-two-note-groups');
-    if (screen.shots) {
-      const count = screen.shots.length;
-      row.style.setProperty('--frame-width', count * (screen.phone?.w || PHONE.w) + (count - 1) * 40 + 12);
+
+    function showWork() {
+      const work = works[activeWork];
+      if (viewerImage.getAttribute('src') !== work.src) viewerImage.src = work.src;
+      viewerImage.alt = work.alt[lang];
+      viewerTitle.textContent = work.title[lang];
+      viewerCredit.textContent = work.credit?.[lang] || '';
+      viewerCredit.hidden = !work.credit;
+      typograph(viewerTitle.parentElement);
     }
-    section.appendChild(notes);
+
+    function stepWork(direction) {
+      activeWork = (activeWork + direction + works.length) % works.length;
+      showWork();
+    }
+
+    function translate() {
+      viewerControls.forEach(control => control.setAttribute('aria-label', T[lang].art[control.dataset.artControl]));
+      grid.querySelectorAll('.art-tile').forEach(tile => {
+        const work = works[tile.dataset.artIndex];
+        tile.querySelector('.art-tile-title').textContent = work.title[lang];
+        tile.querySelector('img').alt = work.alt[lang];
+      });
+      typograph(grid);
+      if (viewer.open) showWork();
+    }
+
+    function createTile(index, first) {
+      const { src, width, height, crop } = works[index];
+      const tile = document.createElement('button');
+      tile.className = 'art-tile';
+      tile.classList.toggle('wide', width > height);
+      tile.type = 'button';
+      tile.dataset.artIndex = index;
+      const image = createImage(src, '', first);
+      image.loading = 'eager';
+      image.draggable = false;
+      image.width = width;
+      image.height = height;
+      const label = document.createElement('span');
+      label.className = 'art-tile-title';
+      if (crop) {
+        const [x, y, cropWidth, cropHeight] = crop;
+        image.style.left = percent(-x, cropWidth);
+        image.style.top = percent(-y, cropHeight);
+        image.style.width = percent(width, cropWidth);
+        image.style.height = percent(height, cropHeight);
+      }
+      tile.append(label, image);
+      return tile;
+    }
+
+    const inputDirection = target => target.closest('.art-column:nth-child(even)') ? -1 : 1;
+
+    function advanceGallery(distance) {
+      for (const column of grid.children) {
+        const track = column.firstElementChild;
+        const animation = track.getAnimations()[0];
+        if (!animation || animation.currentTime === null) continue;
+        const { duration, delay } = animation.effect.getTiming();
+        const cycleHeight = track.firstElementChild.offsetHeight;
+        const elapsed = animation.currentTime - delay + distance * duration / cycleHeight;
+        // Переводим смещение в фазу цикла, включая прокрутку назад через его начало.
+        animation.currentTime = delay + duration + (elapsed % duration + duration) % duration;
+      }
+    }
+
+    function flushWheel() {
+      const step = Math.abs(wheelDistance) < 1 ? wheelDistance : wheelDistance * .26;
+      advanceGallery(step);
+      wheelDistance -= step;
+      wheelFrame = wheelDistance ? requestAnimationFrame(flushWheel) : 0;
+    }
+
+    function stopWheel() {
+      cancelAnimationFrame(wheelFrame);
+      wheelFrame = 0;
+      wheelDistance = 0;
+    }
+
+    function finishDrag() {
+      if (!drag) return;
+      const { active, pointerId } = drag;
+      drag = null;
+      if (!active) return;
+      suppressClick = true;
+      gallery.classList.remove('dragging');
+      if (grid.hasPointerCapture(pointerId)) grid.releasePointerCapture(pointerId);
+    }
+
+    function layout() {
+      stopWheel();
+      finishDrag();
+      const still = reducedMotion.matches;
+      const columnCount = mobile.matches ? 2 : 4;
+      const columns = [];
+      gallery.classList.remove('ready');
+      gallery.classList.toggle('still', still);
+      tileVisibility.disconnect();
+
+      for (let i = 0; i < columnCount; i++) {
+        const column = document.createElement('div');
+        column.className = 'art-column';
+        const track = document.createElement('div');
+        track.className = 'art-track';
+        track.style.setProperty('--art-delay', [0, -6, -2, -8][i] + 's');
+        const indices = gridOrder.filter((_, order) => order % columnCount === i);
+        const cycle = document.createElement('div');
+        cycle.className = 'art-cycle';
+        indices.forEach((index, position) => cycle.appendChild(createTile(index, position === 0)));
+        track.appendChild(cycle);
+        column.appendChild(track);
+        columns.push(column);
+      }
+      grid.replaceChildren(...columns);
+      if (!still) {
+        // Длина круга меняется с подборкой, а скорость остаётся близкой во всех колонках.
+        const speeds = [17, 20, 17, 19];
+        columns.forEach((column, i) => {
+          const track = column.firstElementChild;
+          const cycle = track.firstElementChild;
+          const tiles = Array.from(cycle.children);
+          const repeats = Math.ceil(grid.clientHeight / Math.max(1, cycle.offsetHeight));
+          for (let repeat = 1; repeat < repeats; repeat++) cycle.append(...tiles.map(tile => tile.cloneNode(true)));
+          track.appendChild(cycle.cloneNode(true));
+          const seconds = cycle.offsetHeight / speeds[i];
+          track.style.setProperty('--art-duration', seconds.toFixed(2) + 's');
+        });
+        grid.querySelectorAll('.art-tile').forEach(tile => {
+          tile.tabIndex = -1;
+          tile.setAttribute('aria-hidden', 'true');
+          tileVisibility.observe(tile);
+        });
+      }
+      translate();
+      const images = grid.querySelectorAll('.art-cycle:first-child img');
+      Promise.allSettled(Array.from(images, image => image.decode())).then(() => {
+        if (!listeners.signal.aborted && grid.firstElementChild === columns[0]) gallery.classList.add('ready');
+      });
+    }
+
+    grid.addEventListener('wheel', event => {
+      if (reducedMotion.matches || viewer.open || drag?.active || event.ctrlKey || event.metaKey) return;
+      const sideways = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+      if (mobile.matches && !sideways) return;
+      const distance = sideways ? event.deltaX : event.deltaY;
+      if (!distance) return;
+      event.preventDefault();
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? grid.clientHeight : 1;
+      wheelDistance += distance * unit * inputDirection(event.target);
+      if (!wheelFrame) wheelFrame = requestAnimationFrame(flushWheel);
+    }, { passive: false });
+    grid.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0 || reducedMotion.matches || viewer.open) return;
+      suppressClick = false;
+      const sideways = event.pointerType === 'touch';
+      drag = {
+        pointerId: event.pointerId, sideways, x: event.clientX, y: event.clientY,
+        last: sideways ? event.clientX : event.clientY, direction: inputDirection(event.target), active: false,
+      };
+    });
+    grid.addEventListener('pointermove', event => {
+      if (event.pointerId !== drag?.pointerId) return;
+      const position = drag.sideways ? event.clientX : event.clientY;
+      if (!drag.active) {
+        const dx = Math.abs(event.clientX - drag.x);
+        const dy = Math.abs(event.clientY - drag.y);
+        const distance = drag.sideways ? dx : dy;
+        if (distance < 6 || distance < (drag.sideways ? dy : dx)) return;
+        stopWheel();
+        grid.setPointerCapture(event.pointerId);
+        gallery.classList.add('dragging');
+        drag.active = true;
+      }
+      advanceGallery((drag.last - position) * drag.direction);
+      drag.last = position;
+    });
+    for (const type of ['pointerup', 'pointercancel']) {
+      grid.addEventListener(type, event => { if (event.pointerId === drag?.pointerId) finishDrag(); });
+    }
+    grid.addEventListener('lostpointercapture', event => {
+      if (event.target === grid && event.pointerId === drag?.pointerId) finishDrag();
+    });
+    grid.addEventListener('pointerleave', event => {
+      if (event.pointerId === drag?.pointerId && !drag.active) finishDrag();
+    });
+    grid.addEventListener('click', event => {
+      if (suppressClick && event.detail) {
+        suppressClick = false;
+        return;
+      }
+      const tile = event.target.closest('.art-tile');
+      if (!tile || viewer.open) return;
+      stopWheel();
+      activeWork = Number(tile.dataset.artIndex);
+      showWork();
+      viewer.showModal();
+    });
+    viewer.querySelector('.art-viewer-close').addEventListener('click', () => viewer.close());
+    viewer.querySelector('.art-viewer-prev').addEventListener('click', () => stepWork(-1));
+    viewer.querySelector('.art-viewer-next').addEventListener('click', () => stepWork(1));
+    viewer.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      stepWork(event.key === 'ArrowLeft' ? -1 : 1);
+    });
+
+    const syncVisibility = () => {
+      gallery.classList.toggle('background', document.hidden);
+      if (document.hidden) stopWheel();
+    };
+    const gallerySize = new ResizeObserver(() => {
+      if (!reducedMotion.matches && Array.from(grid.querySelectorAll('.art-cycle:first-child'))
+        .some(cycle => cycle.offsetHeight < grid.clientHeight)) layout();
+    });
+    mobile.addEventListener('change', layout, { signal: listeners.signal });
+    reducedMotion.addEventListener('change', layout, { signal: listeners.signal });
+    document.addEventListener('visibilitychange', syncVisibility, { signal: listeners.signal });
+    feed.appendChild(gallery);
+    galleryVisibility.observe(gallery);
+    gallerySize.observe(grid);
+    syncVisibility();
+    layout();
+    return {
+      translate,
+      dispose() {
+        stopWheel();
+        finishDrag();
+        listeners.abort();
+        galleryVisibility.disconnect();
+        gallerySize.disconnect();
+        tileVisibility.disconnect();
+        if (viewer.open) viewer.close();
+      },
+    };
   }
 
   function buildFeed(id) {
     feed.classList.toggle('go-feed', id === 'go');
+    if (id === 'art') {
+      artGallery = buildArtGallery();
+      return;
+    }
     CASES[id].screens.forEach((screen, index) => {
       const first = index === 0;
       const section = document.createElement('section');
       section.className = 'case-screen';
-      const goPair = id === 'go' && Boolean(screen.shots);
-      section.classList.toggle('go-pair', goPair);
-      if (screen.noteOverlay) section.classList.add(screen.noteOverlay === 'alternate' ? 'mac-note-alternate' : 'mac-note-overlay');
       if (screen.title) {
         const title = document.createElement('h3');
         title.className = 'scr-title';
         caseCopy.set(title, screen.title);
         section.appendChild(title);
       }
-      const notes = screen.mobileNote ? [screen.mobileNote] : screen.notes?.filter(copy => !copy.hint);
-      if (notes?.length) section.appendChild(createScreenNote(notes));
-
       const row = document.createElement('div');
       row.className = 'scr-row';
       const cover = screen.cover || (screen.hold && Object.values(PROJECTS).flat().find(project => project.case === id)?.cover);
@@ -2102,7 +2466,6 @@
         box.className = 'scr-cover';
         let art = box;
         if (screen.coverWidth) {
-          section.classList.add('mac-screen');
           box.classList.add('mac-cover');
           box.style.setProperty('--cover-width', screen.coverWidth);
           box.style.setProperty('--cover-inset', screen.coverInset);
@@ -2125,7 +2488,7 @@
         row.appendChild(createFlip(screen));
       }
       if (screen.frames?.length) {
-        row.className = 'scr-win diagram-row';
+        row.className = 'scr-win';
         row.appendChild(createWindows(screen, first));
         if (screen.mobileDemo) {
           row.classList.add('has-mobile-demo');
@@ -2141,32 +2504,19 @@
       }
 
       section.appendChild(row);
-      if (screen.notes?.length && !screen.frames && !screen.flip) addDesktopNotes(section, row, screen, goPair);
+      const notes = screen.mobileNote ? [screen.mobileNote] : screen.notes?.filter(copy => !copy.hint);
+      if (notes?.length) {
+        section.classList.add('has-caption');
+        section.appendChild(createScreenNote(notes, screen.desktopNote, screen.notes?.find(copy => copy.hint)));
+      }
       feed.appendChild(section);
       slideObserver.observe(section);
     });
     videos.forEach((state, video) => videoObserver.observe(video));
   }
 
-  function clampNotes() {
-    if (mobile.matches) return;
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    for (const section of feed.children) {
-      const box = section.getBoundingClientRect();
-      for (const note of section.querySelectorAll('.note')) {
-        if (!note.getClientRects().length) continue;
-        note.style.removeProperty('--bshift');
-        const body = note.querySelector('.note-body').getBoundingClientRect();
-        const left = box.left + Math.max(40, 2.5 * rem);
-        const right = box.right - 2.5 * rem;
-        const shift = body.left < left ? left - body.left : Math.min(0, right - body.right);
-        if (shift) note.style.setProperty('--bshift', Math.round(shift) + 'px');
-      }
-    }
-  }
-
   function setBar() {
-    if (!currentCase || mobile.matches) return;
+    if (!currentCase || currentCase === 'art' || mobile.matches) return;
     const max = feed.scrollHeight - feed.clientHeight;
     const progress = max > 0 ? Math.max(0, Math.min(1, feed.scrollTop / max)) : 0;
     caseBar.style.setProperty('--p', progress.toFixed(4));
@@ -2179,10 +2529,8 @@
   }, { passive: true });
 
   function refreshLayout() {
-    if (currentCase) {
-      clampNotes();
-      setBar();
-    } else document.querySelectorAll('.fan').forEach(layoutFan);
+    if (currentCase) setBar();
+    else document.querySelectorAll('.fan').forEach(layoutFan);
   }
 
   let layoutFrame = 0;
@@ -2201,16 +2549,20 @@
     const copy = CASES[currentCase][lang];
     const blocks = copy.blocks.map(([label, body]) => {
       const section = document.createElement('section');
-      const title = document.createElement('h2');
       const paragraph = document.createElement('p');
-      title.textContent = label;
+      if (label) {
+        const title = document.createElement('h2');
+        title.textContent = label;
+        section.appendChild(title);
+      }
       paragraph.textContent = body;
-      section.append(title, paragraph);
+      section.appendChild(paragraph);
       return section;
     });
     caseText.replaceChildren(...blocks);
     caseTitle.textContent = copy.title;
     for (const [element, strings] of caseCopy) element.textContent = strings[lang] || strings.ru;
+    artGallery?.translate();
     typograph(caseTitle);
     typograph(caseText);
     typograph(feed);
@@ -2225,6 +2577,7 @@
     clearFeed();
     currentCase = id;
     document.body.dataset.view = 'case';
+    document.body.dataset.caseId = id;
     setCollapsed(false);
     buildFeed(id);
     translateCase();
@@ -2238,6 +2591,7 @@
     clearFeed();
     currentCase = null;
     document.body.dataset.view = 'home';
+    delete document.body.dataset.caseId;
     document.title = T[lang].name + (lang === 'ru' ? ' — продуктовый дизайнер' : ' — product designer');
     scrollTo(0, 0);
     requestLayout();
