@@ -1764,7 +1764,7 @@
     const prose = language => notes.map(copy => {
       const text = copy[language] || copy.ru;
       return /[.!?…]$/.test(text) ? text : text + '.';
-    }).join(' ');
+    }).join(' ').replace(/(?<!\.)\.$/, '');
     caseCopy.set(paragraph, { ru: prose('ru'), en: prose('en') });
     return paragraph;
   }
