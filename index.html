@@ -418,19 +418,22 @@
     /* на телефоне порядок такой: видео, описание проекта, потом экраны с выносками */
     body[data-view="case"] { background: #fff; }
     body[data-view="case"] .case, .case-feed { display: contents; }
-    .case-screen { height: auto; margin-bottom: 40px; padding: 0 1rem; order: 0;
-                   container-type: inline-size; }
-    .scr-title { display: block; margin: 0 1.25rem 1.25rem; font-size: 1.5rem; line-height: 1.19;
+    body[data-view="case"]:has(.scr-pair) {
+      --case-max-width: max(16rem, (100svh - 5rem) / 2.0637);
+    }
+    body[data-view="case"] :is(.case-screen, .card, .page-foot) {
+      width: calc(100% - 2rem); max-width: var(--case-max-width, none); margin-inline: auto;
+    }
+    .case-screen { height: auto; margin-bottom: 40px; order: 0; container-type: inline-size; }
+    .scr-title { display: block; margin: 0 0 1.25rem; font-size: 1.5rem; line-height: 1.19;
                  font-weight: 600; color: #1b1b1d; }
     .case-screen:first-child { order: -2; padding-top: 4.5rem; margin-bottom: 40px; }
     body[data-view="case"] .card { order: -1; }
     .page-foot { order: 1; }
-    /* телефон целиком влезает в экран по высоте */
+    /* Мокапы занимают ту же колонку, что и подписи. */
     .scr-row, .scr-pair { position: static; display: block; height: auto; }
-    .scr-item, .scr-video { position: relative; height: auto; max-height: none; margin: 0 auto; }
-    .scr-item { width: min(100%, (100svh - 5rem) / 2.0525); }
+    .scr-item, .scr-video { position: relative; width: 100%; height: auto; margin: 0 auto; }
     .scr-item + .scr-item { margin-top: 2.5rem; }
-    .scr-video { width: min(100%, (100svh - 5rem) / 2.0637); }
     .scr-cover { width: 100%; height: auto; margin: 0 auto; }
     .scr-cover.mac-cover { width: 100%; max-width: 100%; }
     .scr-item > img { height: auto; }
@@ -453,7 +456,7 @@
     .stage-arrow, .note { display: none; }
     .screen-notes {
       display: flex; flex-direction: column; gap: 1rem;
-      margin: 0 1.25rem 1.5rem; color: #1b1b1d;
+      margin: 0 0 1.5rem; color: #1b1b1d;
       font-size: 1.125rem; line-height: 1.25; overflow-wrap: break-word;
     }
     .screen-notes h4 { font-size: 1rem; color: #626267; }
@@ -492,7 +495,7 @@
     }
     .contract-steps::-webkit-scrollbar { display: none; }
     .contract-step { flex: 0 0 100%; min-width: 0; margin: 0; scroll-snap-align: start; }
-    .contract-step figcaption { margin: 0 .25rem .75rem; font-size: 1rem; line-height: 1.3; }
+    .contract-step figcaption { margin: 0 0 .75rem; font-size: 1rem; line-height: 1.3; }
 
     .partner-demo {
       display: grid; gap: 1rem; margin: 0; padding: 1rem;
@@ -518,7 +521,7 @@
       background: #1b1b1d;
     }
     /* в кейсе чёрный блок — отдельная карточка с отступом 40px до телефонов */
-    body[data-view="case"] .card { margin: 0 1rem 40px; border-radius: 1.5rem; }
+    body[data-view="case"] .card { margin-block: 0 40px; border-radius: 1.5rem; }
     .card-full { position: static; width: auto; padding: 40px 1.25rem; }
     .card-mini, .toggle { display: none; }
     .collapsed .card-full { opacity: 1; pointer-events: auto; }
@@ -535,7 +538,7 @@
     }
     /* в кейсе футер — такая же карточка: 40px сверху, скруглённый верх, ниже ничего нет */
     body[data-view="case"] .page-foot {
-      margin: 40px 1rem 0; border-radius: 1.5rem 1.5rem 0 0; padding-top: 1.5rem;
+      margin-block: 40px 0; border-radius: 1.5rem 1.5rem 0 0; padding-top: 1.5rem;
     }
     .case-screen:last-of-type { margin-bottom: 0; }   /* отступ до футера задаёт сам футер */
     .card-foot { display: none; }
