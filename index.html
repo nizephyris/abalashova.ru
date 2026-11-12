@@ -415,21 +415,23 @@
     }
     /* шапка прибита к экрану — кнопки видно на любой прокрутке */
     body[data-view="case"] .top { position: fixed; top: 1rem; bottom: auto; left: auto; right: 1rem; }
-    /* на телефоне порядок такой: видео, описание проекта, потом экраны с выносками */
     body[data-view="case"] { background: #fff; }
-    body[data-view="case"] .case, .case-feed { display: contents; }
+    /* Белая лента заходит на подложку с вводными, как карточка на главной. */
+    body[data-view="case"] .case {
+      position: relative; inset: auto; z-index: 1; container-type: inline-size;
+      margin-top: -1.5rem; padding-top: 2rem; border-radius: 1.5rem 1.5rem 0 0;
+      overflow: clip; animation: none;
+    }
+    .case-feed { position: static; overflow: visible; scroll-snap-type: none; }
     body[data-view="case"]:has(.scr-pair) {
       --case-max-width: max(16rem, (100svh - 5rem) / 2.0637);
     }
-    body[data-view="case"] :is(.case-screen, .card, .page-foot) {
+    body[data-view="case"] :is(.case-screen, .card-full, .page-foot) {
       width: calc(100% - 2rem); max-width: var(--case-max-width, none); margin-inline: auto;
     }
-    .case-screen { height: auto; margin-bottom: 40px; order: 0; container-type: inline-size; }
+    .case-screen { height: auto; margin-bottom: 40px; container-type: inline-size; }
     .scr-title { display: block; margin: 0 0 1.25rem; font-size: 1.5rem; line-height: 1.19;
                  font-weight: 600; color: #1b1b1d; }
-    .case-screen:first-child { order: -2; padding-top: 4.5rem; margin-bottom: 40px; }
-    body[data-view="case"] .card { order: -1; }
-    .page-foot { order: 1; }
     /* Мокапы занимают ту же колонку, что и подписи. */
     .scr-row, .scr-pair { position: static; display: block; height: auto; }
     .scr-item, .scr-video { position: relative; width: 100%; height: auto; margin: 0 auto; }
@@ -512,22 +514,21 @@
     .partner-status:not(:empty) { margin-top: .5rem; }
 
     .case-bar { display: none !important; }
-    body[data-view="case"] .card { background: #1b1b1d; }
     .card, .collapsed .card {
       position: relative; width: auto; min-height: 0;
       margin-top: -1.5rem; border-radius: 1.5rem 1.5rem 0 0;
       background: #1b1b1d;
     }
-    /* в кейсе чёрный блок — отдельная карточка с отступом 40px до телефонов */
-    body[data-view="case"] .card { margin-block: 0 40px; border-radius: 1.5rem; }
+    body[data-view="case"] .card { margin: 0; border-radius: 0; }
     .card-full { position: static; width: auto; padding: 40px 1.25rem; }
+    body[data-view="case"] .card-full { padding: 4.5rem 0 4rem; }
     .card-mini, .toggle { display: none; }
     .collapsed .card-full { opacity: 1; pointer-events: auto; }
     .bio { font-size: 1.375rem; }
 
     /* на телефоне «2026, всё своими лапками» уезжает в самый низ экрана */
     body { display: flex; flex-direction: column; min-height: 100svh; }
-    .stage, .card, .desk, .page-foot { flex: none; }
+    .stage, .case, .card, .desk, .page-foot { flex: none; }
     .desk { position: static; display: flex; gap: 1.5rem; align-items: flex-end; padding: 0 1.25rem 1.5rem; background: #1b1b1d; }
     .page-foot {
       display: block; margin-top: auto; background: #1b1b1d; color: var(--dim);
@@ -772,11 +773,6 @@
     <button class="pill lang" id="lang" type="button"></button>
   </div>
 
-<main class="case" id="case">
-  <div class="case-feed" id="case-feed"></div>
-  <div class="case-bar" id="case-bar" aria-hidden="true"></div>
-</main>
-
 <aside class="card" id="card">
   <div class="card-full">
     <div class="bio" data-i18n="bio"></div>
@@ -801,6 +797,11 @@
     </button>
   </div>
 </aside>
+
+<main class="case" id="case">
+  <div class="case-feed" id="case-feed"></div>
+  <div class="case-bar" id="case-bar" aria-hidden="true"></div>
+</main>
 
 <div class="desk">
   <a class="desk-item resume" href="assets/resume-ru.pdf" data-resume target="_blank" rel="noopener" draggable="false">
