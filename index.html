@@ -573,7 +573,8 @@
     }
     .go-feed .scr-row { --u: calc(var(--go-phone-height) / 885.333); }
     .go-feed .scr-video { height: var(--go-phone-height); }
-    .go-feed .screen-notes, [data-case-id="expedition"] .screen-notes { -webkit-line-clamp: unset; }
+    .go-feed .screen-notes, [data-case-id="expedition"] .screen-notes,
+    [data-case-id="telegraph"] .case-screen:last-child .screen-notes { -webkit-line-clamp: unset; }
   }
 
   /* низкое окно: шесть блоков кейса должны помещаться без прокрутки */
@@ -1104,8 +1105,8 @@
           cover: 'assets/telegraph-final-mac.png', coverWidth: 6560, coverInset: 147,
           notes: [
             { b: [5.61, 71.69], x: 40, y: 749,
-              ru: 'По точкам графа можно читать ответы студентов об образовании, опыте и общении',
-              en: 'Explore the graph to read students’ answers about education, experience and communication' },
+              ru: 'По точкам графа можно прочитать ответы студентов об образовании, опыте и общении и найти что в них есть общего',
+              en: 'Explore the graph’s nodes to read students’ answers about education, experience and communication and see what their answers have in common' },
           ] },
       ],
       ru: {
@@ -1113,7 +1114,7 @@
         blocks: [
           ['задача', 'Показать, как история Телеграфа связана с новым кампусом Центрального университета. Сайт адресован студентам и тем, кому важно здание'],
           ['моя работа', 'Самостоятельно провела исследование, придумала визуальную концепцию и спроектировала сайт'],
-          ['ключевое решение', 'Глобус с фасада превращается в граф связей между студентами, преподавателями и поколениями. По его точкам можно читать ответы студентов об образовании, опыте и общении'],
+          ['ключевое решение', 'Центральному Телеграфу 100 лет. В юбилей он станет главным корпусом Центрального Университета.', 'Глобус с фасада превратился в граф связей между студентами. По его точкам можно читать ответы студентов об образовании, опыте и общении. Для капсулы времени я подготовила 100 уникальных вопросов'],
           ['статус', 'Концепция и дизайн готовы. Запуск запланирован на сентябрь 2027 года'],
         ],
       },
@@ -1122,7 +1123,7 @@
         blocks: [
           ['the challenge', 'Connect the Telegraph’s history with its new role as Central University’s campus. The site is for students and people who care about the building'],
           ['my work', 'I worked independently on the research, visual concept and site design'],
-          ['the key decision', 'The globe on the facade becomes a graph of connections between students, teachers and generations. Its nodes open students’ answers about education, experience and communication'],
+          ['the key decision', 'The Central Telegraph is 100 years old. To mark its centenary, it will become Central University’s main building.', 'The globe from the facade became a graph of connections between students. Its nodes let visitors read students’ answers about education, experience and communication. I wrote 100 unique questions for the time capsule'],
           ['status', 'The concept and site design are complete. Launch is planned for September 2027'],
         ],
       },
@@ -2579,7 +2580,7 @@
 
   function translateCase() {
     const copy = CASES[currentCase][lang];
-    const blocks = copy.blocks.map(([label, body]) => {
+    const blocks = copy.blocks.map(([label, body, emphasis]) => {
       const section = document.createElement('section');
       const paragraph = document.createElement('p');
       if (label) {
@@ -2588,6 +2589,11 @@
         section.appendChild(title);
       }
       paragraph.textContent = body;
+      if (emphasis) {
+        const strong = document.createElement('strong');
+        strong.textContent = emphasis;
+        paragraph.append(' ', strong);
+      }
       section.appendChild(paragraph);
       return section;
     });
