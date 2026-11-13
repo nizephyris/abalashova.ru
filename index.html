@@ -915,33 +915,33 @@
           notes: [
             // 137+397 = 534 — низ верхнего окна, 480 — левый край правого: по 40 от обоих
             { x: 60, y: 574,
-              ru: 'Если партнёра нет в списке, его можно добавить прямо в форме и продолжить настройку',
-              en: 'If a partner is missing from the list, staff can add them in the form and carry on' },
+              ru: 'Если какого-либо параметра нет в списке, его можно добавить прямо в форме и продолжить настройку',
+              en: 'If a parameter is missing from the list, staff can add it directly in the form and continue setting up the product' },
           ] },
         // Desktop-35 — карточка готового продукта с меню операций
         { title: { ru: 'дублирование продукта', en: 'duplicating a product' }, noteOverlay: true,
           cover: 'assets/otp-duplicate-mac.png', coverWidth: 6612, coverInset: 199,
           notes: [
             { x: 837, y: 591,
-              ru: 'Похожий продукт можно взять за основу. Сотрудник меняет нужные поля в копии',
-              en: 'Staff can duplicate a similar product and edit only the fields that need to change' },
+              ru: 'Похожий продукт можно взять за основу, дублировать его и настроить нужные поля в копии',
+              en: 'Staff can use a similar product as a starting point, duplicate it, and edit the relevant fields in the copy' },
           ] },
       ],
       ru: {
         title: 'Создание продуктов в админке ОТП Банка',
         blocks: [
-          ['задача', 'Сотрудники заводили параметры продукта заранее в других разделах. Ошибки замечали уже при передаче данных в банковские системы'],
+          ['задача', 'Чтобы создать новый продукт, сотрудники заводили каждый параметр (партнёр, тип оплаты, тип продукта и т.д.) заранее в другом разделе. Это растягивало процесс, а ошибки замечали уже при передаче данных в банковские системы'],
           ['моя работа', 'Изучила работу сотрудников и спроектировала новый сценарий вместе с разработчиками'],
-          ['ключевое решение', 'Разбила форму на разделы с проверкой данных и добавила создание параметров прямо в форме. Похожие продукты можно дублировать или импортировать их настройки'],
+          ['ключевое решение', 'Разбила форму на разделы с пошаговой проверкой данных и добавила создание параметров прямо в форме. Похожие продукты можно дублировать или импортировать их настройки'],
           ['результат', 'Среднее время создания продукта сократилось с 30 до 20 минут. Ошибок при заполнении стало вдвое меньше'],
         ],
       },
       en: {
         title: 'Creating products in OTP Bank’s admin panel',
         blocks: [
-          ['the challenge', 'Staff set up product parameters in separate sections before starting the form. Errors surfaced when data reached the bank’s systems'],
+          ['the challenge', 'To create a new product, staff first had to set up each parameter (partner, payment type, product type, and so on) in another section. This slowed them down, and errors only surfaced when the data was sent to the bank’s systems'],
           ['my work', 'I studied how staff worked and designed a new flow with the development team'],
-          ['the key decision', 'I split the form into sections with validation and let staff add parameters in place. They can duplicate similar products or import their settings'],
+          ['the key decision', 'I split the form into sections that check the data at each step and let staff add parameters directly in the form. Staff can duplicate similar products or import their settings'],
           ['the outcome', 'Average product creation time fell from 30 to 20 minutes. Form errors fell by half'],
         ],
       },
