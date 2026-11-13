@@ -573,6 +573,7 @@
     }
     .go-feed .scr-row { --u: calc(var(--go-phone-height) / 885.333); }
     .go-feed .scr-video { height: var(--go-phone-height); }
+    .go-feed .screen-notes { -webkit-line-clamp: unset; }
   }
 
   /* низкое окно: шесть блоков кейса должны помещаться без прокрутки */
@@ -953,64 +954,52 @@
         { title: { ru: 'почему «Экспресс»', en: 'why Express' },
           shots: ['assets/go-1a.webp', 'assets/go-1b.webp'], notes: [
           { at: 'l', y: 436, h: 146,
-            ru: 'Доставка роботом дешевле. В «Экспрессе» показали оба варианта рядом, чтобы разница в цене была видна сразу',
-            en: 'Robot delivery costs less. We put both options side by side in Express so customers could see the price difference at a glance' },
+            ru: 'Основное преимущество роботов — низкая цена доставки. Поэтому добавили робота в форму экспресс-доставки, чтобы разница в цене была нагляднее',
+            en: 'The main advantage of robot delivery is the lower price. We added robots to the Express order form so customers could see the price difference at a glance' },
         ] },
         { title: { ru: 'когда доступен робот', en: 'when you can order a robot' },
-          mobileNote: {
-            ru: 'Робот доступен для заказа с одной остановкой, если оба адреса в зонах тестового запуска. Оплата идёт с корпоративного счёта. До оплаты предупреждаем, что посылку нужно вынести на улицу и передать роботу.',
-            en: 'Businesses can choose a robot for a single-stop delivery when both addresses are in the pilot areas. They pay from a corporate account. Before payment, we tell senders they’ll need to take the parcel outside to the robot.',
-          },
-          desktopNote: {
-            ru: 'Одна остановка, оба адреса в зонах запуска и оплата с корпоративного счёта. До оплаты предупреждаем, что нужно выйти к роботу',
-            en: 'One stop, both addresses in the pilot areas, and a corporate account. Before payment, we tell senders to meet the robot outside',
-          },
           shots: ['assets/go-2a.webp', 'assets/go-2b.webp'],
+          notes: [{
+            ru: 'Тариф рободоставки доступен корпоративным клиентам, если адреса находятся в зонах тестового запуска. До оплаты предупреждаем, что для отправки к роботу нужно выйти на улицу',
+            en: 'The robot delivery rate is available to business customers when both addresses are in the pilot areas. Before payment, we tell senders they’ll need to go outside to hand their parcel to the robot',
+          }],
         },
         { title: { ru: 'перед заказом', en: 'before placing the order' },
-          mobileNote: {
-            ru: 'Робот не может проверить возраст получателя, поэтому предупреждаем, что он не возит товары 18+. При заказе показываем цены до подъезда и до двери, чтобы клиент мог выбрать удобный вариант.',
-            en: 'The robot can’t check the recipient’s age, so we tell customers it can’t carry age-restricted items. We show separate prices for delivery to the building entrance and to the door.',
-          },
-          desktopNote: {
-            ru: 'Робот не возит товары 18+, потому что не может проверить возраст. Показываем цены доставки до подъезда и до двери',
-            en: 'The robot can’t check age, so it can’t carry age-restricted items. We show prices to the building entrance and to the door',
-          },
           shots: ['assets/go-3a.webp', 'assets/go-3b.webp'],
+          notes: [{
+            ru: 'Робот не может проверить возраст получателя, поэтому предупреждаем, что он не доставляет товары 18+. Для многих приоритетна доставка до двери, мы предусмотрели для роботов сценарий, когда до двери заказ помогает доставить курьер',
+            en: 'The robot can’t verify the recipient’s age, so we tell customers it can’t deliver items with an 18+ age restriction. Doorstep delivery matters to many customers, so we give them the option to have a courier take the order from the robot to the door',
+          }],
         },
         { title: { ru: 'встреча с роботом', en: 'meeting the robot' },
-          mobileNote: {
-            ru: 'На экране заказа показываем, где на крышке робота кнопка. На загрузку посылки есть всего минута, поэтому перед открытием спрашиваем, рядом ли отправитель. Если доставка до подъезда, получатель тоже выходит к роботу.',
-            en: 'A diagram on the tracking screen shows where the button is on the lid. The sender has one minute to load the parcel once the lid opens, so we first check that they’re beside the robot. For delivery to the building entrance, the recipient also comes outside.',
-          },
-          desktopNote: {
-            ru: 'На схеме показываем кнопку на крышке. На загрузку есть минута, поэтому перед открытием спрашиваем, рядом ли отправитель',
-            en: 'The diagram shows the lid button. Senders have a minute to load the parcel, so we ask if they’re nearby before opening the lid',
-          },
           shots: ['assets/go-4a.webp', 'assets/go-4b.webp'],
+          notes: [{
+            ru: 'На трекинге показываем схему робота с кнопкой на крышке. На загрузку заказа всего минута, поэтому просим пользователя подтвердить, что он рядом, перед открытием крышки',
+            en: 'A diagram on the tracking screen shows the button on the robot’s lid. Senders have just one minute to load the parcel, so we ask them to confirm they’re nearby before opening the lid',
+          }],
         },
         { title: { ru: 'доставка до двери', en: 'delivery to the door' },
           shots: ['assets/go-5a.webp', 'assets/go-5b.webp'], notes: [
           { at: 'r', y: 708, h: 83,
-            ru: 'Курьер забирает посылку у робота возле дома и относит её к двери. Как только посылка у курьера, ему можно позвонить с экрана заказа',
-            en: 'A courier takes the parcel from the robot to the door. Once they’ve picked it up, the tracking screen shows a call button' },
+            ru: 'В сценарии доставки до двери курьер у дома забирает посылку у робота, а в трекинге появляется кнопка связи с курьером',
+            en: 'For doorstep delivery, a courier collects the parcel from the robot outside the building, and a button to contact the courier appears on the tracking screen' },
         ] },
       ],
       ru: {
         title: 'Доставка роботами для бизнеса в Яндекс Go',
         blocks: [
-          ['задача', 'Добавить робота в привычную форму заказа для бизнеса в Go и объяснить, как его встретить'],
+          ['задача', 'Встроить рободоставку в привычный заказ для бизнеса в Go и объяснить пользователю, как встретить робота'],
           ['моя работа', 'Веду дизайн проекта вместе с продактом и разработчиками. Спроектировала форму заказа и трекинг для отправителя и получателя'],
-          ['ключевое решение', 'В «Экспрессе» можно сравнить цены на доставку роботом и курьером. До оплаты предупреждаем отправителя, что посылку нужно вынести на улицу'],
+          ['ключевое решение', 'В «Экспрессе» клиент может сравнить цены на доставку роботом и курьером. До оплаты отмечаем, что к роботу нужно выходить для отправки'],
           ['статус', 'Запустили в крупных районах Москвы в августе 2026 года. Отслеживаем выбор робота среди доступных вариантов, конверсию в заказ и обращения в поддержку при передаче и получении посылки'],
         ],
       },
       en: {
         title: 'Robot delivery for businesses in Yandex Go',
         blocks: [
-          ['the challenge', 'Add robot delivery to the order form businesses already use in Go and show them how to meet the robot'],
+          ['the challenge', 'Add robot delivery to the familiar ordering flow for businesses in Go and show users how to meet the robot'],
           ['my work', 'I lead the design with the product manager and developers. I designed the order form and tracking for senders and recipients'],
-          ['the key decision', 'In Express, customers can compare prices for robot and courier delivery. Before payment, we tell senders they’ll need to take the parcel outside'],
+          ['the key decision', 'In Express, customers can compare prices for robot and courier delivery. Before payment, we tell them they’ll need to go outside to hand the parcel to the robot'],
           ['status', 'Launched in major Moscow districts in August 2026. We track rover selection when available, order conversion and support requests during handover and collection'],
         ],
       },
