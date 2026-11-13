@@ -573,7 +573,7 @@
     }
     .go-feed .scr-row { --u: calc(var(--go-phone-height) / 885.333); }
     .go-feed .scr-video { height: var(--go-phone-height); }
-    .go-feed .screen-notes { -webkit-line-clamp: unset; }
+    .go-feed .screen-notes, [data-case-id="expedition"] .screen-notes { -webkit-line-clamp: unset; }
   }
 
   /* низкое окно: шесть блоков кейса должны помещаться без прокрутки */
@@ -1031,8 +1031,8 @@
           cover: 'assets/expedition-order-mac.png', coverWidth: 6472, coverInset: 59,
           notes: [
             { b: [67.14, 51.30], anchor: 'l',
-              ru: 'Клиенты замечали ограничение при заказе. Добавили переход к договору прямо в форму',
-              en: 'Clients noticed the restriction at checkout, so we linked to signing from the form' },
+              ru: 'Клиенты замечали ограничение при попытке оформить заказ. Форма заказа крупной грузовой доставки полностью блокируется без подписания договора',
+              en: 'Customers noticed the restriction when they tried to place an order. The order form for oversized shipments is locked until they sign the contract' },
           ] },
         { title: { ru: 'подписание договора', en: 'signing the contract' }, mobileDemo: createContractDemo,
           frames: [
@@ -1042,14 +1042,14 @@
           arrow: { src: 'assets/exp-arrow-1.svg', x: 336, y: 894, w: 262, h: 89 },
           notes: [
             { b: [95.29, 65.37], anchor: 'r',
-              ru: 'Данные уже в договоре. Клиенту остаётся подтвердить ИНН',
-              en: 'We prefill the contract details. At this step, the customer verifies their tax ID' },
+              ru: 'Все данные о клиенте мы подтягивали по введённому при регистрации ИНН. Фактически клиенту остается только подтвердить их через пополнение баланса или систему ЭДО',
+              en: 'We used the tax ID entered during registration to prefill the customer’s details. All they need to do is verify those details by topping up their balance or using an electronic document exchange service' },
           ] },
         { title: { ru: 'два баланса', en: 'two balances' }, mobileDemo: createBalanceDemo,
           frames: [
             { src: 'assets/exp-fin-a.webp', size: [772, 730], x: 148, y: 228, w: 386, h: 425 },
-            { src: 'assets/exp-fin-b.webp', size: [804, 380], x: 850, y: 316, w: 402, h: 250 },
-            { src: 'assets/exp-fin-c.webp', size: [804, 380], x: 650, y: 604, w: 402, h: 250 },
+            { src: 'assets/exp-fin-b.webp', size: [800, 488], x: 850, y: 316, w: 402, h: 305 },
+            { src: 'assets/exp-fin-c.webp', size: [800, 514], x: 650, y: 604, w: 402, h: 318 },
           ],
           arrows: [
             { src: 'assets/exp-arrow-2.svg', x: 562, y: 394, w: 262, h: 90 },
@@ -1057,15 +1057,15 @@
           ],
           notes: [
             { b: [4, 72], anchor: 'l',
-              ru: 'Для доставки показываем баланс и лимит, для экспедиции — оплату актов',
-              en: 'The delivery card puts the balance and credit limit up front. The freight forwarding card highlights payment status' },
+              ru: 'Старый баланс пришлось разделить на два новых: каждый для своего договора. Для каждого из договоров доступна как постоплата (в конце отчетного периода по всем заказам), так и предоплата (за каждый заказ при оформлении)',
+              en: 'We split the original balance into two, one for each contract. For either contract, customers can pay for all orders at the end of the billing period or pay for each order when they place it' },
           ] },
       ],
       ru: {
         title: 'Переход на транспортную экспедицию в Яндекс Доставке',
         blocks: [
-          ['задача', 'При переходе на электронные перевозочные документы бизнесу понадобился новый договор. Нужно было сохранить оформление доставок в привычном кабинете'],
-          ['моя работа', 'Переработала регистрацию, подписание договора, форму заказа, трекинг и финансы'],
+          ['задача', 'При переходе на электронные перевозочные документы бизнесу понадобилось перевести клиентов, занимающихся крупногабаритными грузоперевозками, на новый договор, сохранив число оформляемых доставок'],
+          ['моя работа', 'Переработала регистрацию, подписание договора, форму заказа, трекинг и раздел финансов'],
           ['ключевое решение', 'Встроила подписание договора в кабинет с автоподстановкой данных. Разделила балансы доставки и экспедиции, чтобы было понятно, за что клиент платит и сколько средств доступно'],
           ['результат', 'За первый месяц на новый договор перешли 300 крупных клиентов. Объём доставок через личный кабинет сохранился'],
         ],
@@ -1073,8 +1073,8 @@
       en: {
         title: 'Moving Yandex Delivery clients to freight forwarding',
         blocks: [
-          ['the challenge', 'The switch to electronic transport documents required a new contract. Businesses needed to keep placing delivery orders in the same dashboard'],
-          ['my work', 'I redesigned registration, contract signing, ordering, tracking and finance'],
+          ['the challenge', 'When we switched to electronic transport documents, we needed to move customers shipping oversized freight to a new contract while keeping the number of delivery orders steady'],
+          ['my work', 'I redesigned registration, contract signing, the order form, tracking and the finance section'],
           ['the key decision', 'I added contract signing with prefilled details to the dashboard and separated the two balances so clients could see what they were paying for and how much was available'],
           ['the outcome', 'In the first month, 300 large clients moved to the new contract. Delivery volumes through the dashboard held steady'],
         ],
