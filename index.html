@@ -281,8 +281,10 @@
   }
   .mac-cover-art img { max-width: none; }
   .mac-cover video {
-    position: absolute; left: 12.0122%; top: 10.8787%;
-    width: 76.7683%; height: 78.0858%; display: block; object-fit: fill;
+    position: absolute; top: 10.8787%; height: 78.0858%;
+    left: calc(100% * (var(--cover-inset) + 641) / var(--cover-width));
+    width: calc(100% * 5036 / var(--cover-width));
+    display: block; object-fit: fill;
   }
   /* Карточка-перевёртыш: по наведению глобус сменяется графом. */
   .flip-card {
@@ -1009,7 +1011,7 @@
     expedition: {
       // Экраны собраны по макету: Фигма, Section 146:18467 (пять десктопов)
       screens: [
-        { hold: true, cover: 'assets/expedition-cover-mac.png', coverWidth: 6472, coverInset: 59 },
+        { video: 'assets/expedition-intro-screen.mp4', poster: 'assets/expedition-intro-screen-poster.webp', cover: 'assets/expedition-cover-mac.png', coverWidth: 6472, coverInset: 59 },
         { title: { ru: 'личный кабинет', en: 'the client account' }, noteOverlay: 'alternate',
           cover: 'assets/expedition-home-mac.png', coverWidth: 6472, coverInset: 59,
           mobileNote: {
