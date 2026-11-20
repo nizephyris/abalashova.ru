@@ -20,9 +20,10 @@
     .folder {
       position: relative;
       isolation: isolate;
-      width: min(35rem, calc((100svh - 10rem) * .75), calc(100vw - 7rem));
+      width: min(70rem, calc((100svh - 10rem) * 1.5), calc(100vw - 6rem));
       min-width: 15rem;
-      aspect-ratio: 3 / 4;
+      aspect-ratio: 3 / 2;
+      container-type: inline-size;
       perspective: 1800px;
     }
     .folder-body {
@@ -31,11 +32,13 @@
       transform: rotateX(var(--tilt-x, 1deg)) rotateY(var(--tilt-y, -5deg)) rotateZ(-2deg);
       transition: transform .2s ease-out;
     }
-    .folder.is-open .folder-body { transform: rotateZ(-1deg); }
+    .folder.is-open .folder-body { transform: none; }
+    .closed-group { position: absolute; inset: 0; z-index: 3; transform: scale(1.12); transition: transform .25s ease-out; }
+    .folder.is-open .closed-group { transform: none; }
     .folder-art {
       position: absolute;
-      inset: 0;
-      width: 100%;
+      inset: 0 auto 0 25%;
+      width: 50%;
       height: 100%;
       display: block;
       z-index: 2;
@@ -43,13 +46,24 @@
       user-select: none;
       -webkit-user-drag: none;
       filter: drop-shadow(0 1.5rem 2.5rem #0009);
+      transition: opacity .18s;
     }
-    .cover-open { position: absolute; inset: 8% 9% 3% 12%; z-index: 3; border: 0; border-radius: 1rem; background: transparent; }
+    .folder.is-open .folder-art { opacity: 0; }
+    .cover-open { position: absolute; inset: 8% 29% 3% 31%; z-index: 3; border: 0; border-radius: 1rem; background: transparent; }
     .cover-open:focus-visible { outline-offset: -8px; }
+    .spread-cover { position: absolute; inset: 3% 3.5% 1.5%; display: flex; gap: .6%; visibility: hidden; }
+    .cover-half {
+      width: 50%;
+      border: 1px solid #c8818c88;
+      border-radius: .7rem;
+      background: linear-gradient(135deg, #ffffff0b, transparent 35%, #0008), #210c12;
+      box-shadow: inset 0 0 0 2px #782b3b80, inset 0 0 0 5px #100b10, inset 0 0 22px #bf566c28, 0 12px 24px #0009;
+    }
+    .folder.is-open .spread-cover, .folder.is-open .pages, .folder.is-open .binding { visibility: visible; }
     .tabs {
       position: absolute;
       top: 13%;
-      left: 89%;
+      left: 69.5%;
       bottom: 7%;
       z-index: 1;
       width: 3rem;
@@ -58,6 +72,7 @@
       align-items: flex-start;
       filter: drop-shadow(3px 3px 4px #0005);
     }
+    .folder.is-open .tabs { left: 94.5%; top: 8%; bottom: 6%; }
     .tab {
       flex: 1;
       width: 2.75rem;
@@ -81,10 +96,24 @@
       border-radius: 0 .3rem .65rem 0;
     }
     .tab.papers-tab[aria-selected="true"] { transform: translateX(.25rem); }
-    .pages { position: absolute; inset: 8% 7% 3.8% 16%; z-index: 4; perspective: 1800px; transform-style: preserve-3d; touch-action: pan-y; }
+    .pages { position: absolute; inset: 5.5% 5.5% 4.5%; z-index: 4; perspective: 2000px; perspective-origin: 50% 50%; transform-style: preserve-3d; touch-action: pan-y; visibility: hidden; }
+    .left-stack { position: absolute; inset: 0 50% 0 0; }
+    .spent-sheet {
+      position: absolute;
+      left: calc(var(--depth, 0) * -.65px);
+      right: 0;
+      top: calc(var(--depth, 0) * .25px);
+      bottom: calc(var(--depth, 0) * -.4px);
+      border-radius: .5rem .1rem .1rem .5rem;
+      border: 1px solid #dedede;
+      background: linear-gradient(90deg, #f5f5f5, #fff 8%, #fff 91%, #e1e1e1);
+      box-shadow: -1px 1px 2px #0003;
+      transform-origin: 100% 50%;
+      transform: rotateZ(calc(var(--depth, 0) * -.025deg));
+    }
     .sheet {
       position: absolute;
-      inset: 0;
+      inset: 0 0 0 50%;
       background: linear-gradient(90deg, #e5e5e5, #fff 8%, #fff 94%, #f1f1f1);
       border: 1px solid #fff9;
       border-radius: .15rem .5rem .5rem .15rem;
@@ -103,7 +132,7 @@
     .sheet::after { inset: .3rem .4rem -.35rem -.1rem; background: #fff; transform: translateZ(-2px) rotate(.2deg); }
     .turning-leaf {
       position: absolute;
-      inset: 0;
+      inset: 0 0 0 50%;
       z-index: 8;
       transform-origin: 0 50%;
       transform-style: preserve-3d;
@@ -119,10 +148,18 @@
       -webkit-backface-visibility: hidden;
       box-shadow: 5px 7px 18px #0004;
       transform: translateZ(.1px);
-      will-change: opacity;
     }
-    .leaf-face.back { transform: rotateY(180deg) translateZ(.1px); background: linear-gradient(90deg, #f3f3f3, #fff 40%, #e4e4e4); }
-    .leaf-shadow { position: absolute; inset: 0; z-index: 5; background: linear-gradient(90deg, #0008, transparent 75%); pointer-events: none; opacity: 0; will-change: opacity; }
+    .leaf-face.back { transform: rotateY(180deg) translateZ(.1px); border-radius: .5rem .1rem .1rem .5rem; background: linear-gradient(90deg, #f5f5f5, #fff 8%, #fff 91%, #e1e1e1); }
+    .leaf-shadow { position: absolute; inset: 0; z-index: 5; background: linear-gradient(90deg, transparent 10%, #0005 50%, transparent 88%); pointer-events: none; opacity: 0; will-change: opacity; }
+    .paper-holes { position: absolute; inset: 0 auto 0 clamp(6px, 2.5cqw, 25px); width: clamp(4px, .6cqw, 7px); pointer-events: none; }
+    .spent-sheet .paper-holes, .leaf-face.back .paper-holes { left: auto; right: clamp(6px, 2.5cqw, 25px); }
+    .paper-holes i { position: absolute; left: 0; top: var(--position); width: 100%; aspect-ratio: 1; border-radius: 50%; background: #252428; box-shadow: 0 0 0 1px #c7c6c6; transform: translateY(-50%); }
+    .binding { position: absolute; z-index: 9; left: 50%; top: 5.5%; bottom: 4.5%; width: 3.2%; transform: translateX(-50%); visibility: hidden; pointer-events: none; }
+    .spine-plate { position: absolute; inset: 1% 0; border-radius: .35rem; background: linear-gradient(90deg, #242830, #9c9fa5 12%, #363b42 23%, #1c2026 58%, #777d84 86%, #d5d7da 93%, #32363d); box-shadow: 2px 1px 4px #0008; }
+    .spine-plate::before, .spine-plate::after { content: ""; position: absolute; top: 1.2%; left: 50%; width: 20%; aspect-ratio: 1; border-radius: 50%; transform: translateX(-50%); background: radial-gradient(circle at 35% 25%, #fff, #808790 45%, #272c34 75%); }
+    .spine-plate::after { top: auto; bottom: 1.2%; }
+    .ring { position: absolute; top: var(--position); left: 50%; width: 180%; aspect-ratio: 2.7; border: clamp(1.5px, .3cqw, 3px) solid #b7bfc5; border-top-color: #f9fcff; border-right-color: #d8dfe4; border-bottom-color: #7a858e; border-left-color: #616e79; border-radius: 50%; transform: translate(-50%, -50%) rotate(-9deg); box-shadow: 0 2px 2px #0008, inset 0 1px 1px #fff9; }
+    .ring::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; border-top: 1px solid #fff; border-bottom: 1px solid #363f48; }
     .folder-controls {
       position: absolute;
       left: 50%;
@@ -141,19 +178,21 @@
     .cross::after { transform: rotate(-45deg); }
     .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     @media (max-width: 600px) {
-      main { padding: 2rem 2.6rem 4rem 1.25rem; }
-      .folder { width: min(25rem, calc(100vw - 5rem)); min-width: 0; }
+      main { padding: 2rem 2.25rem 4rem; }
+      .folder { width: calc(100vw - 4.5rem); min-width: 0; }
+      .closed-group { transform: scale(1.8); }
       .folder-body { transform: rotateZ(-2deg); }
-      .tabs { top: 8%; bottom: 3%; left: 89%; width: 2.5rem; }
-      .tab { width: 2.5rem; }
-      .tab.papers-tab { width: 2.75rem; min-height: 36px; }
+      .tabs { top: 8%; bottom: 3%; left: 69.5%; width: 1.5rem; }
+      .tab { min-height: 0; width: 1.4rem; }
+      .tab.papers-tab { width: 1.65rem; min-height: 0; margin-top: .25rem; }
+      .tab[aria-selected="true"] { transform: none; }
     }
-    @media (max-width: 360px), (max-height: 600px) and (min-width: 601px) {
-      .tabs { display: grid; grid-template-rows: repeat(7, 1fr) 1.35fr; grid-auto-flow: column; grid-template-columns: repeat(2, 1fr); gap: 1px; width: 3rem; bottom: 7%; }
-      .tab, .tab:hover, .tab[aria-selected="true"] { width: 100%; min-height: 28px; transform: none; }
-      .tab.papers-tab, .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { grid-column: 1 / -1; grid-row: 8; width: 100%; margin: 0; min-height: 30px; transform: none; }
+    @media (max-width: 600px), (max-height: 600px) and (min-width: 601px) {
+      .folder.is-open .tabs { display: grid; grid-template-rows: repeat(7, 1fr) 1.35fr; grid-auto-flow: column; grid-template-columns: repeat(2, 1fr); gap: 1px; width: 3rem; }
+      .folder.is-open .tab, .folder.is-open .tab[aria-selected="true"] { width: 100%; min-height: 18px; transform: none; }
+      .folder.is-open .tab.papers-tab, .folder.is-open .tab.papers-tab[aria-selected="true"] { grid-column: 1 / -1; grid-row: 8; width: 100%; margin: 0; min-height: 24px; transform: none; }
     }
-    @media (max-height: 600px) and (min-width: 601px) { .folder { width: min(24rem, calc((100svh - 9rem) * .75)); } .tabs { top: 6%; bottom: 3%; } }
+    @media (max-height: 600px) and (max-width: 600px) { .closed-group { transform: scale(1.15); } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
   </style>
 </head>
@@ -162,15 +201,28 @@
   <main>
     <div class="folder" aria-label="Папка с материалами двух недель в Японии">
       <div class="folder-body">
-        <img class="folder-art" src="assets/folder.webp" width="1086" height="1448" alt="Прозрачная бордовая папка с чёрной задней обложкой, белыми листами и металлическими зажимами" fetchpriority="high" draggable="false">
-        <button class="cover-open" type="button" aria-label="Открыть папку на первом дне"></button>
-        <nav class="tabs" role="tablist" aria-label="Дни поездки и бумажки" aria-orientation="vertical"></nav>
+        <div class="spread-cover" aria-hidden="true"><span class="cover-half"></span><span class="cover-half"></span></div>
+        <div class="closed-group">
+          <img class="folder-art" src="assets/folder.webp" width="1086" height="1448" alt="Прозрачная бордовая папка с чёрной задней обложкой, белыми листами и металлическими зажимами" fetchpriority="high" draggable="false">
+          <button class="cover-open" type="button" aria-label="Открыть папку на первом дне"></button>
+          <nav class="tabs" role="tablist" aria-label="Дни поездки и бумажки" aria-orientation="vertical"></nav>
+        </div>
         <div class="pages">
+          <div class="left-stack" aria-hidden="true"></div>
           <div class="leaf-shadow" hidden aria-hidden="true"></div>
           <div class="turning-leaf" hidden aria-hidden="true">
             <div class="leaf-face"></div>
             <div class="leaf-face back"></div>
           </div>
+        </div>
+        <div class="binding" aria-hidden="true">
+          <span class="spine-plate"></span>
+          <span class="ring" style="--position: 6%"></span>
+          <span class="ring" style="--position: 23.6%"></span>
+          <span class="ring" style="--position: 41.2%"></span>
+          <span class="ring" style="--position: 58.8%"></span>
+          <span class="ring" style="--position: 76.4%"></span>
+          <span class="ring" style="--position: 94%"></span>
         </div>
       </div>
       <nav class="folder-controls" aria-label="Листать папку" hidden>
@@ -198,11 +250,32 @@
     const leaf = pages.querySelector('.turning-leaf');
     const faces = leaf.querySelectorAll('.leaf-face');
     const shadow = pages.querySelector('.leaf-shadow');
+    const leftStack = pages.querySelector('.left-stack');
+    const spentSheets = [];
+    const holePositions = [6, 23.6, 41.2, 58.8, 76.4, 94];
     let selected = -1;
     let visible = -1;
     let activeTurn = null;
 
-    function showPanel(index) {
+    function addHoles(sheet) {
+      const holes = document.createElement('span');
+      holes.className = 'paper-holes';
+      holes.setAttribute('aria-hidden', 'true');
+      holePositions.forEach(position => {
+        const hole = document.createElement('i');
+        hole.style.setProperty('--position', `${position}%`);
+        holes.appendChild(hole);
+      });
+      sheet.appendChild(holes);
+    }
+
+    function showPanel(index, leftCount = index) {
+      const count = Math.max(0, leftCount);
+      spentSheets.forEach((sheet, position) => {
+        sheet.hidden = position >= count;
+        if (!sheet.hidden) sheet.style.setProperty('--depth', count - position - 1);
+      });
+      leftStack.setAttribute('data-count', String(count));
       if (index === visible) return;
       if (visible >= 0) panels[visible].hidden = true;
       visible = index;
@@ -223,34 +296,32 @@
         showPanel(index);
         return;
       }
-      const forward = index > visible;
+      const from = visible;
+      const forward = index > from;
       const turn = { target: index, animations: [] };
       activeTurn = turn;
       pages.setAttribute('aria-busy', 'true');
-      if (forward) showPanel(index);
+      // Keep the turned sheets on the left while one leaf crosses the binding.
+      if (forward) showPanel(index, from);
+      else showPanel(from, index);
       leaf.hidden = shadow.hidden = false;
       const timing = {
-        duration: 480,
-        easing: 'cubic-bezier(.3,.08,.2,1)',
+        duration: 1000,
+        easing: 'cubic-bezier(.35,.08,.25,1)',
         direction: forward ? 'normal' : 'reverse',
         fill: 'both',
       };
       const motion = leaf.animate([
         { transform: 'rotateY(0deg)' },
         { transform: 'rotateY(-92deg)', offset: .55 },
-        { transform: 'rotateY(-160deg)' },
+        { transform: 'rotateY(-180deg)' },
       ], timing);
-      const fade = [...faces].map(face => face.animate([
-        { opacity: 1 },
-        { opacity: 1, offset: .7 },
-        { opacity: 0 },
-      ], timing));
       const shade = shadow.animate([
         { opacity: 0 },
         { opacity: .3, offset: .45 },
         { opacity: 0 },
       ], timing);
-      turn.animations = [motion, ...fade, shade];
+      turn.animations = [motion, shade];
       motion.finished.then(() => {
         if (activeTurn !== turn) return;
         showPanel(turn.target);
@@ -282,7 +353,8 @@
         showPanel(index);
       } else if (activeTurn) {
         // Finish the current turn sooner, then go straight to the latest selection.
-        if (index !== activeTurn.target) activeTurn.animations.forEach(animation => animation.updatePlaybackRate(2.5));
+        const speed = index === activeTurn.target ? 1 : 1.5;
+        activeTurn.animations.forEach(animation => animation.updatePlaybackRate(speed));
       } else turnTo(index);
       if (updateHistory) {
         const url = new URL(location.href);
@@ -311,9 +383,20 @@
       panel.setAttribute('role', 'tabpanel');
       panel.setAttribute('aria-labelledby', tab.id);
       panel.hidden = true;
+      addHoles(panel);
       pages.appendChild(panel);
       panels.push(panel);
+      if (index < sections.length - 1) {
+        const spent = document.createElement('div');
+        spent.className = 'spent-sheet';
+        spent.style.zIndex = index + 1;
+        spent.hidden = true;
+        addHoles(spent);
+        leftStack.appendChild(spent);
+        spentSheets.push(spent);
+      }
     });
+    faces.forEach(addHoles);
 
     function closeCover() {
       select(-1);
