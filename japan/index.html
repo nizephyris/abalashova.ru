@@ -29,8 +29,7 @@
       position: absolute;
       inset: 0;
       transform: rotateX(var(--tilt-x, 1deg)) rotateY(var(--tilt-y, -5deg)) rotateZ(-2deg);
-      transform-style: preserve-3d;
-      transition: transform .6s cubic-bezier(.2,.7,.2,1);
+      transition: transform .2s ease-out;
     }
     .folder.is-open .folder-body { transform: rotateZ(-1deg); }
     .folder-art {
@@ -44,9 +43,7 @@
       user-select: none;
       -webkit-user-drag: none;
       filter: drop-shadow(0 1.5rem 2.5rem #0009);
-      transition: filter .6s;
     }
-    .folder.is-open .folder-art { filter: brightness(.75) drop-shadow(0 1.5rem 2.5rem #0009); }
     .cover-open { position: absolute; inset: 8% 9% 3% 12%; z-index: 3; border: 0; border-radius: 1rem; background: transparent; }
     .cover-open:focus-visible { outline-offset: -8px; }
     .tabs {
@@ -71,9 +68,9 @@
       background: linear-gradient(90deg, #b7b7b7, #f7f7f7 20%, #fff 85%, #e8e8e8);
       box-shadow: inset 0 1px #fff, 0 1px 2px #0005;
       padding: 0;
-      transition: width .2s, filter .2s;
+      transition: transform .15s ease-out;
     }
-    .tab:hover, .tab[aria-selected="true"] { width: 3.25rem; filter: brightness(1.12); }
+    .tab[aria-selected="true"] { transform: translateX(.5rem); }
     .tab.papers-tab {
       flex: 1.55;
       min-height: 36px;
@@ -83,7 +80,7 @@
       margin-top: .5rem;
       border-radius: 0 .3rem .65rem 0;
     }
-    .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { width: 3.75rem; }
+    .tab.papers-tab[aria-selected="true"] { transform: translateX(.25rem); }
     .pages { position: absolute; inset: 8% 7% 3.8% 16%; z-index: 4; perspective: 1800px; transform-style: preserve-3d; touch-action: pan-y; }
     .sheet {
       position: absolute;
@@ -111,6 +108,7 @@
       transform-origin: 0 50%;
       transform-style: preserve-3d;
       pointer-events: none;
+      will-change: transform;
     }
     .leaf-face {
       position: absolute;
@@ -120,9 +118,11 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       box-shadow: 5px 7px 18px #0004;
+      transform: translateZ(.1px);
+      will-change: opacity;
     }
-    .leaf-face.back { transform: rotateY(180deg); background: linear-gradient(90deg, #f3f3f3, #fff 40%, #e4e4e4); }
-    .leaf-shadow { position: absolute; inset: 0; z-index: 5; background: linear-gradient(90deg, #0008, transparent 75%); pointer-events: none; opacity: 0; }
+    .leaf-face.back { transform: rotateY(180deg) translateZ(.1px); background: linear-gradient(90deg, #f3f3f3, #fff 40%, #e4e4e4); }
+    .leaf-shadow { position: absolute; inset: 0; z-index: 5; background: linear-gradient(90deg, #0008, transparent 75%); pointer-events: none; opacity: 0; will-change: opacity; }
     .folder-controls {
       position: absolute;
       left: 50%;
@@ -146,14 +146,12 @@
       .folder-body { transform: rotateZ(-2deg); }
       .tabs { top: 8%; bottom: 3%; left: 89%; width: 2.5rem; }
       .tab { width: 2.5rem; }
-      .tab:hover, .tab[aria-selected="true"] { width: 2.75rem; }
       .tab.papers-tab { width: 2.75rem; min-height: 36px; }
-      .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { width: 3rem; }
     }
     @media (max-width: 360px), (max-height: 600px) and (min-width: 601px) {
       .tabs { display: grid; grid-template-rows: repeat(7, 1fr) 1.35fr; grid-auto-flow: column; grid-template-columns: repeat(2, 1fr); gap: 1px; width: 3rem; bottom: 7%; }
-      .tab, .tab:hover, .tab[aria-selected="true"] { width: 100%; min-height: 28px; }
-      .tab.papers-tab, .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { grid-column: 1 / -1; grid-row: 8; width: 100%; margin: 0; min-height: 30px; }
+      .tab, .tab:hover, .tab[aria-selected="true"] { width: 100%; min-height: 28px; transform: none; }
+      .tab.papers-tab, .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { grid-column: 1 / -1; grid-row: 8; width: 100%; margin: 0; min-height: 30px; transform: none; }
     }
     @media (max-height: 600px) and (min-width: 601px) { .folder { width: min(24rem, calc((100svh - 9rem) * .75)); } .tabs { top: 6%; bottom: 3%; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
@@ -167,7 +165,13 @@
         <img class="folder-art" src="assets/folder.webp" width="1086" height="1448" alt="Прозрачная бордовая папка с чёрной задней обложкой, белыми листами и металлическими зажимами" fetchpriority="high" draggable="false">
         <button class="cover-open" type="button" aria-label="Открыть папку на первом дне"></button>
         <nav class="tabs" role="tablist" aria-label="Дни поездки и бумажки" aria-orientation="vertical"></nav>
-        <div class="pages"></div>
+        <div class="pages">
+          <div class="leaf-shadow" hidden aria-hidden="true"></div>
+          <div class="turning-leaf" hidden aria-hidden="true">
+            <div class="leaf-face"></div>
+            <div class="leaf-face back"></div>
+          </div>
+        </div>
       </div>
       <nav class="folder-controls" aria-label="Листать папку" hidden>
         <button class="previous" type="button" aria-label="Предыдущий лист"><span class="chevron" aria-hidden="true"></span></button>
@@ -191,50 +195,76 @@
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     const tabs = [];
     const panels = [];
+    const leaf = pages.querySelector('.turning-leaf');
+    const faces = leaf.querySelectorAll('.leaf-face');
+    const shadow = pages.querySelector('.leaf-shadow');
     let selected = -1;
-    let turnAnimations = [];
-    let turnOverlay = null;
+    let visible = -1;
+    let activeTurn = null;
 
-    function finishTurn() {
-      turnAnimations.forEach(animation => animation.cancel());
-      turnAnimations = [];
-      turnOverlay?.remove();
-      turnOverlay = null;
-      pages.querySelector('.leaf-shadow')?.remove();
+    function showPanel(index) {
+      if (index === visible) return;
+      if (visible >= 0) panels[visible].hidden = true;
+      visible = index;
+      if (visible >= 0) panels[visible].hidden = false;
     }
 
-    function turnPage(forward) {
-      if (reducedMotion.matches) return;
-      const leaf = document.createElement('div');
-      leaf.className = 'turning-leaf';
-      leaf.setAttribute('aria-hidden', 'true');
-      leaf.innerHTML = '<div class="leaf-face"></div><div class="leaf-face back"></div>';
-      const shadow = document.createElement('div');
-      shadow.className = 'leaf-shadow';
-      pages.append(shadow, leaf);
-      turnOverlay = leaf;
-      const keyframes = [
-        { transform: 'rotateY(0deg)', filter: 'brightness(1)' },
-        { transform: 'rotateY(-85deg)', filter: 'brightness(.82)', offset: .48 },
-        { transform: 'rotateY(-172deg)', filter: 'brightness(1)' },
-      ];
-      const animation = leaf.animate(keyframes, {
-        duration: 850,
-        easing: 'cubic-bezier(.36,.05,.18,1)',
+    function stopTurn() {
+      const turn = activeTurn;
+      activeTurn = null;
+      turn?.animations.forEach(animation => animation.cancel());
+      leaf.hidden = shadow.hidden = true;
+      pages.setAttribute('aria-busy', 'false');
+    }
+
+    function turnTo(index) {
+      if (index === visible) return;
+      if (index < 0 || visible < 0 || reducedMotion.matches) {
+        showPanel(index);
+        return;
+      }
+      const forward = index > visible;
+      const turn = { target: index, animations: [] };
+      activeTurn = turn;
+      pages.setAttribute('aria-busy', 'true');
+      if (forward) showPanel(index);
+      leaf.hidden = shadow.hidden = false;
+      const timing = {
+        duration: 480,
+        easing: 'cubic-bezier(.3,.08,.2,1)',
         direction: forward ? 'normal' : 'reverse',
         fill: 'both',
+      };
+      const motion = leaf.animate([
+        { transform: 'rotateY(0deg)' },
+        { transform: 'rotateY(-92deg)', offset: .55 },
+        { transform: 'rotateY(-160deg)' },
+      ], timing);
+      const fade = [...faces].map(face => face.animate([
+        { opacity: 1 },
+        { opacity: 1, offset: .7 },
+        { opacity: 0 },
+      ], timing));
+      const shade = shadow.animate([
+        { opacity: 0 },
+        { opacity: .3, offset: .45 },
+        { opacity: 0 },
+      ], timing);
+      turn.animations = [motion, ...fade, shade];
+      motion.finished.then(() => {
+        if (activeTurn !== turn) return;
+        showPanel(turn.target);
+        stopTurn();
+        turnTo(selected);
+      }).catch(() => {
+        if (activeTurn !== turn) return;
+        stopTurn();
+        showPanel(selected);
       });
-      const shade = shadow.animate([{ opacity: 0 }, { opacity: .4, offset: .45 }, { opacity: 0 }], { duration: 850 });
-      turnAnimations = [animation, shade];
-      animation.finished.then(() => {
-        if (turnOverlay === leaf) finishTurn();
-      }).catch(() => {});
     }
 
     function select(index, updateHistory = true, animate = true) {
       if (index === selected) return;
-      const old = selected;
-      finishTurn();
       selected = index;
       const open = index >= 0;
       folder.classList.toggle('is-open', open);
@@ -246,9 +276,14 @@
         const active = position === index;
         tab.setAttribute('aria-selected', String(active));
         tab.tabIndex = active || !open && position === 0 ? 0 : -1;
-        panels[position].hidden = !active;
       });
-      if (open && animate) turnPage(old >= 0 && index > old);
+      if (!open || !animate || reducedMotion.matches) {
+        stopTurn();
+        showPanel(index);
+      } else if (activeTurn) {
+        // Finish the current turn sooner, then go straight to the latest selection.
+        if (index !== activeTurn.target) activeTurn.animations.forEach(animation => animation.updatePlaybackRate(2.5));
+      } else turnTo(index);
       if (updateHistory) {
         const url = new URL(location.href);
         url.hash = open ? sections[index].id : '';
@@ -329,6 +364,11 @@
     }, { passive: true });
     addEventListener('popstate', () => route());
     addEventListener('hashchange', () => route());
+    reducedMotion.addEventListener('change', () => {
+      if (!reducedMotion.matches) return;
+      stopTurn();
+      showPanel(selected);
+    });
     const movement = matchMedia('(hover: hover) and (pointer: fine)');
     folder.addEventListener('pointermove', event => {
       if (!movement.matches || reducedMotion.matches || selected >= 0) return;
