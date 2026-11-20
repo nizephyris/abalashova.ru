@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080808">
+  <title>Япония — папка Насти Балашовой</title>
+  <meta name="description" content="Личная папка с материалами двухнедельной поездки в Японию.">
+  <link rel="icon" type="image/png" href="../assets/icon-32.png">
+  <link rel="preload" as="image" href="assets/folder.webp">
+  <style>
+    :root { color-scheme: dark; background: #080808; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { min-width: 320px; }
+    body { margin: 0; overflow-x: clip; }
+    button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
+    button:focus-visible { outline: 2px solid #e3bdc0; outline-offset: 4px; }
+    main { min-height: 100svh; display: grid; place-items: center; padding: 3rem; }
+    .folder {
+      position: relative;
+      isolation: isolate;
+      width: min(35rem, calc((100svh - 10rem) * .75), calc(100vw - 7rem));
+      min-width: 15rem;
+      aspect-ratio: 3 / 4;
+      perspective: 1800px;
+    }
+    .folder-body {
+      position: absolute;
+      inset: 0;
+      transform: rotateX(var(--tilt-x, 1deg)) rotateY(var(--tilt-y, -5deg)) rotateZ(-2deg);
+      transform-style: preserve-3d;
+      transition: transform .6s cubic-bezier(.2,.7,.2,1);
+    }
+    .folder.is-open .folder-body { transform: rotateZ(-1deg); }
+    .folder-art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 2;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      filter: drop-shadow(0 1.5rem 2.5rem #0009);
+      transition: filter .6s;
+    }
+    .folder.is-open .folder-art { filter: brightness(.75) drop-shadow(0 1.5rem 2.5rem #0009); }
+    .cover-open { position: absolute; inset: 8% 9% 3% 12%; z-index: 3; border: 0; border-radius: 1rem; background: transparent; }
+    .cover-open:focus-visible { outline-offset: -8px; }
+    .tabs {
+      position: absolute;
+      top: 13%;
+      left: 89%;
+      bottom: 7%;
+      z-index: 1;
+      width: 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      filter: drop-shadow(3px 3px 4px #0005);
+    }
+    .tab {
+      flex: 1;
+      width: 2.75rem;
+      min-height: 24px;
+      border: 1px solid #ffffff66;
+      border-left: 0;
+      border-radius: 0 .3rem .3rem 0;
+      background: linear-gradient(90deg, #b7b7b7, #f7f7f7 20%, #fff 85%, #e8e8e8);
+      box-shadow: inset 0 1px #fff, 0 1px 2px #0005;
+      padding: 0;
+      transition: width .2s, filter .2s;
+    }
+    .tab:hover, .tab[aria-selected="true"] { width: 3.25rem; filter: brightness(1.12); }
+    .tab.papers-tab {
+      flex: 1.55;
+      min-height: 36px;
+      width: 3.5rem;
+      background: linear-gradient(90deg, #371117, #73323c 28%, #9c515b);
+      border-color: #c3828a66;
+      margin-top: .5rem;
+      border-radius: 0 .3rem .65rem 0;
+    }
+    .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { width: 3.75rem; }
+    .pages { position: absolute; inset: 8% 7% 3.8% 16%; z-index: 4; perspective: 1800px; transform-style: preserve-3d; touch-action: pan-y; }
+    .sheet {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #e5e5e5, #fff 8%, #fff 94%, #f1f1f1);
+      border: 1px solid #fff9;
+      border-radius: .15rem .5rem .5rem .15rem;
+      box-shadow: -5px 2px 12px #0003, 3px 6px 10px #0005;
+      transform-style: preserve-3d;
+    }
+    .sheet::before, .sheet::after {
+      content: "";
+      position: absolute;
+      inset: .15rem .2rem -.2rem -.15rem;
+      border-radius: inherit;
+      background: #eee;
+      box-shadow: 0 1px 3px #0003;
+      transform: translateZ(-1px) rotate(-.6deg);
+    }
+    .sheet::after { inset: .3rem .4rem -.35rem -.1rem; background: #fff; transform: translateZ(-2px) rotate(.2deg); }
+    .turning-leaf {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      transform-origin: 0 50%;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+    .leaf-face {
+      position: absolute;
+      inset: 0;
+      border-radius: .15rem .5rem .5rem .15rem;
+      background: linear-gradient(90deg, #e1e1e1, #fff 12%, #fff 92%, #ededed);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      box-shadow: 5px 7px 18px #0004;
+    }
+    .leaf-face.back { transform: rotateY(180deg); background: linear-gradient(90deg, #f3f3f3, #fff 40%, #e4e4e4); }
+    .leaf-shadow { position: absolute; inset: 0; z-index: 5; background: linear-gradient(90deg, #0008, transparent 75%); pointer-events: none; opacity: 0; }
+    .folder-controls {
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 1.25rem);
+      display: flex;
+      gap: 1rem;
+      transform: translateX(-50%);
+    }
+    .folder-controls button { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #fff2; border-radius: 50%; background: #ffffff08; color: #b9adb0; }
+    .folder-controls button:hover { background: #ffffff17; color: #fff; }
+    .folder-controls button:disabled { opacity: .22; cursor: default; }
+    .chevron { width: 8px; height: 8px; border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor; transform: rotate(45deg); }
+    .previous .chevron { transform: rotate(-135deg); }
+    .cross { position: relative; width: 12px; height: 12px; }
+    .cross::before, .cross::after { content: ""; position: absolute; left: 5px; height: 13px; width: 1.5px; background: currentColor; transform: rotate(45deg); }
+    .cross::after { transform: rotate(-45deg); }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    @media (max-width: 600px) {
+      main { padding: 2rem 2.6rem 4rem 1.25rem; }
+      .folder { width: min(25rem, calc(100vw - 5rem)); min-width: 0; }
+      .folder-body { transform: rotateZ(-2deg); }
+      .tabs { top: 8%; bottom: 3%; left: 89%; width: 2.5rem; }
+      .tab { width: 2.5rem; }
+      .tab:hover, .tab[aria-selected="true"] { width: 2.75rem; }
+      .tab.papers-tab { width: 2.75rem; min-height: 36px; }
+      .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { width: 3rem; }
+    }
+    @media (max-width: 360px), (max-height: 600px) and (min-width: 601px) {
+      .tabs { display: grid; grid-template-rows: repeat(7, 1fr) 1.35fr; grid-auto-flow: column; grid-template-columns: repeat(2, 1fr); gap: 1px; width: 3rem; bottom: 7%; }
+      .tab, .tab:hover, .tab[aria-selected="true"] { width: 100%; min-height: 28px; }
+      .tab.papers-tab, .tab.papers-tab:hover, .tab.papers-tab[aria-selected="true"] { grid-column: 1 / -1; grid-row: 8; width: 100%; margin: 0; min-height: 30px; }
+    }
+    @media (max-height: 600px) and (min-width: 601px) { .folder { width: min(24rem, calc((100svh - 9rem) * .75)); } .tabs { top: 6%; bottom: 3%; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <h1 class="visually-hidden">Материалы поездки в Японию</h1>
+  <main>
+    <div class="folder" aria-label="Папка с материалами двух недель в Японии">
+      <div class="folder-body">
+        <img class="folder-art" src="assets/folder.webp" width="1086" height="1448" alt="Прозрачная бордовая папка с чёрной задней обложкой, белыми листами и металлическими зажимами" fetchpriority="high" draggable="false">
+        <button class="cover-open" type="button" aria-label="Открыть папку на первом дне"></button>
+        <nav class="tabs" role="tablist" aria-label="Дни поездки и бумажки" aria-orientation="vertical"></nav>
+        <div class="pages"></div>
+      </div>
+      <nav class="folder-controls" aria-label="Листать папку" hidden>
+        <button class="previous" type="button" aria-label="Предыдущий лист"><span class="chevron" aria-hidden="true"></span></button>
+        <button class="close" type="button" aria-label="Закрыть папку"><span class="cross" aria-hidden="true"></span></button>
+        <button class="next" type="button" aria-label="Следующий лист"><span class="chevron" aria-hidden="true"></span></button>
+      </nav>
+    </div>
+  </main>
+  <script>
+    const sections = [
+      ...Array.from({ length: 14 }, (_, index) => ({ id: `day-${index + 1}`, title: `День ${index + 1}` })),
+      { id: 'papers', title: 'Бумажки' },
+    ];
+    const folder = document.querySelector('.folder');
+    const rail = document.querySelector('.tabs');
+    const pages = document.querySelector('.pages');
+    const cover = document.querySelector('.cover-open');
+    const controls = document.querySelector('.folder-controls');
+    const previous = controls.querySelector('.previous');
+    const next = controls.querySelector('.next');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const tabs = [];
+    const panels = [];
+    let selected = -1;
+    let turnAnimations = [];
+    let turnOverlay = null;
+
+    function finishTurn() {
+      turnAnimations.forEach(animation => animation.cancel());
+      turnAnimations = [];
+      turnOverlay?.remove();
+      turnOverlay = null;
+      pages.querySelector('.leaf-shadow')?.remove();
+    }
+
+    function turnPage(forward) {
+      if (reducedMotion.matches) return;
+      const leaf = document.createElement('div');
+      leaf.className = 'turning-leaf';
+      leaf.setAttribute('aria-hidden', 'true');
+      leaf.innerHTML = '<div class="leaf-face"></div><div class="leaf-face back"></div>';
+      const shadow = document.createElement('div');
+      shadow.className = 'leaf-shadow';
+      pages.append(shadow, leaf);
+      turnOverlay = leaf;
+      const keyframes = [
+        { transform: 'rotateY(0deg)', filter: 'brightness(1)' },
+        { transform: 'rotateY(-85deg)', filter: 'brightness(.82)', offset: .48 },
+        { transform: 'rotateY(-172deg)', filter: 'brightness(1)' },
+      ];
+      const animation = leaf.animate(keyframes, {
+        duration: 850,
+        easing: 'cubic-bezier(.36,.05,.18,1)',
+        direction: forward ? 'normal' : 'reverse',
+        fill: 'both',
+      });
+      const shade = shadow.animate([{ opacity: 0 }, { opacity: .4, offset: .45 }, { opacity: 0 }], { duration: 850 });
+      turnAnimations = [animation, shade];
+      animation.finished.then(() => {
+        if (turnOverlay === leaf) finishTurn();
+      }).catch(() => {});
+    }
+
+    function select(index, updateHistory = true, animate = true) {
+      if (index === selected) return;
+      const old = selected;
+      finishTurn();
+      selected = index;
+      const open = index >= 0;
+      folder.classList.toggle('is-open', open);
+      controls.hidden = !open;
+      cover.hidden = open;
+      previous.disabled = index <= 0;
+      next.disabled = index >= sections.length - 1;
+      tabs.forEach((tab, position) => {
+        const active = position === index;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active || !open && position === 0 ? 0 : -1;
+        panels[position].hidden = !active;
+      });
+      if (open && animate) turnPage(old >= 0 && index > old);
+      if (updateHistory) {
+        const url = new URL(location.href);
+        url.hash = open ? sections[index].id : '';
+        if (url.href !== location.href) history.pushState(null, '', url);
+      }
+      document.title = open ? `${sections[index].title} — Япония` : 'Япония — папка Насти Балашовой';
+    }
+
+    sections.forEach((section, index) => {
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = index === 14 ? 'tab papers-tab' : 'tab';
+      tab.id = `tab-${section.id}`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', section.id);
+      tab.setAttribute('aria-label', section.title);
+      tab.setAttribute('aria-selected', 'false');
+      tab.tabIndex = index === 0 ? 0 : -1;
+      tab.addEventListener('click', () => select(index));
+      rail.appendChild(tab);
+      tabs.push(tab);
+      const panel = document.createElement('article');
+      panel.id = section.id;
+      panel.className = 'sheet';
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', tab.id);
+      panel.hidden = true;
+      pages.appendChild(panel);
+      panels.push(panel);
+    });
+
+    function closeCover() {
+      select(-1);
+      cover.focus({ preventScroll: true });
+    }
+    function route(animate = true) {
+      select(sections.findIndex(section => '#' + section.id === location.hash), false, animate);
+    }
+
+    rail.addEventListener('keydown', event => {
+      const index = tabs.indexOf(event.target);
+      if (index < 0) return;
+      let target;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') target = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') target = (index + tabs.length - 1) % tabs.length;
+      else if (event.key === 'Home') target = 0;
+      else if (event.key === 'End') target = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      event.stopPropagation();
+      select(target);
+      tabs[target].focus({ preventScroll: true });
+    });
+    cover.addEventListener('click', () => select(0));
+    controls.querySelector('.close').addEventListener('click', closeCover);
+    previous.addEventListener('click', () => select(selected - 1));
+    next.addEventListener('click', () => select(selected + 1));
+    addEventListener('keydown', event => {
+      if (selected < 0) return;
+      if (event.key === 'Escape') closeCover();
+      if (event.key === 'ArrowLeft' && selected > 0) { event.preventDefault(); select(selected - 1); }
+      if (event.key === 'ArrowRight' && selected < 14) { event.preventDefault(); select(selected + 1); }
+    });
+    let touchStart = null;
+    pages.addEventListener('touchstart', event => {
+      const touch = event.touches[0];
+      touchStart = { x: touch.clientX, y: touch.clientY };
+    }, { passive: true });
+    pages.addEventListener('touchend', event => {
+      if (!touchStart || selected < 0) return;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - touchStart.x;
+      const dy = touch.clientY - touchStart.y;
+      touchStart = null;
+      if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+      const target = selected + (dx < 0 ? 1 : -1);
+      if (target >= 0 && target < sections.length) select(target);
+    }, { passive: true });
+    addEventListener('popstate', () => route());
+    addEventListener('hashchange', () => route());
+    const movement = matchMedia('(hover: hover) and (pointer: fine)');
+    folder.addEventListener('pointermove', event => {
+      if (!movement.matches || reducedMotion.matches || selected >= 0) return;
+      const bounds = folder.getBoundingClientRect();
+      folder.style.setProperty('--tilt-x', `${1 - (event.clientY - bounds.top) / bounds.height * 2}deg`);
+      folder.style.setProperty('--tilt-y', `${-5 + (event.clientX - bounds.left) / bounds.width * 4}deg`);
+    });
+    folder.addEventListener('pointerleave', () => {
+      folder.style.removeProperty('--tilt-x');
+      folder.style.removeProperty('--tilt-y');
+    });
+    route(false);
+  </script>
+</body>
+</html>
