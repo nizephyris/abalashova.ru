@@ -259,6 +259,10 @@
               object-fit: cover; object-position: top; }
   .stage-arrow { position: absolute; display: block; }
   .scr-item > img { width: 100%; height: 100%; display: block; }   /* сам снимок, не иконка выноски */
+  .phone-bezel .scr-item {
+    overflow: hidden; border-radius: 12.5% / 5.9%; background: #000;
+    box-shadow: 0 0 0 2px #151619, 0 0 0 3px #a4a8aa;
+  }
   /* первый экран: видео стоит само по себе — телефон уже внутри ролика.
      Радиус 120px от ширины 816 и высоты 1684 обрезает чёрные углы кадра */
   .scr-video {
@@ -401,6 +405,7 @@
     .bio-break { display: none; }
     .f-body { width: 80%; }
     .fan-item { width: 8.5rem; }           /* пучок по тапу: карточки компактнее */
+    [data-folder="folder3"] .fan-item { width: 8.5em; }
     /* на телефоне карточки стоят вплотную — подпись в одну строку наезжала бы на соседнюю */
     .fan-name { white-space: normal; min-width: 0; max-width: 100%; min-height: 2.4em;
                 display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -543,7 +548,8 @@
     }
     /* в кейсе футер — такая же карточка: 40px сверху, скруглённый верх, ниже ничего нет */
     body[data-view="case"] .page-foot {
-      margin-block: 40px 0; border-radius: 1.5rem 1.5rem 0 0; padding-top: 1.5rem;
+      width: 100%; max-width: none; margin: 40px 0 0;
+      border-radius: 1.5rem 1.5rem 0 0; padding-top: 1.5rem;
     }
     .case-screen:last-of-type { margin-bottom: 0; }   /* отступ до футера задаёт сам футер */
     .card-foot { display: none; }
@@ -1316,7 +1322,7 @@
     aviasales: {
       // Экраны собраны по макету: Фигма, Section 4 (пять десктопов)
       screens: [
-        { video: 'assets/aviasales-prototype-phone.mp4', poster: 'assets/aviasales-prototype-phone-poster.webp' },
+        { video: 'assets/aviasales-prototype-phone.mp4?v=2', poster: 'assets/aviasales-prototype-phone-poster.webp' },
         // три телефона 354×735, выноски 260 — как нарисовано
         { title: { ru: 'точки входа', en: 'entry points' },
           mobileNote: {
@@ -1340,6 +1346,14 @@
               ru: 'Предлагаем создать поездку, когда человек уже ищет билеты на двоих или больше',
               en: 'We suggest starting a group trip when someone searches for tickets for two or more people' },
           ] },
+        { title: { ru: 'знакомство с новой фичей', en: 'introducing group trips' },
+          mobileNote: {
+            ru: 'Три шага объясняют, как пригласить друзей, вместе выбрать поездку и разделить оплату. После знакомства с фичей можно перейти к планированию',
+            en: 'Three onboarding steps explain how to invite friends, choose a trip together and split the cost. Travellers can then start planning',
+          },
+          phone: { w: 354, h: 749.647, ar: '1564 / 3312', bezel: true }, span: 1710,
+          shots: ['assets/av-onboarding-1.webp', 'assets/av-onboarding-2.webp', 'assets/av-onboarding-3.webp'],
+        },
         // два телефона обычного размера
         { title: { ru: 'создание поездки', en: 'creating a trip' },
           mobileNote: {
@@ -1789,7 +1803,8 @@
 
     const gap = 2.5 * rem;                 // 40px от папки до нижнего ряда
     const colGap = 2.5 * rem, rowGap = .31 * h, lean = .19 * w;   // 40px между обложками
-    const cols = n > 1 ? 2 : 1;
+    const inline = folder.dataset.folder === 'folder3';
+    const cols = inline ? n : n > 1 ? 2 : 1;
     // лёгкий хаос: у каждой карточки свой сдвиг — всегда один и тот же
     const noise = (el, salt) => {
       let h = 2166136261;
@@ -1804,11 +1819,11 @@
       const slot = toRight ? col : col - (inRow - 1);
       return {
         x: slot * (w + colGap) + (toRight ? -row * lean : row * lean)
-           + noise(items[i], 'x') * .03 * w,
-        y: gap + row * (h + rowGap) + noise(items[i], 'y') * .02 * h,
+           + (inline ? 0 : noise(items[i], 'x') * .03 * w),
+        y: gap + row * (h + rowGap) + (inline ? 0 : noise(items[i], 'y') * .02 * h),
       };
     };
-    const tilt = i => noise(items[i], 'a') * 1.6;
+    const tilt = i => inline ? 0 : noise(items[i], 'a') * 1.6;
 
     let top = 0, left = 0, right = 0;
     items.forEach((el, i) => {
@@ -2279,6 +2294,7 @@
   function createPhones(screen, first) {
     const pair = document.createElement('div');
     pair.className = 'scr-pair';
+    if (screen.phone?.bezel) pair.classList.add('phone-bezel');
     if (screen.phone) {
       pair.style.setProperty('--ph-h', screen.phone.h);
       pair.style.setProperty('--ph-ar', screen.phone.ar);
