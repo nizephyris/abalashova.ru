@@ -205,7 +205,7 @@
   }
   .folder.open .fan-item {
     opacity: 1;
-    transform: translate(calc(-50% + var(--x)), calc(-1 * var(--y))) rotate(var(--a));
+    transform: translate(calc(-50% + var(--x)), calc(-1 * var(--y))) rotate(var(--a)) scale(var(--fan-scale, 1));
     transition-delay: calc(var(--i) * 45ms);
   }
   .fan-item:focus-visible .fan-cover { transform: translateY(-.35em) scale(1.06); }
@@ -1792,7 +1792,8 @@
     trigger.focus();
   });
 
-  // Творческие проекты выровнены по папкам под ними.
+  // На телефоне творческие проекты стоят в два ряда справа у своей папки,
+  // на десктопе — выровнены по папкам под ними.
   // В остальных папках сохраняется раскладка по две обложки в ряд.
   function layoutFan(fan) {
     const items = [...fan.children], n = items.length;
@@ -1801,6 +1802,40 @@
     const pad = 12;
 
     fan.style.setProperty('--k', 1);
+    fan.style.setProperty('--fan-scale', 1);
+    if (folder.dataset.folder === 'folder3' && matchMedia('(max-width: 760px), (max-aspect-ratio: 4/5)').matches) {
+      const width = 8.5 * rem;
+      items.forEach(item => { item.style.width = width + 'px'; });
+      const heights = items.map(item => item.offsetHeight);
+      const stage = document.getElementById('stage').getBoundingClientRect();
+      const controls = document.querySelector('.top').getBoundingClientRect();
+      const folders = folder.parentElement.getBoundingClientRect();
+      const folderBox = folder.getBoundingClientRect();
+      const folderWidth = parseFloat(getComputedStyle(folder.querySelector('.f-body')).width);
+      const origin = fan.getBoundingClientRect();
+      const cols = Math.min(2, n), rows = Math.ceil(n / cols);
+      const colGap = 1.25 * rem, rowGap = rem, height = Math.max(...heights);
+      const left = Math.max(pad, stage.left + pad);
+      const right = Math.min(innerWidth - pad, stage.right - pad, folderBox.left + (folderBox.width + folderWidth) / 2);
+      const top = Math.max(pad, stage.top + pad, controls.bottom + rem), bottom = folders.top - 1.5 * rem;
+      const groupWidth = cols * width + (cols - 1) * colGap;
+      const groupHeight = rows * height + (rows - 1) * rowGap;
+      const scale = Math.max(0, Math.min(1, (right - left) / groupWidth, (bottom - top) / groupHeight));
+      const rowTop = bottom - groupHeight * scale;
+      fan.style.setProperty('--fan-scale', scale.toFixed(4));
+      items.forEach((item, i) => {
+        const row = Math.floor(i / cols), col = i % cols, inRow = Math.min(cols, n - row * cols);
+        const x = right - (inRow - 1 - col) * (width + colGap) * scale - width * scale / 2;
+        const y = rowTop + row * (height + rowGap) * scale;
+        item.style.setProperty('--x', (x - origin.left).toFixed(2) + 'px');
+        item.style.setProperty('--y', (origin.top - y - heights[i] * (1 + scale) / 2).toFixed(2) + 'px');
+        item.style.setProperty('--a', '0deg');
+      });
+      fan.style.setProperty('--h', (origin.top - rowTop + rem).toFixed(2) + 'px');
+      fan.style.setProperty('--bl', (right - groupWidth * scale - origin.left - rem).toFixed(2) + 'px');
+      fan.style.setProperty('--bw', (groupWidth * scale + 2 * rem).toFixed(2) + 'px');
+      return;
+    }
     const anchors = folder.dataset.folder === 'folder3' ? [...folder.parentElement.children] : [];
     if (anchors.length === n) {
       const bounds = anchors.map(anchor => {
