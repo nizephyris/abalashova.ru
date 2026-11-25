@@ -607,6 +607,9 @@
     }
     .go-feed .scr-row { --u: calc(var(--go-phone-height) / 885.333); }
     .go-feed .scr-video { height: var(--go-phone-height); }
+    [data-case-id="aviasales"] .scr-video {
+      height: min(var(--case-media-height), var(--case-media-width) * 885.333 / (2 * 431.333 + 40));
+    }
     .go-feed .screen-notes, [data-case-id="expedition"] .screen-notes,
     [data-case-id="telegraph"] .case-screen:last-child .screen-notes { -webkit-line-clamp: unset; }
   }
@@ -1313,7 +1316,7 @@
     aviasales: {
       // Экраны собраны по макету: Фигма, Section 4 (пять десктопов)
       screens: [
-        { hold: true },
+        { video: 'assets/aviasales-prototype-phone.mp4', poster: 'assets/aviasales-prototype-phone-poster.webp' },
         // три телефона 354×735, выноски 260 — как нарисовано
         { title: { ru: 'точки входа', en: 'entry points' },
           mobileNote: {
