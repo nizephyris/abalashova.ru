@@ -1513,7 +1513,7 @@
     document.getElementById('lang').textContent = t.lang;
     for (const [label, project] of projectLabels) {
       label.textContent = project[lang];
-      typograph(label);
+      if (project.case !== 'art') typograph(label);
     }
     applyLinks();
     if (currentCase) translateCase();
