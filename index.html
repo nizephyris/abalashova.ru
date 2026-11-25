@@ -387,6 +387,8 @@
 
   /* ── Телефоны и узкие окна ── */
   @media (max-width: 760px), (max-aspect-ratio: 4/5) {
+    html { background: #1b1b1d; overscroll-behavior-y: none; }
+    body { overscroll-behavior-y: none; }
     :root { --button-font-size: 1rem; }
     html { font-size: 16px; }
     .stage { height: 78svh; min-height: 30rem; }
@@ -1789,8 +1791,8 @@
     trigger.focus();
   });
 
-  // обложки встают над папкой шахматкой: по две в ряд, ряды поднимаются вверх
-  // и слегка уходят вправо. Если стопка не помещается, она уменьшается и сдвигается целиком.
+  // Творческие проекты выровнены по папкам под ними.
+  // В остальных папках сохраняется раскладка по две обложки в ряд.
   function layoutFan(fan) {
     const items = [...fan.children], n = items.length;
     const folder = fan.parentElement;
@@ -1798,6 +1800,32 @@
     const pad = 12;
 
     fan.style.setProperty('--k', 1);
+    const anchors = folder.dataset.folder === 'folder3' ? [...folder.parentElement.children] : [];
+    if (anchors.length === n) {
+      const bounds = anchors.map(anchor => {
+        const rect = anchor.getBoundingClientRect();
+        const width = rect.width && parseFloat(getComputedStyle(anchor.querySelector('.f-body')).width);
+        const center = rect.left + rect.width / 2;
+        return { top: rect.top, left: center - width / 2, right: center + width / 2, width };
+      });
+      if (!bounds[0].width) return;
+      items.forEach((item, i) => { item.style.width = bounds[i].width + 'px'; });
+      const heights = items.map(item => item.offsetHeight);
+      const origin = fan.getBoundingClientRect();
+      const rowTop = Math.max(pad, Math.min(...bounds.map(rect => rect.top)) - 2.5 * rem - Math.max(...heights));
+      items.forEach((item, i) => {
+        const rect = bounds[i];
+        item.style.setProperty('--x', (rect.left + rect.width / 2 - origin.left).toFixed(2) + 'px');
+        item.style.setProperty('--y', (origin.top - rowTop - heights[i]).toFixed(2) + 'px');
+        item.style.setProperty('--a', '0deg');
+      });
+      const left = Math.min(...bounds.map(rect => rect.left));
+      const right = Math.max(...bounds.map(rect => rect.right));
+      fan.style.setProperty('--h', (origin.top - rowTop + rem).toFixed(2) + 'px');
+      fan.style.setProperty('--bl', (left - origin.left - rem).toFixed(2) + 'px');
+      fan.style.setProperty('--bw', (right - left + 2 * rem).toFixed(2) + 'px');
+      return;
+    }
     const w = items[0].offsetWidth, h = items[0].offsetHeight;
     if (!w || !h) return;      // экран кейса прячет папки — считать тут нечего
 
